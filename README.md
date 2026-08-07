@@ -56,7 +56,7 @@ to the methods used in the calculation:
 
 ## Contributors
 
-QTrans is developed and maintained by:
+**QTrans** is developed and maintained by:
 
 - Dr. Shixu Liu
 - Haozhe Li
