@@ -1,0 +1,68 @@
+[build-system]
+requires = [
+    "setuptools>=77",
+    "wheel",
+    "numpy>=1.21",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "QTrans"
+version = "1.0.0"
+description = "Electron-phonon coupling, electron spectral functions, and transport calculations"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    { name = "Shixu Liu" },
+    { name = "Haozhe Li" },
+    { name = "Yang Zhong" },
+    { name = "Jiarui Bu" },
+    { name = "Xingding Li" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=1.21",
+    "scipy",
+    "PyYAML",
+    "mpi4py",
+    "phonopy",
+    "pymatgen",
+    "torch",
+    "torch-geometric",
+    "spglib",
+    "easydict",
+    "opt-einsum",
+    "h5py",
+    "natsort",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7",
+    "pytest-cov",
+]
+docs = [
+    "sphinx>=6",
+]
+
+[project.scripts]
+qtrans-run = "qtrans.cli:calculator_main"
+qtrans-prep = "qtrans.cli:preparer_main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["qtrans*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
