@@ -9,7 +9,7 @@ def native_extension():
         os.path.join("c", "utils_matrix.c"),
     ]
 
-    include_dirs = [np.get_include(), '/public/home/liushixu/software/anaconda3/envs/QTrans_stable/include/python3.9']
+    include_dirs = [np.get_include()]
     compile_args = ["-O3", "-fopenmp"]
     link_args = ["-fopenmp", "-lpthread"]
 
