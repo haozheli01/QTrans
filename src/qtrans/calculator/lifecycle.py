@@ -54,7 +54,7 @@ class _LifecycleMixin:
                   If None, runs in single-process mode.
         """
         if config is None:
-            print("This is QTransCalculator\nRun 'qtrans-run --config config.yaml'.")
+            print("This is QTransCalculator\nRun 'QTrans_run --config config.yaml'.")
             return
 
         # parallelization

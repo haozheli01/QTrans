@@ -43,18 +43,9 @@ dependencies = [
     "natsort",
 ]
 
-[project.optional-dependencies]
-test = [
-    "pytest>=7",
-    "pytest-cov",
-]
-docs = [
-    "sphinx>=6",
-]
-
 [project.scripts]
-qtrans-run = "qtrans.cli:calculator_main"
-qtrans-prep = "qtrans.cli:preparer_main"
+QTrans_run = "qtrans.cli:calculator_main"
+QTrans_prep = "qtrans.cli:preparer_main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -62,7 +53,3 @@ package-dir = { "" = "src" }
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["qtrans*"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-ra"

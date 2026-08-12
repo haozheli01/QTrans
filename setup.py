@@ -1,6 +1,4 @@
 import os
-import sys
-
 import numpy as np
 from setuptools import Extension, setup
 
@@ -11,17 +9,14 @@ def native_extension():
         os.path.join("c", "utils_matrix.c"),
     ]
 
-    if sys.platform == "win32":
-        compile_args = ["/O2", "/openmp"]
-        link_args = []
-    else:
-        compile_args = ["-O3", "-fopenmp"]
-        link_args = ["-fopenmp", "-lpthread"]
+    include_dirs = [np.get_include(), '/public/home/liushixu/software/anaconda3/envs/QTrans_stable/include/python3.9']
+    compile_args = ["-O3", "-fopenmp"]
+    link_args = ["-fopenmp", "-lpthread"]
 
     return Extension(
         "qtrans._native",
         sources=sources,
-        include_dirs=[np.get_include()],
+        include_dirs=include_dirs,
         extra_compile_args=compile_args,
         extra_link_args=link_args,
     )
