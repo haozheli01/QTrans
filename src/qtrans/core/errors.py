@@ -49,7 +49,7 @@ class InputParameterError(Exception):
     5027: The 'system_2D' in <advanced> block must be a boolean.
     5028: The 'tetra_integral' in <advanced> block must be a boolean.
     5029: The 'spin_length_scale' in <advanced> block must be a positive number.
-    5030: The 'symm_wav_for_PT' in <advanced> block must be a boolean.
+    5030: ...
     5031: The 'smooth_gauge' in <advanced> block must be a boolean.
     5032: ...
     5041: The 'supercell_matrix' in <phonon> block must be a 3*3 float matrix.
@@ -90,13 +90,13 @@ class InputParameterError(Exception):
     5144: The 'LRC_taylor_order' in <epc> block must be 0 or 1.
     5145: The 'q_cut' in <epc> block must be a number.
     5146: ...
+    5148: The 'phonon_frequency_cutoff' in <epc> block must be a number.
     5182: The 'k_size' in <transport> block must be set as '[nkx, nky, nkz]'.
     5183: The 'q_size' in <transport> block must be set as '[nqx, nqy, nqz]'.
     5184: The 'bands_indices' in <transport> block is not supported.
     5185: The 'fermi_maxiter' in <transport> block must be a positive integer.
     5186: The 'fermi_shift' in <transport> block must be a number.
     5187: The 'temperature' in <transport> block must be a positive number.
-    5188: The 'frequency_cutoff' in <transport> block must be a number.
     5189: The 'smeark' in <transport> block must be a positive number.
     5190: The 'smearq' in <transport> block must be a positive number.
     5191: The 'gauss_type' in <transport> block must be an integer.

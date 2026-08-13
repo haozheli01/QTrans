@@ -167,7 +167,7 @@ class _PomegaMixin:
         else:
             epc_strengths = np.zeros((nqs_local, nbranches))
         # Precompute: filter valid q indices (nonzero q and at least one valid branch)
-        branch_masks = freq_grid >= self.frequency_cutoff  # (nqs_local, nbranches)
+        branch_masks = freq_grid >= self.phonon_frequency_cutoff  # (nqs_local, nbranches)
         has_valid_branch = np.any(branch_masks, axis=1)  # (nqs_local,)
         valid_q_indices = np.where(has_valid_branch)[0]
         valid_q_grid = q_grid_local[valid_q_indices]  # (nqs_valid, 3)

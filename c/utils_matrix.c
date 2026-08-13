@@ -225,12 +225,12 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *ar
     PyArrayObject *emkpq_match_table_obj;
     PyArrayObject *eig_k_obj;
     PyArrayObject *eig_kpq_obj;
-    double frequency_cutoff, inv_degaussw, efermi, weight_k;
+    double phonon_frequency_cutoff, inv_degaussw, efermi, weight_k;
 
     if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOdddd", &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
                           &phase_k_obj, &phase_kpq_obj, &grad_mat_obj, &wave_k_obj, &wave_kpq_obj,
                           &enk_match_table_obj, &emkpq_match_table_obj, &eig_k_obj, &eig_kpq_obj, &epc_strengths_obj,
-                          &frequency_cutoff, &inv_degaussw, &efermi, &weight_k))
+                          &phonon_frequency_cutoff, &inv_degaussw, &efermi, &weight_k))
     {
         return NULL;
     }
@@ -288,7 +288,7 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *ar
     double *inv_sqrt_freq = (double *)malloc(nbranches * sizeof(double));
     for (int ib = 0; ib < nbranches; ib++)
     {
-        if (freq[ib] >= frequency_cutoff)
+        if (freq[ib] >= phonon_frequency_cutoff)
             inv_sqrt_freq[ib] = 1.0 / sqrt(2.0 * cabs(freq[ib]));
         else
             inv_sqrt_freq[ib] = 0.0;
@@ -342,7 +342,7 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *ar
 #pragma omp parallel for private(epc, e, iorb, jorb, g2_tmp) schedule(dynamic)
             for (ibranch = 0; ibranch < nbranches; ibranch++)
             {
-                if (freq[ibranch] < frequency_cutoff)
+                if (freq[ibranch] < phonon_frequency_cutoff)
                     continue;
 
                 epc = 0.0 + 0.0 * I;
@@ -400,12 +400,12 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject
     PyArrayObject *emkpq_match_table_obj;
     PyArrayObject *eig_k_obj;
     PyArrayObject *eig_kpq_obj;
-    double frequency_cutoff, inv_degaussw, efermi, weight_k;
+    double phonon_frequency_cutoff, inv_degaussw, efermi, weight_k;
 
     if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOdddd", &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
                           &phase_k_obj, &phase_kpq_obj, &grad_mat_obj, &wave_k_obj, &wave_kpq_obj,
                           &enk_match_table_obj, &emkpq_match_table_obj, &eig_k_obj, &eig_kpq_obj, &epc_strengths_obj,
-                          &frequency_cutoff, &inv_degaussw, &efermi, &weight_k))
+                          &phonon_frequency_cutoff, &inv_degaussw, &efermi, &weight_k))
     {
         return NULL;
     }
@@ -467,7 +467,7 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject
     double *inv_sqrt_freq = (double *)malloc(nbranches * sizeof(double));
     for (int ib = 0; ib < nbranches; ib++)
     {
-        if (freq[ib] >= frequency_cutoff)
+        if (freq[ib] >= phonon_frequency_cutoff)
             inv_sqrt_freq[ib] = 1.0 / sqrt(2.0 * cabs(freq[ib]));
         else
             inv_sqrt_freq[ib] = 0.0;
@@ -517,7 +517,7 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject
 #pragma omp parallel for private(epc, e, iorb, jorb, g2_tmp) schedule(dynamic)
             for (ibranch = 0; ibranch < nbranches; ibranch++)
             {
-                if (freq[ibranch] < frequency_cutoff)
+                if (freq[ibranch] < phonon_frequency_cutoff)
                     continue;
 
                 epc = 0.0 + 0.0 * I;
@@ -1254,14 +1254,14 @@ PyObject *transport_eliashberg_function_cal_EPC_iso_helper_sparse(PyObject *self
     PyArrayObject *vmkq_obj;
     PyArrayObject *epc_strengths_obj;
     PyArrayObject *epc_strengths_tr_obj;
-    double frequency_cutoff, inv_degaussw, efermi;
+    double phonon_frequency_cutoff, inv_degaussw, efermi;
 
     if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOOOOddd",
                         &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
                         &phase_k_obj, &phase_kpq_obj, &grad_mat_obj, &wave_k_obj,
                         &wave_kpq_obj, &enk_match_table_obj, &emkpq_match_table_obj, &eig_k_obj,
                         &eig_kpq_obj, &vnk_obj, &vmkq_obj, &epc_strengths_obj, &epc_strengths_tr_obj,
-                        &frequency_cutoff, &inv_degaussw, &efermi))
+                        &phonon_frequency_cutoff, &inv_degaussw, &efermi))
     {
         return NULL;
     }
@@ -1366,7 +1366,7 @@ PyObject *transport_eliashberg_function_cal_EPC_iso_helper_sparse(PyObject *self
 #pragma omp parallel for private(iorb, jorb, ibranch, epc, tmp1, factor, tmp2, g2_tmp, delta_nk, delta_mkq, result, arg, tmp_r1, tmp_r2, zero, idx_val)
             for (ibranch = 0; ibranch < nbranches; ibranch++)
             {
-                if (freq[ibranch] < frequency_cutoff)
+                if (freq[ibranch] < phonon_frequency_cutoff)
                 {
                     continue;
                 }

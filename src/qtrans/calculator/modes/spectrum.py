@@ -144,7 +144,7 @@ def _prepare_electron_epc_self_energy_q_parallel(QTc_obj, k_grid:np.ndarray, q_g
         raise RuntimeError("Error(9999): q-parallel self-energy requires one-dimensional q weights.")
 
     nbranches = QTc_obj._get_nbranches()
-    q_grid_local, freq_grid, phon_vecs, apply_correction_for_qs, _ = QTc_obj._compute_boson_spectrum(
+    q_grid_local, freq_grid, phon_vecs, apply_correction_for_qs = QTc_obj._compute_phonon_spectrum(
         q_grid_local_frac, nbranches, is_metal)
 
     k_grid_local = split_into_rank(k_grid, 0, QTc_obj.rank, QTc_obj.rank_size)

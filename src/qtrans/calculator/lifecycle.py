@@ -91,7 +91,7 @@ class _LifecycleMixin:
         except Exception as e:
             raise RuntimeError(f"Fail to load configuration.\n{e}")
 
-    def _log(self, msg:str):
+    def _log(self, msg:str=''):
         if self.rank == 0:
             print(msg)
 

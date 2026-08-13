@@ -135,7 +135,7 @@ class _TransportEliashbergMixin:
                             # velocity_factor: shape (3, 3)
                             velocity_factor = np.outer(vnk[ibnd], vnk[ibnd] - vmkq[jbnd])
                             for ibranch in range(nbranches):
-                                if freq[ibranch] < self.frequency_cutoff:
+                                if freq[ibranch] < self.phonon_frequency_cutoff:
                                     continue
                                 epc = self._epc_cal_element(k, q, freq[ibranch], phvec_wap[ibranch],
                                                             tmp1, self.grad_mat, phase_k, phase_kpq,
@@ -282,7 +282,7 @@ class _TransportEliashbergMixin:
                             velocity_factor = np.eye(3) - np.outer(vnk[ibnd], vmkq[jbnd])/np.outer(vnk[ibnd], vnk[ibnd])
                             #velocity_factor = (1 - np.dot(vnk[ibnd], vmkq[jbnd]) / np.linalg.norm(vnk[ibnd])**2 ) * np.eye(3)
                             for ibranch in range(nmodes):
-                                if freq[ibranch] < self.frequency_cutoff:
+                                if freq[ibranch] < self.phonon_frequency_cutoff:
                                     continue
                                 epc = self._epc_cal_element(k, q, freq[ibranch], phvec_wap[ibranch],
                                                             tmp1, self.grad_mat, phase_k, phase_kpq,
@@ -408,7 +408,7 @@ class _TransportEliashbergMixin:
                             #velocity_factor = 1.0
 
                             for ibranch in range(nbranches):
-                                if freq[ibranch] < self.frequency_cutoff:
+                                if freq[ibranch] < self.phonon_frequency_cutoff:
                                     continue
                                 epc = self._epc_cal_element(k, q, freq[ibranch], phvec_wap[ibranch],
                                                             tmp1, self.grad_mat, phase_k, phase_kpq,
@@ -545,7 +545,7 @@ class _TransportEliashbergMixin:
                         np.ascontiguousarray(phase_k), np.ascontiguousarray(phase_kpq), self.grad_mat, np.ascontiguousarray(wave_k),
                         np.ascontiguousarray(wave_kpq), np.ascontiguousarray(enk_match_table), np.ascontiguousarray(emkq_match_table), np.ascontiguousarray(eig_k),
                         np.ascontiguousarray(eig_kpq), np.ascontiguousarray(vnk), np.ascontiguousarray(vmkq), epc_strengths_q, epc_strengths_tr_q,
-                        self.frequency_cutoff, self.inv_smeark, self.efermi)
+                        self.phonon_frequency_cutoff, self.inv_smeark, self.efermi)
                     epc_strengths[iq] = epc_strengths[iq] + epc_strengths_q
                     epc_strengths_tr[iq] = epc_strengths_tr[iq] + epc_strengths_tr_q
             if self.rank==0:
@@ -667,7 +667,7 @@ class _TransportEliashbergMixin:
                                 # SERTA
                                 #velocity_factor = 1.0
                                 for ibranch in range(nbranches):
-                                    if freq[ibranch] < self.frequency_cutoff:
+                                    if freq[ibranch] < self.phonon_frequency_cutoff:
                                         continue
                                     epc = self._epc_cal_element(k, q, freq[ibranch], phvec_wap[ibranch],
                                                             tmp1, self.grad_mat[ispin], phase_k, phase_kpq,
@@ -794,7 +794,7 @@ class _TransportEliashbergMixin:
                             np.ascontiguousarray(phase_k), np.ascontiguousarray(phase_kpq), self.grad_mat[ispin], np.ascontiguousarray(wave_k[ispin]),
                             np.ascontiguousarray(wave_kpq[ispin]), np.ascontiguousarray(enk_match_table[ispin]), np.ascontiguousarray(emkq_match_table[ispin]), np.ascontiguousarray(eig_k[ispin]),
                             np.ascontiguousarray(eig_kpq[ispin]), np.ascontiguousarray(vnk[ispin]), np.ascontiguousarray(vmkq), epc_strengths_q, epc_strengths_tr_q,
-                            self.frequency_cutoff, self.inv_smeark, self.efermi)
+                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi)
                         epc_strengths[ispin, iq] += epc_strengths_q
                         epc_strengths_tr[ispin, iq] += epc_strengths_tr_q
             if self.rank==0:

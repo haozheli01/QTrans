@@ -139,12 +139,12 @@ class _EPCPlotMixin:
             # Phonon frequencies on FBZ q grid
             freq_grid, _ = self._phonon_cal(q_fbz)  # (nqs_FBZ, nbranches)
 
-            # Frequency cutoff: branches with freq < frequency_cutoff are
+            # Frequency cutoff: branches with freq < phonon_frequency_cutoff are
             # already zeroed inside epc_cal_path (see e.g. l.2534 sparse,
             # l.2562 dense). Save the cutoff so downstream code knows the
             # threshold; the filtered (q, branch) positions can be re-derived
-            # from frequency < frequency_cutoff_Ha.
-            n_filtered = int(np.sum(freq_grid < self.frequency_cutoff))
+            # from frequency < phonon_frequency_cutoff_Ha.
+            n_filtered = int(np.sum(freq_grid < self.phonon_frequency_cutoff))
             n_total = freq_grid.size
 
             # k-side symmetry info (used to fold k_full -> k_ibz downstream)
@@ -156,7 +156,7 @@ class _EPCPlotMixin:
             np.savez(outfile,
                      epc=epcs,
                      frequency=freq_grid,
-                     frequency_cutoff_Ha=self.frequency_cutoff,
+                     phonon_frequency_cutoff_Ha=self.phonon_frequency_cutoff,
                      k_ibz_frac=k_ibz,
                      weight_k=weight_k,
                      k_fbz_frac=k_fbz_frac,
@@ -170,8 +170,8 @@ class _EPCPlotMixin:
             print(f"EPC grid data saved to {outfile}")
             print(f"  epc shape: {epcs.shape}, unit: Hartree, mem: {epcs.nbytes/1024**3:.2f} GB")
             print(f"  frequency shape: {freq_grid.shape}, unit: Hartree")
-            print(f"  frequency_cutoff = {self.frequency_cutoff / QTcts.MEVtoHARTREE:.4f} meV"
-                  f" ({self.frequency_cutoff:.6e} Hartree); "
+            print(f"  phonon_frequency_cutoff = {self.phonon_frequency_cutoff / QTcts.MEVtoHARTREE:.4f} meV"
+                  f" ({self.phonon_frequency_cutoff:.6e} Hartree); "
                   f"filtered {n_filtered}/{n_total} (q,branch) modes "
                   f"(|g| zeroed inside epc_cal_path).")
             print(f"  k_ibz: {nks} points, k_fbz: {len(k_fbz_frac)} points")

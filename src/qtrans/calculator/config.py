@@ -357,6 +357,8 @@ class _ConfigMixin:
         self._set('grad_mat_path',    validate_readable_path, 'epc', 5141)
         self._set('mat_info_sc_path', validate_readable_path, 'epc', 5142)
         self._set('cell_range_cut',   validate_int_list,      'epc', 5143, 3)
+        self._set('phonon_frequency_cutoff', validate_num, 'epc', 5148)
+        self.phonon_frequency_cutoff *= QTcts.MEVtoHARTREE
 
         try:
             self.mat_info_sc = np.load(self.mat_info_sc_path, allow_pickle=True).item()
@@ -431,7 +433,6 @@ class _ConfigMixin:
         self._set('fermi_maxiter',      validate_positive_int,      'transport', 5185)
         self._set('fermi_shift',        validate_num,               'transport', 5186)
         self._set('temperature',        validate_positive_num,      'transport', 5187)
-        self._set('frequency_cutoff',   validate_num,               'transport', 5188)
         self._set('smeark',             validate_positive_num,      'transport', 5189)
         self._set('smearq',             validate_positive_num,      'transport', 5190)
         self._set('gauss_type',         validate_int,               'transport', 5191)
@@ -463,7 +464,6 @@ class _ConfigMixin:
         self.smearq = self.smearq * QTcts.MEVtoHARTREE
         self.inv_smearq = 1.0 / self.smearq
         self.e_thr = self.e_thr * QTcts.MEVtoHARTREE
-        self.frequency_cutoff = self.frequency_cutoff * QTcts.MEVtoHARTREE
         self.fermi_shift = self.fermi_shift * QTcts.EVtoHARTREE
 
     def _initial_conductivity(self):
@@ -813,12 +813,9 @@ class _ConfigMixin:
 
         elif self.cal_mode == 'epc':
             self._print_banner('EPC Calculation')
-            self._parse_input_optional(config=config, block_name='transport')
             self._init_scattering_blocks(config)
-            self._initial_transport()
             self._parse_input_optional(config=config, block_name='dispersion')
             self._initial_dispersion()
-            config.pop('transport', 0)
             config.pop('dispersion', 0)
         
         elif self.cal_mode == 'fermi_surface':

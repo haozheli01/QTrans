@@ -190,13 +190,13 @@ class _TransportCommonMixin:
             emax = np.max(eigs_k)
             emin = np.min(eigs_k)
             for ibranch, wqv in enumerate(freqs):
-                if wqv < self.frequency_cutoff:
+                if wqv < self.phonon_frequency_cutoff:
                     continue
                 match_table[:, ibranch] = (eigs_kpq - wqv - self.e_thr < emax) & (eigs_kpq + wqv + self.e_thr > emin)
         else:
             match_table = np.zeros((len(eigs_k), len(eigs_kpq), len(freqs)), dtype=bool)
             for ibranch, wqv in enumerate(freqs):
-                if wqv < self.frequency_cutoff:
+                if wqv < self.phonon_frequency_cutoff:
                     continue
                 for iband, enk in enumerate(eigs_k):
                     for jband, emkq in enumerate(eigs_kpq):
@@ -210,7 +210,6 @@ class _TransportCommonMixin:
 
     def _compute_phonon_spectrum(self, q_grid_local, nbranches, is_metal):
         """Compute phonon spectrum and eigenvectors for local q points."""
-        rot_mat = None
         apply_correction_for_qs = None
         if q_grid_local.size > 0:
             freq_grid, boson_vecs = self._phonon_cal(q_grid_local)
@@ -228,7 +227,7 @@ class _TransportCommonMixin:
             freq_grid = np.empty((0, nbranches))
             boson_vecs = np.empty((0, nbranches, self.natoms, 3))
             apply_correction_for_qs = np.empty((0,))
-        return q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs, rot_mat
+        return q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs
 
     def _compute_electron_properties(self, k_grid_local, band_indice, band_edge_energy, nbands):
         """Compute eigenvalues, eigenvectors, velocities, and fermi speed for local k points."""
@@ -327,7 +326,7 @@ class _TransportCommonMixin:
             nbranches = self._get_nbranches()
 
             # compute boson spectrum
-            q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs, rot_mat = self._compute_phonon_spectrum(q_grid_local, nbranches, is_metal)
+            q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs = self._compute_phonon_spectrum(q_grid_local, nbranches, is_metal)
 
             # k grid is split
             split_sections = np.zeros(self.rank_size, dtype=int)
@@ -362,7 +361,7 @@ class _TransportCommonMixin:
             nbranches = self._get_nbranches()
 
             # compute boson spectrum
-            q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs, rot_mat = self._compute_phonon_spectrum(q_grid_local, nbranches, is_metal)
+            q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs = self._compute_phonon_spectrum(q_grid_local, nbranches, is_metal)
 
             q_grid_all = self.comm.allgather(q_grid_local)
 

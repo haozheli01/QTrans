@@ -60,6 +60,7 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'grad_mat_path': "./grad_mat.npy",
         'mat_info_sc_path': "./mat_info_sc.npy",
         'cell_range_cut': [10, 10, 10],
+        'phonon_frequency_cutoff': 0.5,    # meV
         'LRC_taylor_order': 0,
         'q_cut': 100.0,    # The q cut for dipole correction. We can have a test to determine the best q_cut.
         'range_separation_length_L': 100.0,    # Ang, range separation length for 2D long-range correction
@@ -72,7 +73,6 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'fermi_maxiter': 100,
         'fermi_shift': 0.0, # eV
         'temperature': 300.0,    # K
-        'frequency_cutoff': 0.5,    # meV
         'smeark': 25.0,    # meV
         'smearq': 25.0,    # meV
         'gauss_type': 0,    # the type of gaussian function

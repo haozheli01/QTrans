@@ -458,7 +458,7 @@ class _PreparerConfigMixin:
                 print("Electron-Phonon Coupling Settings:")
                 print("  Supercell Size          : {:<3} * {:<3} * {:<3}".format(*self.epc_sc_matrix))
                 print("  Finite Displacement     : {:.6f} angstrom".format(self.epc_sc_disp*QTcts.BOHRtoANG))
-                print("  Method of FD            : ", self.fd_method)
+                print("  Method of FD            :", self.fd_method)
                 print()
 
             # make dir <perturb>

@@ -37,9 +37,7 @@ class _OutputMixin:
             hsk_labels = []
             for lbs in kpath_seek.kpath['path']:
                 hsk_labels += lbs
-            if self.rank ==0:
-                print(kpath_seek.kpath['path'])
-                print(kpath_seek.kpath['kpoints'])
+            self._log('Automatically generating high-symmetry points..')
 
             # remove adjacent duplicates   
             res = [hsk_labels[0]]
@@ -55,6 +53,9 @@ class _OutputMixin:
             k_vec = k_vec.reshape(-1,3) # shape (nk, 3)
         except:
             raise RuntimeError("kpoints_generator failed.", '1012')
+        info_str = '\n'.join(["{:<6s}: {:6.4f}    {:6.4f}    {:6.4f}".format(hsk_labels[i], *hsk_points[i]) for i in range(len(hsk_labels))])
+        self._log("High-Symmetry Points:")
+        self._log(info_str)
         return k_vec, k_dist, k_node, hsk_labels_plot
 
     def _read_dispersion(self, filepath:str):

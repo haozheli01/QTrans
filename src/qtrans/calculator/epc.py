@@ -148,7 +148,7 @@ class _EPCMixin:
             # Zero out the prefactor for branches below the frequency cutoff so that
             # any small-frequency (acoustic-Gamma-like) contribution is excluded from g.
             # This mirrors the April-version behaviour in _epc_norm_cal_kq.
-            mask = np.where(freq < self.frequency_cutoff)
+            mask = np.where(freq < self.phonon_frequency_cutoff)
             ph_prefac[mask] = 0.0
             phon_vec_wap = np.ascontiguousarray(phon_vec_wap)
             phase_k = np.ascontiguousarray(phase_k)
@@ -176,7 +176,7 @@ class _EPCMixin:
                 for jband in range(nbands_fin):
                     tmp1 = np.einsum('m,n -> mn', np.conj(wave_kpq[jband]), wave_k[iband])
                     for ibranch in range(nbranches):
-                        if freq[ibranch] > self.frequency_cutoff:
+                        if freq[ibranch] > self.phonon_frequency_cutoff:
                             epc = self._epc_cal_element(k_cart, q_cart, freq[ibranch], phon_vec_wap[ibranch], tmp1, grad_mat, phase_k, phase_kpq, dipole_correction)
                         else:
                             epc = 0.0

@@ -71,10 +71,6 @@ class _ElectronMixin:
             eigen = np.swapaxes(eigen, 0, 1) # (2*norbs, nks)
             eigen_vecs = np.array(eigen_vecs) # (nks, 2, norbs, norbs)
             eigen_vecs = np.swapaxes(eigen_vecs, -1, -2) # (nks, 2, norbs, norbs)
-            if self.symm_wav_for_PT:
-                translations, mapping, rotation_matrix = self._symm_info_for_PT()
-                eigen_vecs = self._symm_wav_for_PT(translations, mapping, rotation_matrix,k_vec, eigen_vecs)
-                del translations, mapping, rotation_matrix
             eigen_vecs = eigen_vecs.reshape(-1, 2*self.norbs, self.norbs) # (nks, 2*norbs, norbs)
         else:
             eigen = []
@@ -99,89 +95,6 @@ class _ElectronMixin:
             eigen_vecs = np.array(eigen_vecs) # (nks, norbs, norbs)
             eigen_vecs = np.swapaxes(eigen_vecs, -1, -2)
         return eigen, eigen_vecs
-
-    def _symm_info_for_PT(self, tol= 1E-2):
-        # For AFM with PT symmetry, we obtain the wavefunctions of spin-down channel using that of spin-up channel
-        # Here we abtain the info needed in one run
-        
-        # First, we define the rotation matrix for P
-        s_orbit = np.eye(1) # even
-        p_orbit = np.eye(3) * (-1)  # odd
-        d_orbit = np.eye(5) # even
-        f_orbit = np.eye(7) * (-1)  # odd
-
-        # Second, decides the detail orbit of each elements and build the rotation matrix
-        rotation_matrix = []
-        # parse the Atomic Orbital Basis Sets
-        basis_definition = np.zeros((99, self.nao_max))
-        # key is the atomic number, value is the index of the occupied orbits.
-        basis_def = basis_def_dicts[self.basis_label]
-        for k in basis_def.keys():
-            basis_definition[k][basis_def[k]] = 1
-        orb_mask = basis_definition[self.graph_data.species] # shape: [natoms,nao_max]
-        if self.basis_label == 'openmx_26':
-            s1 = [0]
-            s2 = [1]
-            s3 = [2]
-            p1 = [3,4,5]
-            p2 = [6,7,8]
-            d1 = [9,10,11,12,13]
-            d2 = [14,15,16,17,18]
-            f1 = [19,20,21,22,23,24,25]
-            orbital_blocks = {
-                's': [s1, s2, s3],
-                'p': [p1, p2],
-                'd': [d1, d2],
-                'f': [f1],
-            }
-        elif self.basis_label == 'openmx_19':
-            s1 = [0]
-            s2 = [1]
-            s3 = [2]
-            p1 = [3,4,5]
-            p2 = [6,7,8]
-            d1 = [9,10,11,12,13]
-            d2 = [14,15,16,17,18]
-            orbital_blocks = {
-                's': [s1, s2, s3],
-                'p': [p1, p2],
-                'd': [d1, d2],
-            }
-        else:
-            raise RuntimeError(f"Error(9999): You should add your basis in '_symm_wav_for_PT' function! :)")
-        for idx, atom in enumerate(self.graph_data.species):
-            occ = orb_mask[idx]
-            count = {l: sum(occ[shell].any() for shell in shells)
-                    for l, shells in orbital_blocks.items()}
-            if self.basis_label == 'openmx_26':
-                blocks = ([s_orbit] * count['s'] + [p_orbit] * count['p'] + [d_orbit] * count['d']  + [f_orbit] * count['f'])
-            elif self.basis_label == 'openmx_19':
-                blocks = ([s_orbit] * count['s'] + [p_orbit] * count['p'] + [d_orbit] * count['d'])
-            temp = block_diag(*blocks)
-            rotation_matrix.append(temp)
-
-        # Third, mapping the atoms 
-        N = len(self.graph_data.species) # num of atoms
-        atomic_pos_frac = np.matmul(self.graph_data.pos, self.graph_data.inv_latt)
-        original_frac = atomic_pos_frac % 1.0 # back to [0,1), initial fractional positions
-        inversed_frac = original_frac * (-1) # present fractional positions
-        # inversed_frac_wrapped = inversed_frac % 1.0 # back to [0,1)
-        mapping = np.full(N, -1, dtype=int)
-        translations = np.zeros((N, 3), dtype=int)
-        for i in range(N):
-            for j in range(N):
-                if self.graph_data.species[i] != self.graph_data.species[j]:
-                    continue
-                diff = original_frac[j] - inversed_frac[i] 
-                T = np.round(diff).astype(int)
-                if np.allclose(inversed_frac[i] + T, original_frac[j], atol=tol):
-                    mapping[i] = j
-                    translations[i] = -1 * T
-                    break
-            if mapping[i] < 0:
-                raise RuntimeError(f"Atom {i} not mapped under inversion! Check your strcture!")
-
-        return translations, mapping, rotation_matrix
 
     def _elec_cal(self, k_grid):
         k_vec = k_grid.reshape(-1, 3)

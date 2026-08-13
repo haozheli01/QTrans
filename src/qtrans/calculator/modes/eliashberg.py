@@ -32,7 +32,7 @@ class _EliashbergMixin:
             self.inv_smeark (float): Inverse of smeark.
             self.inv_smearq (float): Inverse of phonon smearing width.
             self.e_thr (float): Energy threshold for Fermi window filtering.
-            self.frequency_cutoff (float): Minimum phonon frequency to include.
+            self.phonon_frequency_cutoff (float): Minimum phonon frequency to include.
             self.spinor_mode (str): 'nc' (non-collinear), 'collinear', or other (non-spin-polarized).
             self.doping_charge (float): Doping charge for adjusting electron count.
             self.fermi_shift (float): Manual shift applied to the Fermi energy.
@@ -150,7 +150,7 @@ class _EliashbergMixin:
             atomic_phase = np.exp(QTcts.JTWOPI * (self.graph_data.pos @ q)) # shape (natoms, )
             phvec_wap = atomic_phase[None,:,None] * eigen_vec_phon # shape (nbranches, natoms, 3)
             # pre-compute valid branches mask (does not depend on k or bands)
-            valid_branches = freq >= self.frequency_cutoff  # shape (nbranches,)
+            valid_branches = freq >= self.phonon_frequency_cutoff  # shape (nbranches,)
             valid_branch_indices = np.where(valid_branches)[0]
             if len(valid_branch_indices) == 0:
                 if self.rank == 0:
@@ -271,7 +271,7 @@ class _EliashbergMixin:
             self.smeark (float): Electronic smearing width for Fermi level determination.
             self.inv_smeark (float): 1 / smeark, inverse electronic smearing.
             self.inv_smearq (float): Inverse phonon smearing width for delta function broadening.
-            self.frequency_cutoff (float): Minimum phonon frequency to include (filters acoustic modes).
+            self.phonon_frequency_cutoff (float): Minimum phonon frequency to include (filters acoustic modes).
             self.gauss_type (int): Smearing function type (0=Gaussian, -1=cold, -99=Fermi-Dirac, etc.).
             self.spinor_mode (str): 'none', 'collinear', or 'nc'.
             self.graph_data: Object holding atomic structure (pos, latt, num_electrons, H_cell, S_cell, etc.).
@@ -488,7 +488,7 @@ class _EliashbergMixin:
                                                             np.ascontiguousarray(wave_k[ispin]), np.ascontiguousarray(wave_kpq[ispin]),
                                                             np.ascontiguousarray(enk_match_table[ispin]), np.ascontiguousarray(emkq_match_table[ispin]),
                                                             np.ascontiguousarray(eig_k[ispin]), np.ascontiguousarray(eig_kpq[ispin]), epc_strengths_q,
-                                                            self.frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
+                                                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
                         epc_strengths[ispin, iq] += epc_strengths_q
                 else:
                     eig_k = enks_useful[:, idx]  # (nbands,)
@@ -504,14 +504,14 @@ class _EliashbergMixin:
                                                             np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
                                                             np.ascontiguousarray(enk_match_table), np.ascontiguousarray(emkq_match_table),
                                                             np.ascontiguousarray(eig_k), np.ascontiguousarray(eig_kpq), epc_strengths_q,
-                                                            self.frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
+                                                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
                     else:
                         eliashberg_spectrum_cal_EPC_helper_sparse(np.ascontiguousarray(freq_grid[iq]), atomic_mass, np.ascontiguousarray(phvec_wap),
                                                             np.ascontiguousarray(phase_k), np.ascontiguousarray(phase_kpq), self.grad_mat,
                                                             np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
                                                             np.ascontiguousarray(enk_match_table), np.ascontiguousarray(emkq_match_table),
                                                             np.ascontiguousarray(eig_k), np.ascontiguousarray(eig_kpq), epc_strengths_q,
-                                                            self.frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
+                                                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
                     epc_strengths[iq] += epc_strengths_q
             if self.rank==0:
                 logger.step(iq+1)
@@ -658,7 +658,7 @@ class _EliashbergMixin:
                                                           np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
                                                           np.ascontiguousarray(enk_match_table), np.ascontiguousarray(emkq_match_table),
                                                           np.ascontiguousarray(eig_k), np.ascontiguousarray(eig_kpq), epc_strengths_q,
-                                                          self.frequency_cutoff, self.inv_smeark, self.efermi, weights_k_recv[ik])
+                                                          self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_recv[ik])
                     epc_strengths[iq] += epc_strengths_q
             if self.rank==0:
                 logger.step(send_rank+1)
