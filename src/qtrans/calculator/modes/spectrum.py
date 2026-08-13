@@ -126,6 +126,7 @@ def _spectrum_function_electron(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, i
             enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_sparse(QTc_obj, k_grid, q_grid, is_metal=is_metal)
         else:
             enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_dense(QTc_obj, k_grid, q_grid, is_metal=is_metal)
+    return enks, omega_list, self_energies, spectrum_func
 
 def _prepare_electron_epc_self_energy_q_parallel(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False):
     k_grid = QTc_obj._frac2car(k_grid)
