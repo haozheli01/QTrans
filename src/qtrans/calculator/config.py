@@ -612,7 +612,7 @@ class _ConfigMixin:
         else:
             self.adv_cal = False
         efield_str = "[" + ", ".join("{:.4f}".format(x) for x in self.efield) + "]"
-        self._log('The strength of external electric field (V/cm):', efield_str)
+        self._log('The strength of external electric field (V/cm):'+efield_str)
         self.efield *= (100 / (QTcts.HARTREEtoEV / QTcts.BOHRtoM))
 
     def _initial_self_energy(self):

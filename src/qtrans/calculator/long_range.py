@@ -15,15 +15,16 @@ class _LongRangeMixin:
         return Hv_cell
 
     def _Sv_cell_prepare(self,):
-        Sv_cell = np.einsum('nij,nk->nijk', self.graph_data.S_cell, self.graph_data.nbr_shift_of_cell) # (ncells, norbs, norbs, 3)
+        S_cell_full = self.graph_data.S_cell
         if self.spinor_mode == 'nc':
-            ncells, norbs_half, _, ndirs = Sv_cell.shape
+            ncells, norbs_half, _ = S_cell_full.shape
             norbs = norbs_half * 2
-            new_Sv_cell = np.zeros((ncells, norbs, norbs, ndirs), dtype=Sv_cell.dtype)
-            new_Sv_cell[:, :norbs_half, :norbs_half, :] = Sv_cell
-            new_Sv_cell[:, norbs_half:, norbs_half:, :] = Sv_cell
-            Sv_cell = new_Sv_cell
-            del new_Sv_cell
+            new_S_cell = np.zeros((ncells, norbs, norbs), dtype=S_cell_full.dtype)
+            new_S_cell[:, :norbs_half, :norbs_half] = S_cell_full
+            new_S_cell[:, norbs_half:, norbs_half:] = S_cell_full
+            S_cell_full = new_S_cell
+        self.graph_data.S_cell_full = S_cell_full
+        Sv_cell = np.einsum('nij,nk->nijk', S_cell_full, self.graph_data.nbr_shift_of_cell) # (ncells, norbs, norbs, 3)
         return Sv_cell
 
     def _vel_nk_cal_from_HS(self, eig, wfn, k_grid, collinear_part_index:int=0):
@@ -70,6 +71,13 @@ class _LongRangeMixin:
                                                     self.graph_data.Poff[:,:,:,i], self.graph_data.edge_index, Ham_type=self.Ham_type)
             P_cell.append(P_tmp)
         P_cell = np.stack(P_cell, axis=-1)
+        if self.spinor_mode == 'nc':
+            ncells, norbs_half, _, ndirs = P_cell.shape
+            norbs = norbs_half * 2
+            new_P_cell = np.zeros((ncells, norbs, norbs, ndirs), dtype=P_cell.dtype)
+            new_P_cell[:, :norbs_half, :norbs_half, :] = P_cell
+            new_P_cell[:, norbs_half:, norbs_half:, :] = P_cell
+            P_cell = new_P_cell
         return P_cell
 
     def _get_reciprocal_lattice_vectors(self, n1:int=3, n2:int=3, n3:int=3, exclude_gamma: bool=False, ix:int=0, iy:int=0, iz:int=0):
@@ -145,7 +153,7 @@ class _LongRangeMixin:
 
             # ---- k-only precomputation ----
             phase = np.exp(QTcts.JTWOPI * (self.graph_data.nbr_shift_of_cell @ k))   # (ncells,)
-            phase_S = np.tensordot(phase, self.graph_data.S_cell,            axes=([0], [0]))  # (norbs, norbs)
+            phase_S = np.tensordot(phase, self.graph_data.S_cell_full,       axes=([0], [0]))  # (norbs, norbs)
             if use_outplane:
                 phase_z = np.tensordot(phase, self.graph_data.P_cell[:, :, :, 2], axes=([0], [0]))  # (norbs, norbs)
 
@@ -181,7 +189,7 @@ class _LongRangeMixin:
             order = self.LRC_taylor_order
             if order == 1:
                 mat_r = 1.0j * np.einsum('nija, ga->gnij', self.graph_data.P_cell, qG_vec_cart)  # (ngs, ncells, norbs, norbs)
-                mat_exp_taylor = self.graph_data.S_cell[None, :, :] + mat_r  # (ngs, ncells, norbs, norbs)
+                mat_exp_taylor = self.graph_data.S_cell_full[None, :, :] + mat_r  # (ngs, ncells, norbs, norbs)
             # Precompute per-branch numerator and temp3
             use_dipole = self.apply_correction
             use_quadrupole = self.quadrupole_correction
@@ -207,7 +215,7 @@ class _LongRangeMixin:
                 branch_scalar = prefactor * inv_vol * np.array(
                     [(temp3_all[ib] * factors_all[ib, :, None]).sum() for ib in range(nbranches)])  # (nbranches,)
                 # Precompute phase-weighted S_cell: sum_n phase[n]*S_cell[n] -> (norbs, norbs)
-                phase_S = np.tensordot(phase, self.graph_data.S_cell, axes=([0], [0]))  # (norbs, norbs)
+                phase_S = np.tensordot(phase, self.graph_data.S_cell_full, axes=([0], [0]))  # (norbs, norbs)
             else:  # order == 1
                 # Precompute phase-weighted mat_exp_taylor: sum_n phase[n]*mat_exp[g,n] -> (ngs, norbs, norbs)
                 phase_mat = np.tensordot(mat_exp_taylor, phase, axes=([1], [0]))  # (ngs, norbs, norbs)
@@ -253,7 +261,7 @@ class _LongRangeMixin:
             # qG_vec_cart in bohr^{-1}
             qG_vec_cart, exp_inner_term = self._get_LRC_ewald_G(q_vec)
             phase = np.exp(QTcts.JTWOPI*np.sum(self.graph_data.nbr_shift_of_cell*k_vec[None,:], axis=-1)) # shape: (ncells, )
-            sum_r = np.einsum('n, ij, nij->', phase, wave_coe_tp, self.graph_data.S_cell)
+            sum_r = np.einsum('n, ij, nij->', phase, wave_coe_tp, self.graph_data.S_cell_full)
             atomic_phase = np.exp(-1.0j*np.einsum('ga, ka->kg', qG_vec_cart, self.graph_data.pos))  # shape: (natoms, ngs)
             temp1 = np.einsum('gi, kij, kj->kg', qG_vec_cart, self.BECs, phvec_wap) # shape: (natoms, ngs)
             temp2 = np.exp(-exp_inner_term / self.ewald_param) / exp_inner_term
@@ -265,7 +273,7 @@ class _LongRangeMixin:
             phase = np.exp(QTcts.JTWOPI*np.sum(self.graph_data.nbr_shift_of_cell*k_vec[None,:], axis=-1)) # shape: (ncells, )
             mat_r = 1.0j*np.einsum('nija, ga->gnij', self.graph_data.P_cell, qG_vec_cart)   # shape: (ngs, ncells, norbs, norbs)
             # mat_exp: shape (ngs, ncells, norbs, norbs)
-            mat_exp_taylor = self.graph_data.S_cell[None, :, :] + mat_r
+            mat_exp_taylor = self.graph_data.S_cell_full[None, :, :] + mat_r
             sum_r = np.einsum('n, ij, gnij->g', phase, wave_coe_tp, mat_exp_taylor) # shape: (ngs, )
             atomic_phase = np.exp(-1.0j*np.einsum('ga, ka->kg', qG_vec_cart, self.graph_data.pos))  # shape: (natoms, ngs)
             temp1 = np.einsum('gi, kij, kj->kg', qG_vec_cart, self.BECs, phvec_wap) # shape: (natoms, ngs)
@@ -295,7 +303,7 @@ class _LongRangeMixin:
             # qG_vec_cart in bohr^{-1}
             qG_vec_cart, exp_inner_term = self._get_LRC_ewald_G(q_vec)
             phase = np.exp(QTcts.JTWOPI*np.sum(self.graph_data.nbr_shift_of_cell*k_vec[None,:], axis=-1))
-            sum_r = np.einsum('n, ij, nij->', phase, wave_coe_tp, self.graph_data.S_cell)    # shape: (0,)  # matrix element <Bloch | exp |Bloch >
+            sum_r = np.einsum('n, ij, nij->', phase, wave_coe_tp, self.graph_data.S_cell_full)    # shape: (0,)  # matrix element <Bloch | exp |Bloch >
             atomic_phase = np.exp(-1.0j*np.einsum('ga, ka->kg', qG_vec_cart, self.graph_data.pos))  # shape: (natoms, ngs)
             # iZ   1/2 Q
             numerator_dipole = 1.0j * np.einsum("gi, kij, kj->kg", qG_vec_cart, self.BECs, phvec_wap)  # shape: (natoms, ngs)  
@@ -309,7 +317,7 @@ class _LongRangeMixin:
             qG_vec_cart, exp_inner_term = self._get_LRC_ewald_G(q_vec)
             phase = np.exp(QTcts.JTWOPI*np.sum(self.graph_data.nbr_shift_of_cell*k_vec[None,:], axis=-1)) # shape: (ncells, )
             mat_r = 1.0j*np.einsum('nija, ga->gnij', self.graph_data.P_cell, qG_vec_cart)   # shape: (ngs, ncells, norbs, norbs)
-            mat_exp_taylor = self.graph_data.S_cell[None, :, :] + mat_r  # shape: (ngs, ncells, norbs, norbs)
+            mat_exp_taylor = self.graph_data.S_cell_full[None, :, :] + mat_r  # shape: (ngs, ncells, norbs, norbs)
             sum_r = np.einsum("n, ij, gnij->g", phase, wave_coe_tp, mat_exp_taylor)  # shape: (ngs, )  # matrix element <Bloch | exp |Bloch >
             atomic_phase = np.exp(-1.0j*np.einsum('ga, ka->kg', qG_vec_cart, self.graph_data.pos))  # shape: (natoms, ngs)
             # iZ   1/2 Q
@@ -477,7 +485,7 @@ class _LongRangeMixin:
         atomic_phase = np.exp(-1.0j * np.einsum('gx, kx->gk', qplusG_vec_cart, self.graph_data.pos))
 
         phase_neighbour = np.exp(QTcts.JTWOPI * np.sum(self.graph_data.nbr_shift_of_cell * k_vec[None, :], axis=-1))
-        S_mat_Bloch = np.einsum('n, ij, nij->', phase_neighbour, wave_coe_tp, self.graph_data.S_cell)
+        S_mat_Bloch = np.einsum('n, ij, nij->', phase_neighbour, wave_coe_tp, self.graph_data.S_cell_full)
         z_mat_Bloch = np.einsum('n, ij, nij->', phase_neighbour, wave_coe_tp, self.graph_data.P_cell[:, :, :, 2])
         V_key_part_Bloch = inplane_coef * S_mat_Bloch + outplane_coef * z_mat_Bloch
         g_LR_of_G = np.einsum('g, k, kx, gk, gkx->g', factor1, ph_prefac, phvec, atomic_phase, V_key_part_Bloch)
@@ -498,7 +506,7 @@ class _LongRangeMixin:
         atomic_phase = np.exp(-1.0j * np.einsum('gx, kx->gk', qplusG_vec_cart, self.graph_data.pos))
 
         phase_neighbour = np.exp(QTcts.JTWOPI * np.sum(self.graph_data.nbr_shift_of_cell * k_vec[None, :], axis=-1))
-        S_mat_Bloch = np.einsum('n, ij, nij->', phase_neighbour, wave_coe_tp, self.graph_data.S_cell)
+        S_mat_Bloch = np.einsum('n, ij, nij->', phase_neighbour, wave_coe_tp, self.graph_data.S_cell_full)
         V_key_part_Bloch = inplane_coef * S_mat_Bloch
         g_LR_of_G = np.einsum('g, k, kx, gk, gkx->g', factor1, ph_prefac, phvec, atomic_phase, V_key_part_Bloch)
         return np.einsum('g->', g_LR_of_G)
