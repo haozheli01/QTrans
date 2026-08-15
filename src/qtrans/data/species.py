@@ -1,80 +1,5 @@
 """QTrans data.species helpers."""
 
-
-openmx_cutoff_radius = {
-}
-
-abacus_cutoff_radius = {    # 似乎没有调用
-    'H' : 6.0,
-    'He': 6.0,
-    'Li': 7.0,
-    'Be': 7.0,
-    'B' : 8.0,
-    'C' : 7.0,
-    'N' : 7.0,
-    'O' : 7.0,
-    'F' : 7.0,
-    'Ne': 6.0,
-    'Na': 8.0,
-    'Mg': 8.0,
-    'Al': 7.0,
-    'Si': 7.0,
-    'P' : 7.0,
-    'S' : 7.0,
-    'Cl': 7.0,
-    'Ar': 7.0,
-    'K' : 9.0,
-    'Ca': 9.0,
-    'Sc': 8.0,
-    'Ti': 8.0,
-    'V' : 8.0,
-    'Cr': 8.0,
-    'Mn': 8.0,
-    'Fe': 8.0,
-    'Co': 8.0,
-    'Ni': 8.0,
-    'Cu': 8.0,
-    'Zn': 8.0,
-    'Ga': 8.0,
-    'Ge': 8.0,
-    'As': 7.0,
-    'Se': 8.0,
-    'Br': 7.0,
-    'Kr': 7.0,
-    'Rb': 10.0,
-    'Sr': 9.0,
-    'Y' : 8.0,
-    'Zr': 8.0,
-    'Nb': 8.0,
-    'Mo': 7.0,
-    'Tc': 7.0,
-    'Ru': 7.0,
-    'Rh': 7.0,
-    'Pd': 7.0,
-    'Ag': 7.0,
-    'Cd': 7.0,
-    'In': 7.0,
-    'Sn': 7.0,
-    'Sb': 7.0,
-    'Te': 7.0,
-    'I' : 7.0,
-    'Xe': 8.0,
-    'Cs': 10.0,
-    'Ba': 10.0,
-    'Hf': 7.0,
-    'Ta': 8.0,
-    'W' : 8.0,
-    'Re': 7.0,
-    'Os': 7.0,
-    'Ir': 7.0,
-    'Pt': 7.0,
-    'Au': 7.0,
-    'Hg': 9.0,
-    'Tl': 7.0,
-    'Pb': 7.0,
-    'Bi': 7.0
-}
-
 openmx_spin_sets = {'H':[0.5, 0.5], # 1
             'He':[1.0,1.0], # 2
             'Li':[1.5,1.5], # 3
@@ -181,7 +106,7 @@ openmx_pao_dict = {'H':'H6.0-s2p1',
             'Mn':'Mn6.0-s3p2d2',
             'Fe':'Fe5.5H-s3p2d1',
             'Co':'Co6.0H-s3p2d1',
-            'Ni':'Ni6.0H-s3p2d2f1', # 'Ni6.0H-s3p2d1',
+            'Ni':'Ni6.0H-s3p2d1',
             'Cu':'Cu6.0H-s3p2d1',
             'Zn':'Zn6.0H-s3p2d1',
             'Ga':'Ga7.0-s3p2d2',
@@ -405,8 +330,7 @@ abacus_pao_dict = {
     'B' : 'B_gga_8au_100Ry_2s2p1d.orb',
     'C' : 'C_gga_7au_100Ry_2s2p1d.orb',
     'N' : 'N_gga_7au_100Ry_2s2p1d.orb',
-    # 'O' : 'O_gga_7au_100Ry_2s2p1d.orb',
-    'O' : 'O_gga_6au_100Ry_3s3p2d.orb',    #TZDP
+    'O' : 'O_gga_7au_100Ry_2s2p1d.orb',
     'F' : 'F_gga_7au_100Ry_2s2p1d.orb',
     'Ne': 'Ne_gga_6au_100Ry_2s2p1d.orb',
     'Na': 'Na_gga_8au_100Ry_4s2p1d.orb',
@@ -426,8 +350,7 @@ abacus_pao_dict = {
     'Mn': 'Mn_gga_8au_100Ry_4s2p2d1f.orb',
     'Fe': 'Fe_gga_8au_100Ry_4s2p2d1f.orb',
     'Co': 'Co_gga_8au_100Ry_4s2p2d1f.orb',
-    #'Ni': 'Ni_gga_8au_100Ry_4s2p2d1f.orb',
-    'Ni': 'Ni_gga_8au_100Ry_6s3p3d2f.orb',    # TZDP
+    'Ni': 'Ni_gga_8au_100Ry_4s2p2d1f.orb',
     'Cu': 'Cu_gga_8au_100Ry_4s2p2d1f.orb',
     'Zn': 'Zn_gga_8au_100Ry_4s2p2d1f.orb',
     'Ga': 'Ga_gga_8au_100Ry_2s2p2d1f.orb',
@@ -457,7 +380,6 @@ abacus_pao_dict = {
     'Cs': 'Cs_gga_10au_100Ry_4s2p1d.orb',
     'Ba': 'Ba_gga_10au_100Ry_4s2p2d1f.orb',    
     'La': 'La_gga_8au_100Ry_6s3p3d2f.orb',    # TZDP
-
     'Hf': 'Hf_gga_10au_100Ry_4s2p2d2f.orb',
     'Ta': 'Ta_gga_10au_100Ry_4s2p2d2f.orb',
     'W' : 'W_gga_10au_100Ry_4s2p2d2f.orb',
@@ -480,8 +402,7 @@ abacus_pot_pbe_dict = {
     'B': 'B_ONCV_PBE-1.0.upf',
     'C': 'C_ONCV_PBE-1.0.upf',
     'N': 'N_ONCV_PBE-1.0.upf',
-    # 'O': 'O_ONCV_PBE-1.0.upf',
-    'O' : 'O.upf',
+    'O': 'O_ONCV_PBE-1.0.upf',
     'F': 'F_ONCV_PBE-1.0.upf',
     'Ne': 'Ne_ONCV_PBE-1.0.upf',
     'Na': 'Na_ONCV_PBE-1.0.upf',
@@ -501,8 +422,7 @@ abacus_pot_pbe_dict = {
     'Mn': 'Mn_ONCV_PBE-1.0.upf',
     'Fe': 'Fe_ONCV_PBE-1.0.upf',
     'Co': 'Co_ONCV_PBE-1.0.upf',
-    #'Ni': 'Ni_ONCV_PBE-1.0.upf',
-    'Ni' : 'Ni.upf',
+    'Ni': 'Ni_ONCV_PBE-1.0.upf',
     'Cu': 'Cu_ONCV_PBE-1.0.upf',
     'Zn': 'Zn_ONCV_PBE-1.0.upf',
     'Ga': 'Ga_ONCV_PBE-1.0.upf',
@@ -531,9 +451,7 @@ abacus_pot_pbe_dict = {
     'Xe': 'Xe_ONCV_PBE-1.0.upf',
     'Cs': 'Cs_ONCV_PBE-1.0.upf',
     'Ba': 'Ba_ONCV_PBE-1.0.upf',
-    #'La': 'La_ONCV_PBE-1.0.upf',
-    'La' : 'La.upf',
-
+    'La': 'La_ONCV_PBE-1.0.upf',
     'Hf': 'Hf_ONCV_PBE-1.0.upf',
     'Ta': 'Ta_ONCV_PBE-1.0.upf',
     'W': 'W_ONCV_PBE-1.0.upf',
@@ -547,13 +465,3 @@ abacus_pot_pbe_dict = {
     'Pb': 'Pb_ONCV_PBE-1.0.upf',
     'Bi': 'Bi_ONCV_PBE-1.0.upf'
 }
-
-# Warning: Those basis dictionary are not complete!
-# OpenMX
-# s1, s2, s3, px1, py1, pz1, px2, py2, pz2, d3z^2-r^2, dx^2-y^2, dxy, dxz, dyz
-# SIESTA
-# s1, s2,-py1, pz1,-px1,-py1, pz1,-px1, dxy,-dyz, dz2,-dxz, dx2-y2
-# ABACUS
-# see: https://github.com/abacusmodeling/abacus-develop/issues/267
-
-# OpenMX
