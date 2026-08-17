@@ -104,9 +104,7 @@ class _MeshMixin:
                 cell = (self.graph_data.latt*QTcts.BOHRtoANG, positions, numbers_data)
                 mapping, grid = spglib.get_ir_reciprocal_mesh(mesh, cell, is_shift=shift, is_time_reversal=False)
         ird_grids = grid[np.unique(mapping)] / np.array(mesh, dtype=float) # (nks, 3)
-        if self.rank == 0:
-            print('########################################## Symmetry Check! #########################################')
-            print('The symmetry for setting up kpoint is:', spglib.get_spacegroup(cell, symprec=1e-5))
+        self._log(f"\nThe symmetry for setting up kpoint is: {spglib.get_spacegroup(cell, symprec=1e-5)}")
         
         if not return_frac:
             ird_grids = np.tensordot(ird_grids, self.graph_data.rec_latt, axes=1) # (nks, 3)

@@ -545,9 +545,15 @@ class _ConfigMixin:
         """
         Initialize superconductivity block.
         """
+        
         self._set('mus',         validate_numpy_array,  'superconductivity', 5241, (3,), float)
         self._set('omega_range', validate_numpy_array,  'superconductivity', 5242, (2,), float)
         self._set('omega_step',  validate_positive_num, 'superconductivity', 5243)
+
+        self.sc_method = str(self.sc_method).strip().lower()
+        if self.sc_method not in ['allen_dynes']:
+            raise InputParameterError(5244, 'superconductivity', 'sc_method',
+                "The method \'{!r}\' for superconductivity calculation is not supported.".format(self.method))
 
         self.mus = np.arange(self.mus[0], self.mus[1], self.mus[2])
         self.omega_range *= QTcts.MEVtoHARTREE

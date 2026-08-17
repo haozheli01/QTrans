@@ -14,7 +14,6 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'doping_charge': 0.0,
         'system_2D': False,
         'tetra_integral': False,
-        'spin_length_scale': 1.0,
     },
     'dos': {
         'dos_qp': 'electron',  # electron, phonon
@@ -97,6 +96,7 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'ibte_cycle': 200,
     },
     'superconductivity': {
+        'sc_method': "allen_dynes",
         'mus': [0.05, 0.25, 0.01],
         'omega_range': [0.0, 100.0], # meV
         'omega_step': 0.01,  # meV

@@ -109,7 +109,6 @@ class _GraphMixin:
                 raise InputParameterError(5024, 'advanced', 'magnetic_type', f"The magnetic type {self.magnetic_type} is not supported.")
         if self.magnetic_type in ['collinear', 'nc']:
             self.graph_data.spin_length = average_close_values(self.graph_data.spin_length, self.moment_similar_tolerence)
-            self.graph_data.spin_length = self.graph_data.spin_length * self.spin_length_scale
         # if exist Pon and Poff, save them in self.graph_data for electron-phonon-coupling long range correction
         # Pon shape: (natoms, nao_max^2, 3)
         # Poff shape: (num_edges, nao_max^2, 3)

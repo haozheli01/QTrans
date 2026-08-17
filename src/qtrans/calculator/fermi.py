@@ -56,6 +56,7 @@ class _FermiMixin:
         Returns:
             efermi: The fermi energy in Hartree
             carrier_density: The carrier density in a.u.
+            band_edge: The CBM or VBM energy.
         """
         efermi = 0.0
         nbnd = enks.shape[0]
@@ -63,12 +64,12 @@ class _FermiMixin:
         carrier_density = 0.0
         carrier_small_judge = QTcts.TENPM80 / (QTcts.CMtoBOHR ** 3)
         if self.is_hole:
-            evbm = self._get_evbm(enks, iband_edge)
-            self._log("VBM = {:10.6f} eV".format(evbm * QTcts.HARTREEtoEV))
+            band_edge = self._get_evbm(enks, iband_edge)
+            self._log("VBM = {:10.6f} eV".format(band_edge * QTcts.HARTREEtoEV))
             ks_exp = np.zeros((nbnd, nks))
             for ibnd in range(nbnd):
                 for ik in range(nks):
-                    arg = (enks[ibnd,ik] - evbm) / self.temperature
+                    arg = (enks[ibnd,ik] - band_edge) / self.temperature
                     if arg < -QTcts.EXP_MAXARG:
                         ks_exp[ibnd,ik] = 0.0
                     else:
@@ -91,7 +92,7 @@ class _FermiMixin:
                 else:
                     rel_err = (hole_density - np.abs(self.ncarrier)) / hole_density
                 if np.abs(rel_err) < QTcts.TENPM5:
-                    efermi = evbm - (np.log(ef) * self.temperature)
+                    efermi = band_edge - (np.log(ef) * self.temperature)
                     break
                 elif rel_err > QTcts.TENPM5:
                     elw = ef
@@ -102,12 +103,12 @@ class _FermiMixin:
                     fnk = fermi_weight(enks[ibnd,ik] - efermi, self.temperature)
                     carrier_density += (1.0 - fnk) * self.weight_k[ik]
         else:
-            ecbm = self._get_ecbm(enks, iband_edge)
-            self._log("CBM = {:10.6f} eV".format(ecbm * QTcts.HARTREEtoEV))
+            band_edge = self._get_ecbm(enks, iband_edge)
+            self._log("CBM = {:10.6f} eV".format(band_edge * QTcts.HARTREEtoEV))
             ks_expcb = np.zeros((nbnd, nks))
             for ibnd in range(nbnd):
                 for ik in range(nks):
-                    arg = (enks[ibnd,ik] - ecbm) / self.temperature
+                    arg = (enks[ibnd,ik] - band_edge) / self.temperature
                     if arg > QTcts.EXP_MAXARG:
                         ks_expcb[ibnd,ik] = QTcts.TENPP200
                     else:
@@ -130,7 +131,7 @@ class _FermiMixin:
                 else:
                     rel_err = (electron_density - np.abs(self.ncarrier)) / electron_density
                 if np.abs(rel_err) < QTcts.TENPM5:
-                    efermi = ecbm - (np.log(ef) * self.temperature)
+                    efermi = band_edge - (np.log(ef) * self.temperature)
                     break
                 elif rel_err > QTcts.TENPM5:
                     eup = ef
@@ -142,7 +143,7 @@ class _FermiMixin:
                     carrier_density += fnk * self.weight_k[ik]
         if i == (self.fermi_maxiter - 1):
             raise RuntimeError("The insulator fermi level cannot converge.", '6002')
-        return efermi, carrier_density
+        return efermi, carrier_density, band_edge
 
     def _get_fermi_level_metal(self, enks, degauss, ngauss, nelec):
         # ref from PW efermig.f90

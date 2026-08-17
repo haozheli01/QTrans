@@ -48,8 +48,7 @@ class InputParameterError(Exception):
     5026: The 'doping_charge' in <advanced> block must be a number.
     5027: The 'system_2D' in <advanced> block must be a boolean.
     5028: The 'tetra_integral' in <advanced> block must be a boolean.
-    5029: The 'spin_length_scale' in <advanced> block must be a positive number.
-    5030: ...
+    5029: ...
     5031: The 'smooth_gauge' in <advanced> block must be a boolean.
     5032: ...
     5041: The 'supercell_matrix' in <phonon> block must be a 3*3 float matrix.
@@ -127,7 +126,8 @@ class InputParameterError(Exception):
     5241: The 'mus' in <superconductivity> block must be a list of 3 numbers.
     5242: The 'omega_range' in <superconductivity> block must be a list of 2 numbers.
     5243: The 'omega_step' in <superconductivity> block must be a positive number.
-    5244: ...
+    5244: The 'sc_method' in <superconductivity> block is not supported.
+    5245: ...
     5261: The 'fbd_erange' in <breakdown> block must be a list of 3 numbers.
     5262: The file specified by 'fbd_rate_file' in the <breakdown> block does not exist or is not readable.
     5263: The 'fbd_effective_mass' in <breakdown> block must be a positive number.
