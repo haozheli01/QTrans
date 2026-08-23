@@ -1,1 +1,1 @@
-"""QTrans calculator.transport package."""
+"""Reusable transport kernels and solver services shared by workflows."""

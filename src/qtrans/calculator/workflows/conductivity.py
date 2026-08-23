@@ -1,6 +1,8 @@
-"""Mechanically extracted QTrans methods."""
+"""Electrical and thermal conductivity calculation workflow."""
+"""Conductivity and mobility calculation-mode entry point."""
 
 from qtrans.core.constants import QTcts
+from qtrans.core.logging import log
 from qtrans.numerics.random import random_cauchy
 from qtrans.numerics.random import random_uniform
 from qtrans.parallel.mpi import print_peak_memeory
@@ -31,7 +33,7 @@ class _ConductivityMixin:
         elif self.MC_sampling == 'uniform':
             q_grid_fbz, self.weight_q = random_uniform(self.nsamples, random_seed=self.sampling_seed)
         else:
-            q_grid_fbz = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+            q_grid_fbz = self._get_monkhorst_pack(self.q_size, return_frac=True)
             self.weight_q = np.ones(len(q_grid_fbz)) / len(q_grid_fbz)
         nks_fbz = len(k_grid_fbz)
         nks_ibz = len(k_grid_ibz)
@@ -120,8 +122,8 @@ class _ConductivityMixin:
                     self.carrier_density = np.zeros(2, dtype=float)
                     band_edge_energy = np.zeros(2, dtype=float)
                     for ispin in range(2):
-                        self.efermi[ispin], self.carrier_density[ispin] = self._get_fermi_level_insulator(enks[ispin], iband_edge)
-                        print("=" * 100)
+                        self.efermi[ispin], self.carrier_density[ispin], _ = self._get_fermi_level_insulator(enks[ispin], iband_edge)
+                        log("=" * 100, rank=self.rank)
                         if self.system_2D:
                             print("Fermi energy = {:10.6f} eV, Carrier density = {:12.4e} cm^(-2) for spin {}.".format(
                                 self.efermi[ispin] * QTcts.HARTREEtoEV, self.carrier_density[ispin] * self.inv_cell / (QTcts.BOHRtoCM ** 2), ispin+1
@@ -137,7 +139,7 @@ class _ConductivityMixin:
                             band_edge_energy[ispin] = self._get_ecbm(enks[ispin], iband_edge)
                     ele_data_tmp = [*self.efermi, *self.carrier_density, *band_edge_energy]
                 else:
-                    self.efermi, self.carrier_density = self._get_fermi_level_insulator(enks[:nbands], iband_edge)
+                    self.efermi, self.carrier_density, _ = self._get_fermi_level_insulator(enks[:nbands], iband_edge)
                     print("=" * 100)
                     if self.system_2D:
                         print("Fermi energy = {:10.6f} eV, Carrier density = {:12.4e} cm^(-2).".format(

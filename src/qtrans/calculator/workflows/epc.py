@@ -1,4 +1,4 @@
-"""Mechanically extracted QTrans methods."""
+"""Electron-phonon coupling calculation and plotting workflows."""
 
 from qtrans.core.constants import QTcts
 from qtrans.parallel.mpi import gather_to_rank_root

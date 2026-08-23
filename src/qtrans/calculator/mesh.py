@@ -4,6 +4,7 @@ from collections import Counter
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
 from qtrans.core.constants import QTcts
+from qtrans.core.logging import log
 import math
 import numpy as np
 import spglib
@@ -103,8 +104,17 @@ class _MeshMixin:
                 numbers_data[self.graph_data.mag_atom_index] = magtag_numbers
                 cell = (self.graph_data.latt*QTcts.BOHRtoANG, positions, numbers_data)
                 mapping, grid = spglib.get_ir_reciprocal_mesh(mesh, cell, is_shift=shift, is_time_reversal=False)
+            elif self.spinor_mode == 'nc':
+                # Non-collinear moments cannot be represented by spglib's scalar
+                # magnetic tags, so retain the full Monkhorst-Pack grid.
+                k_vec = self._get_monkhorst_pack(mesh, shift=shift, return_frac=return_frac)
+                weight = np.ones(len(k_vec), dtype=float) / len(k_vec)
+                if auxiliary_info:
+                    grid2ir_idx = np.arange(len(k_vec), dtype=int)
+                    return k_vec, weight, k_vec.copy(), grid2ir_idx
+                return k_vec, weight
         ird_grids = grid[np.unique(mapping)] / np.array(mesh, dtype=float) # (nks, 3)
-        self._log(f"\nThe symmetry for setting up kpoint is: {spglib.get_spacegroup(cell, symprec=1e-5)}")
+        log(f"\nThe symmetry for setting up kpoint is: {spglib.get_spacegroup(cell, symprec=1e-5)}", rank=self.rank)
         
         if not return_frac:
             ird_grids = np.tensordot(ird_grids, self.graph_data.rec_latt, axes=1) # (nks, 3)

@@ -1,13 +1,9 @@
-"""Mechanically extracted QTrans methods."""
+"""Shared ERTA and IBTE transport-solver services."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
 from qtrans.core.logging import time_logger
-from qtrans.numerics.distributions import bose_weight
-from qtrans.numerics.distributions import fermi_weight
 from qtrans.numerics.distributions import minus_dfermi
-from qtrans.numerics.gaussian import w0gauss
-from qtrans.parallel.mpi import gather_to_rank_root
 from typing import List
 import numpy as np
 import opt_einsum as oe
@@ -16,240 +12,6 @@ import sys
 
 
 class _TransportSolverMixin:
-    def scattering_rate_cal_epc_polar(self, k_grid:np.ndarray, q_grid:np.ndarray, band_indice:np.ndarray, band_edge_energy:float):
-        """
-        Calculate the polar long-range contribution to EPC scattering rates.
-
-        This routine evaluates only the long-range polar correction part of the EPC
-        scattering rate. It does not use the short-range gradient matrix. Only q points
-        marked by ``apply_correction_for_qs`` contribute. If ``self.mode_resolved`` is True,
-        per-phonon-branch polar rates are saved to ``rate_mode_resolved.npy`` and the
-        corresponding eigenvalues are saved to ``enks_all.npy``.
-
-        Args:
-            k_grid (np.ndarray): Local or filtered k sampling points, shape (nks_local, 3).
-            q_grid (np.ndarray): q sampling points, shape (nqs, 3).
-            band_indice (np.ndarray): Band indices included in the transport window, shape (nbands,).
-            band_edge_energy (float): The energy of the band edge.
-
-        Returns:
-            tuple: ``(rate_all, eigen, vnks)``.
-
-            rate_all (np.ndarray): Polar scattering rate, shape (nbands, nks_local).
-            eigen (np.ndarray): Eigenvalues on the local k grid, shape (nbands, nks_local).
-            vnks (np.ndarray): Band velocities, shape (nks_local, nbands, 3).
-
-        Side Effects:
-            If ``self.mode_resolved`` is True, saves ``rate_mode_resolved.npy`` with shape
-            (nbands, nks_local, nbranches), and saves ``enks_all.npy`` on rank 0.
-        """
-
-        nbranches = self._get_nbranches()
-        nbands = len(band_indice)
-        nks = len(k_grid)
-        mode_resolved = self.mode_resolved
-
-        rate_all = np.full((nbands, nks), np.inf)
-        rate_all_resolved = np.full((nbands, nks, nbranches), np.inf) if mode_resolved else None
-        efocus_threshold, k_grid_all, eigen, eigen_vecs, vnks, q_grid_local, weights_q_local, freq_grid, phon_vecs, apply_correction_for_qs = \
-            self._transport_prepare(k_grid, q_grid, band_indice, band_edge_energy)
-
-        if self.rank == 0:
-            logger = time_logger(total_cycles=self.rank_size, routine_name='scattering_rate_cal_epc_polar')
-
-        atomic_phases_all = np.exp(QTcts.JTWOPI * (self.graph_data.pos @ q_grid_local.T))
-        phvec_waps_all = [atomic_phases_all[:, iq][None, :, None] * phon_vecs[iq] for iq in range(len(q_grid_local))]
-        bose_grid = [bose_weight(freq_grid[iq], self.temperature) for iq in range(len(q_grid_local))]
-
-        ik_all = -1
-        for send_rank in range(self.rank_size):
-            eigen_vecs_recv, eigen_recv = self.comm.bcast((eigen_vecs, eigen), root=send_rank)
-            for ik, k in enumerate(k_grid_all[send_rank]):
-                ik_all += 1
-                eig_k, wave_k = eigen_recv[:, ik], eigen_vecs_recv[ik, :]
-                if self.is_hole:
-                    enk_inside_table = (eig_k >= efocus_threshold)
-                else:        
-                    enk_inside_table = (eig_k <= efocus_threshold)
-                if not enk_inside_table.any():
-                    continue
-                rate_all[enk_inside_table, ik_all] = 0.0
-                if mode_resolved:
-                    rate_all_resolved[enk_inside_table, ik_all, :] = 0.0
-                ibands_inside = np.where(enk_inside_table)[0]
-                for iq, q in enumerate(q_grid_local):
-                    if not apply_correction_for_qs[iq]:
-                        continue
-                    # phonon spectrum
-                    kpq = k + q
-                    eig_kpq, wave_kpq = self._elec_cal_torch(kpq)
-                    eig_kpq = eig_kpq[band_indice, 0]
-                    wave_kpq = wave_kpq[0, band_indice, :]
-                    if self.is_hole:
-                        emkpq_inside_table = (eig_kpq >= efocus_threshold)
-                    else:        
-                        emkpq_inside_table = (eig_kpq <= efocus_threshold)
-                    if not emkpq_inside_table.any():
-                        continue 
-                    jbands_inside = np.where(emkpq_inside_table)[0]
-                    freq = freq_grid[iq]
-                    phvec_wap = phvec_waps_all[iq]
-                    match_table = self._get_match_table(eig_k, eig_kpq, freq)
-                    if not match_table.any():
-                        continue
-                    bose_qvs = bose_grid[iq]
-                    fermi_kpqs = fermi_weight(eig_kpq - self.efermi, self.temperature)
-                    # phase_kpq = np.exp(QTcts.JTWOPI*np.sum(self.nbr_shift_of_cell_sc*(kpq)[None,:], axis=-1)) # shape: (ncells,)
-                    epc_corr = self._get_LR_correction_kq(q, freq, phvec_wap, match_table, enk_inside_table, k, wave_k, wave_kpq, return_tmp1=False)
-                    for iband in ibands_inside:
-                        for jband in jbands_inside:
-                            for ibranch in range(nbranches):
-                                if match_table[iband, jband, ibranch]:
-                                    epc = epc_corr[iband, jband, ibranch]
-                                    delta_f1 = w0gauss((eig_k[iband] - eig_kpq[jband] + freq[ibranch]) * self.inv_smearq) * self.inv_smearq
-                                    delta_f2 = w0gauss((eig_k[iband] - eig_kpq[jband] - freq[ibranch]) * self.inv_smearq) * self.inv_smearq
-                                    g2_tmp = np.abs(epc) * np.abs(epc)
-                                    rate_tmp = g2_tmp * ((bose_qvs[ibranch] + fermi_kpqs[jband]) * delta_f1 + 
-                                                                    (bose_qvs[ibranch] + 1.0 - fermi_kpqs[jband]) * delta_f2) * weights_q_local[iq]
-                                    rate_all[iband,ik_all] += rate_tmp
-                                    if mode_resolved:
-                                        rate_all_resolved[iband,ik_all,ibranch] += rate_tmp
-            if self.rank == 0:
-                logger.step(send_rank+1)
-        rate_all *= QTcts.TWOPI
-        if mode_resolved:
-            rate_all_resolved *= QTcts.TWOPI
-        # The rate_all of the whole q is obtained by allreducing the rate_all of each process
-        if self.comm is not None:
-            self.comm.Allreduce(MPI.IN_PLACE, rate_all, op=MPI.SUM)
-            if mode_resolved:
-                self.comm.Allreduce(MPI.IN_PLACE, rate_all_resolved, op=MPI.SUM)
-                enks_all = gather_to_rank_root(eigen, self.comm)
-            self.comm.Barrier()
-        elif mode_resolved:
-            enks_all = [eigen]
-        if self.rank == 0 and mode_resolved:
-            np.save('rate_mode_resolved.npy', rate_all_resolved)
-            enks_all = np.concatenate(enks_all, axis=-1) # (nbands, nks)
-            np.save('enks_all.npy', enks_all)
-        # sanity check!
-        rate_all[np.abs(rate_all) < QTcts.TENPM160] = np.inf
-        return rate_all, eigen, vnks
-
-    def scattering_rate_cal_epc_polar_collinear(self, k_grid:np.ndarray, q_grid:np.ndarray, band_indice:np.ndarray, band_edge_energy:float):
-        """
-        Calculate the polar long-range contribution to EPC scattering rates in collinear mode.
-
-        This is the spin-resolved collinear version of ``scattering_rate_cal_epc_polar``.
-        It evaluates only the long-range polar correction and does not use the short-range
-        gradient matrix. If ``self.mode_resolved`` is True, per-phonon-branch polar rates
-        are saved to ``rate_mode_resolved.npy``.
-
-        Args:
-            k_grid (np.ndarray): Local or filtered k sampling points, shape (nks_local, 3).
-            q_grid (np.ndarray): q sampling points, shape (nqs, 3).
-            band_indice (np.ndarray): Band indices included in the transport window, shape (nbands,).
-            band_edge_energy (float): The energy of the band edge.
-
-        Returns:
-            tuple: ``(rate_all, eigen, vnks)``.
-
-            rate_all (np.ndarray): Polar scattering rate, shape (2, nbands, nks_local).
-            eigen (np.ndarray): Eigenvalues on the local k grid, shape (2, nbands, nks_local).
-            vnks (np.ndarray): Band velocities, shape (2, nks_local, nbands, 3).
-
-        Side Effects:
-            If ``self.mode_resolved`` is True, saves ``rate_mode_resolved.npy`` with shape
-            (2, nbands, nks_local, nbranches).
-        """
-        nbranches = self._get_nbranches()
-        nbands = len(band_indice)
-        nks = len(k_grid)
-        mode_resolved = self.mode_resolved
-
-        rate_all = np.full((2, nbands, nks), np.inf)
-        rate_all_resolved = np.full((2, nbands, nks, nbranches), np.inf) if mode_resolved else None
-        efocus_threshold, k_grid_all, eigen, eigen_vecs, vnks, q_grid_local, weights_q_local, freq_grid, phon_vecs, apply_correction_for_qs = \
-            self._transport_prepare(k_grid, q_grid, band_indice, band_edge_energy)
-
-        if self.rank == 0:
-            logger = time_logger(total_cycles=self.rank_size, routine_name='scattering_rate_cal_epc_polar_collinear')
-
-        atomic_phases_all = np.exp(QTcts.JTWOPI * (self.graph_data.pos @ q_grid_local.T))
-        phvec_waps_all = [atomic_phases_all[:, iq][None, :, None] * phon_vecs[iq] for iq in range(len(q_grid_local))]
-        bose_grid = [bose_weight(freq_grid[iq], self.temperature) for iq in range(len(q_grid_local))]
-
-        ik_all = -1
-        for send_rank in range(self.rank_size):
-            eigen_vecs_recv, eigen_recv = self.comm.bcast((eigen_vecs, eigen), root=send_rank)
-            for ik, k in enumerate(k_grid_all[send_rank]):
-                ik_all += 1
-                eig_k, wave_k = eigen_recv[:, :, ik], eigen_vecs_recv[:, ik]
-                if self.is_hole:
-                    enk_inside_table = (eig_k >= efocus_threshold[:,None])
-                else:        
-                    enk_inside_table = (eig_k <= efocus_threshold[:,None])
-                if not enk_inside_table.any():
-                    continue
-                rate_all[enk_inside_table, ik_all] = 0.0
-                if mode_resolved:
-                    for ispin in range(2):
-                        rate_all_resolved[ispin, enk_inside_table[ispin], ik_all, :] = 0.0
-                ibands_inside_by_spin = [np.where(enk_inside_table[ispin])[0] for ispin in range(2)]
-                # phase_k = np.exp(QTcts.JTWOPI*np.sum(self.nbr_shift_of_cell_sc*k[None,:], axis=-1)) # shape: (ncells,)
-                for iq, q in enumerate(q_grid_local):
-                    if not apply_correction_for_qs[iq]:
-                        continue
-                    kpq = k + q
-                    eig_kpq, wave_kpq = self._elec_cal_torch(kpq)
-                    eig_kpq = np.stack((eig_kpq[band_indice, 0], eig_kpq[band_indice+self.norbs, 0]), axis=0)
-                    wave_kpq = np.stack((wave_kpq[0, band_indice], wave_kpq[0, band_indice+self.norbs]), axis=0)
-                    if self.is_hole:
-                        emkpq_inside_table = (eig_kpq >= efocus_threshold[:, None])
-                    else:        
-                        emkpq_inside_table = (eig_kpq <= efocus_threshold[:, None])
-                    if not emkpq_inside_table.any():
-                        continue 
-                    jbands_inside_by_spin = [np.where(emkpq_inside_table[ispin])[0] for ispin in range(2)]
-                    freq = freq_grid[iq]
-                    phvec_wap = phvec_waps_all[iq]
-                    bose_qvs = bose_grid[iq]
-                    # phase_kpq = np.exp(QTcts.JTWOPI*np.sum(self.nbr_shift_of_cell_sc*(kpq)[None,:], axis=-1)) # shape: (ncells,)
-                    for ispin in range(2):
-                        match_table = self._get_match_table(eig_k[ispin], eig_kpq[ispin], freq)
-                        if not match_table.any():
-                            continue
-                        fermi_kpqs = fermi_weight(eig_kpq[ispin] - self.efermi[ispin], self.temperature)
-                        epc_corr = self._get_LR_correction_kq(q, freq, phvec_wap, match_table, enk_inside_table[ispin], k, wave_k[ispin], wave_kpq[ispin], return_tmp1=False)
-                        for iband in ibands_inside_by_spin[ispin]:
-                            for jband in jbands_inside_by_spin[ispin]:
-                                for ibranch in range(nbranches):
-                                    if match_table[iband, jband, ibranch]:
-                                        epc = epc_corr[iband, jband, ibranch]
-                                        delta_f1 = w0gauss((eig_k[ispin,iband] - eig_kpq[ispin,jband] + freq[ibranch]) * self.inv_smearq) * self.inv_smearq
-                                        delta_f2 = w0gauss((eig_k[ispin,iband] - eig_kpq[ispin,jband] - freq[ibranch]) * self.inv_smearq) * self.inv_smearq
-                                        g2_tmp = np.abs(epc) * np.abs(epc)
-                                        rate_tmp = g2_tmp * ((bose_qvs[ibranch] + fermi_kpqs[jband]) * delta_f1 +
-                                                                        (bose_qvs[ibranch] + 1.0 - fermi_kpqs[jband]) * delta_f2) * weights_q_local[iq]
-                                        rate_all[ispin,iband,ik_all] += rate_tmp
-                                        if mode_resolved:
-                                            rate_all_resolved[ispin, iband, ik_all, ibranch] += rate_tmp
-            if self.rank == 0:
-                logger.step(send_rank+1)
-        rate_all *= QTcts.TWOPI
-        if mode_resolved:
-            rate_all_resolved *= QTcts.TWOPI
-        # The rate_all of the whole q is obtained by allreducing the rate_all of each process
-        if self.comm is not None:
-            self.comm.Allreduce(MPI.IN_PLACE, rate_all, op=MPI.SUM)
-            if mode_resolved:
-                self.comm.Allreduce(MPI.IN_PLACE, rate_all_resolved, op=MPI.SUM)
-        if self.rank == 0 and mode_resolved:
-            np.save('rate_mode_resolved.npy', rate_all_resolved)
-        # sanity check!
-        rate_all[np.abs(rate_all) < QTcts.TENPM160] = np.inf
-        return rate_all, eigen, vnks
-
     def _read_rate_file(self, filepath:str, shape:List[int]):
         rate_ir = None
         data = np.atleast_2d(np.loadtxt(filepath, skiprows=2))
@@ -355,7 +117,7 @@ class _TransportSolverMixin:
         return scat_channel
 
     def _get_epc_func(self):
-        """Return the appropriate epc scattering rate method based on spinor_mode and sparse/dense."""
+        """Return the standard EPC scattering-rate method for the current spin mode."""
         if self.spinor_mode == 'collinear':
             return self.scattering_rate_cal_epc_collinear_sparse if self.read_sparse_grad_mat \
                 else self.scattering_rate_cal_epc_collinear_dense
@@ -363,13 +125,28 @@ class _TransportSolverMixin:
             return self.scattering_rate_cal_epc_sparse if self.read_sparse_grad_mat \
                 else self.scattering_rate_cal_epc_dense
 
+    def _get_scattering_rate_func(self, is_metal:bool, polar_split:str=None):
+        """Select the scattering-rate kernel for the requested transport channel.
+
+        Standard EPC kernels handle ``none`` and ``rmp``.  The pure polar channel
+        uses a dedicated kernel because it contains only the long-range correction
+        and has no short-range gradient contribution.
+        """
+        if not is_metal and polar_split == 'polar':
+            if self.spinor_mode == 'collinear':
+                return self.scattering_rate_cal_epc_polar_collinear
+            return self.scattering_rate_cal_epc_polar
+        return self._get_epc_func()
+
     def _dispatch_scattering_rate(self, k_grid:np.ndarray, q_grid:np.ndarray, bands_indices:np.ndarray,
                                    energy_ref, is_metal:bool, polar_split:str=None):
         """
         Dispatch the appropriate scattering rate calculation method.
 
-        Selects the function based on spinor_mode, read_sparse_grad_mat,
-        mob_level, and polar_split. For IBTE, also writes the scattering channel to disk.
+        Selects the kernel based on spin mode, gradient representation, and polar
+        channel. The pure polar channel is ERTA-only, while ``rmp`` uses the standard
+        EPC kernel with ``is_rmp=True``. The standard IBTE path also writes its
+        transition channels to disk.
 
         Args:
             k_grid (np.ndarray): useful IBZ k-points.
@@ -386,37 +163,42 @@ class _TransportSolverMixin:
             fout_name (str): output filename for the rate file.
             scat_channel_local: scattering channel data (only for IBTE), or None.
         """
-        scat_channel_local = None
         col_suffix = '_collinear' if self.spinor_mode == 'collinear' else ''
 
-        if not is_metal and polar_split == 'polar' and self.mob_level == 'erta':
-            fout_name = f'rate_nk_polar{col_suffix}.dat'
-            if self.spinor_mode == 'collinear':
-                func = self.scattering_rate_cal_epc_polar_collinear
-            else:
-                func = self.scattering_rate_cal_epc_polar
-            rate_useful, eigen_local, vnks_local = func(k_grid, q_grid, bands_indices, energy_ref)
-            return rate_useful, eigen_local, vnks_local, fout_name, None
+        is_pure_polar = (not is_metal and polar_split == 'polar')
+        is_rmp = (not is_metal and polar_split == 'rmp')
+        if is_pure_polar and self.mob_level != 'erta':
+            raise NotImplementedError(
+                "The pure polar scattering channel currently supports only ERTA; "
+                "IBTE requires transition channels that are not produced by the polar kernel."
+            )
 
-        if not is_metal and polar_split == 'rmp' and self.mob_level == 'erta':
-            fout_name = f'rate_nk_rmp{col_suffix}.dat'
-            func = self._get_epc_func()
-            rate_useful, eigen_local, vnks_local = func(
-                k_grid, q_grid, bands_indices, energy_ref, mob_level='erta', is_rmp=True)
-            return rate_useful, eigen_local, vnks_local, fout_name, None
-
-        fout_name = f'rate_nk{col_suffix}.dat'
-        func = self._get_epc_func()
-        kwargs = {'mob_level': self.mob_level}
-        if is_metal:
-            kwargs['is_metal'] = True
-        result = func(k_grid, q_grid, bands_indices, energy_ref, **kwargs)
-
-        if self.mob_level == 'ibte':
-            rate_useful, eigen_local, vnks_local, scat_channel_local = result
-            self._write_scattering_channel(scat_channel_local)
-        else:
+        rate_func = self._get_scattering_rate_func(is_metal=is_metal, polar_split=polar_split)
+        if is_pure_polar:
+            result = rate_func(k_grid, q_grid, bands_indices, energy_ref)
             rate_useful, eigen_local, vnks_local = result
+            scat_channel_local = None
+            fout_name = f'rate_nk_polar{col_suffix}.dat'
+        else:
+            result = rate_func(
+                k_grid,
+                q_grid,
+                bands_indices,
+                energy_ref,
+                mob_level=self.mob_level,
+                is_metal=is_metal,
+                is_rmp=is_rmp,
+            )
+            if self.mob_level == 'ibte':
+                rate_useful, eigen_local, vnks_local, scat_channel_local = result
+                self._write_scattering_channel(scat_channel_local)
+            else:
+                rate_useful, eigen_local, vnks_local = result
+                scat_channel_local = None
+            if is_rmp:
+                fout_name = f'rate_nk_rmp{col_suffix}.dat'
+            else:
+                fout_name = f'rate_nk{col_suffix}.dat'
 
         return rate_useful, eigen_local, vnks_local, fout_name, scat_channel_local
 

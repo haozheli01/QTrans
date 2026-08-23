@@ -1,4 +1,4 @@
-"""Mechanically extracted QTrans methods."""
+"""Ordinary and transport-weighted EPC spectral functions."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
@@ -9,7 +9,7 @@ from qtrans.parallel.mpi import print_peak_memeory
 import numpy as np
 
 
-class _TransportEliashbergMixin:
+class _TransportSpectrumMixin:
     def transport_eliashberg_function_cal_epc(self, k_grid, q_grid, dos_ef):
         """
         Calculate the tensor transport Eliashberg function with dense EPC gradients.

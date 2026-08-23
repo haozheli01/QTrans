@@ -10,6 +10,7 @@ from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from qtrans.core.constants import QTcts
 from qtrans.core.defaults import preparer_default_parameters
 from qtrans.core.errors import InputParameterError
+from qtrans.core.logging import print_banner
 from qtrans.data.basis import basis_def_dicts
 from qtrans.io.abacus import read_abacus_input
 from qtrans.io.abacus import write_abacus_input
@@ -48,7 +49,8 @@ class _PreparerConfigMixin:
         
         # Processing different block accroding to the prep_mode
         if self.prep_mode == 'vasp-ph':
-            if self.rank == 0: print('#'*50+' VASP Phonon Preparation '+'#'*50)    
+            if self.rank == 0:
+                print_banner('VASP Phonon Preparation')
             self._parse_input_optional(config, "software_path")
             self._initial_software_path()
             self._parse_input_optional(config, "material")
@@ -62,7 +64,8 @@ class _PreparerConfigMixin:
             config.pop('scf_params', 0)
             config.pop('phonon_prep', 0)
         elif self.prep_mode == 'grad-epc':
-            if self.rank == 0: print('#'*50+' EPC Gradient Matrix Preparation '+'#'*50)    
+            if self.rank == 0:
+                print_banner('EPC Gradient Matrix Preparation')
             self._parse_input_optional(config, "software_path")
             self._initial_software_path()
             self._parse_input_optional(config, "material")
@@ -76,7 +79,8 @@ class _PreparerConfigMixin:
             config.pop('scf_params', 0)
             config.pop('grad_epc', 0)
         elif self.prep_mode == 'graph-pack':
-            if self.rank == 0: print('#'*50+' Graph Data Packing '+'#'*50)
+            if self.rank == 0:
+                print_banner('Graph Data Packing')
             self._parse_input_optional(config, "software_path")
             self._initial_software_path()
             self._parse_input_optional(config, "material")

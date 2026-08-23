@@ -3,6 +3,7 @@
 from easydict import EasyDict
 from qtrans.core.constants import QTcts
 from qtrans.core.errors import InputParameterError
+from qtrans.core.logging import log
 from qtrans.data.valence import num_val_abacus
 from qtrans.data.valence import num_val_openmx
 from qtrans.data.valence import num_val_siesta
@@ -50,17 +51,17 @@ class _GraphMixin:
         if self.soc_switch:
             self._load_soc_hamiltonian(graph_data)
             if self.magnetic_type == 'none':
-                self._log("Running calculation for a non-magnetic system with SOC.")
+                log("Running calculation for a non-magnetic system with SOC.", rank=self.rank)
             elif self.magnetic_type == 'nc':
                 self._load_magnetic_data(graph_data)
-                self._log("Running calculation for a non-collinear magnetic system with SOC.")
+                log("Running calculation for a non-collinear magnetic system with SOC.", rank=self.rank)
             else:
                 raise InputParameterError(5024, 'advanced', 'magnetic_type', f"The magnetic type {self.magnetic_type} is not supported in SOC systems.")
             self.spinor_mode = 'nc'
         else:
             if self.magnetic_type == 'none':
                 self._load_hamiltonian(graph_data, -1, self.nao_max, self.nao_max)
-                self._log("Running calculation for a non-magnetic system without SOC.")
+                log("Running calculation for a non-magnetic system without SOC.", rank=self.rank)
             elif self.magnetic_type == 'collinear':
                 self._load_hamiltonian(graph_data, -1, 2, self.nao_max, self.nao_max)
                 self._load_magnetic_data(graph_data)
@@ -75,36 +76,36 @@ class _GraphMixin:
                 spin_vec_with_length = self.graph_data.spin_vec[:, 2] * self.graph_data.spin_length
                 pure_moment = np.abs(np.sum(spin_vec_with_length))
                 self.spin_system_type = None
-                self._log("Running calculation for a collinear magnetic system without SOC.")
+                log("Running calculation for a collinear magnetic system without SOC.", rank=self.rank)
                 if natoms_mag_spin_up == 0 and natoms_mag_spin_down == 0:
-                    self._log("Warning: This collinear system has no magnetic order.\n")
+                    log("Warning: This collinear system has no magnetic order.\n", rank=self.rank)
                 elif natoms_mag_spin_up == 0:
                     self.spin_first_index = spin_down_atom_index[0]
                     self.spin_system_type = 'FM'
-                    self._log("Dealing with a standard ferromagnetic system, and the spin direction is z-axis down.\n")
+                    log("Dealing with a standard ferromagnetic system, and the spin direction is z-axis down.\n", rank=self.rank)
                 elif natoms_mag_spin_down == 0:
                     self.spin_first_index = spin_up_atom_index[0]
                     self.spin_system_type = 'FM'
-                    self._log("Dealing with a standard ferromagnetic system, and the spin direction is z-axis up.\n")
+                    log("Dealing with a standard ferromagnetic system, and the spin direction is z-axis up.\n", rank=self.rank)
                 elif pure_moment < QTcts.TENPM3:
                     if natoms_mag_spin_up == natoms_mag_spin_down:
                         self.spin_first_index = [spin_down_atom_index[0], spin_up_atom_index[0]]
                         self.spin_system_type = 'AFM'
-                        self._log("Dealing with a standard antiferromagnetic system.\n")
+                        log("Dealing with a standard antiferromagnetic system.\n", rank=self.rank)
                     else:
                         self.spin_first_index = [spin_down_atom_index[0], spin_up_atom_index[0]]
                         self.spin_system_type = 'CFM'
-                        self._log("Dealing with a compensated ferromagnetic system.")
+                        log("Dealing with a compensated ferromagnetic system.", rank=self.rank)
                 else:
                     self.spin_first_index = [spin_down_atom_index[0], spin_up_atom_index[0]]
                     self.spin_system_type = 'FiM'
-                    self._log("Dealing with a ferrimagnetism system.")
+                    log("Dealing with a ferrimagnetism system.", rank=self.rank)
                 self.spinor_mode = 'collinear'
             elif self.magnetic_type == 'nc':
                 self._load_soc_hamiltonian(graph_data)
                 self._load_magnetic_data(graph_data)
                 self.spinor_mode = 'nc'
-                self._log("Running calculation for a non-collinear magnetic system without SOC.")
+                log("Running calculation for a non-collinear magnetic system without SOC.", rank=self.rank)
             else:
                 raise InputParameterError(5024, 'advanced', 'magnetic_type', f"The magnetic type {self.magnetic_type} is not supported.")
         if self.magnetic_type in ['collinear', 'nc']:
@@ -144,7 +145,7 @@ class _GraphMixin:
 
         self.has_unpair_electron = bool(self.graph_data.num_electrons & 1)
         if self.has_unpair_electron and self.cal_mode in ['breakdown']:
-            self._log("Warnning: The system has an odd number of electrons. Please make sure it is an insulator.")
+            log("Warnning: The system has an odd number of electrons. Please make sure it is an insulator.", rank=self.rank)
 
         # CBM and VBM
         if self.spinor_mode == 'nc':

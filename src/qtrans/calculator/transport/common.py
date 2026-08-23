@@ -108,6 +108,16 @@ class _TransportCommonMixin:
                 # 1) Gather all symmetry rotations (Rotations only)
                 sym_data = spglib.get_symmetry(cell)
                 all_rots = np.array(sym_data['rotations'], dtype=int)   # shape (N_rots,3,3)
+            elif self.spinor_mode == 'nc':
+                k_vec = self._get_monkhorst_pack(mesh, shift=shift)
+                ir_indices = np.arange(len(k_vec))
+                rot_indices = [[0] for _ in range(len(k_vec))]
+                all_rots = np.eye(3)[None, :, :]
+                ibz_to_fbz = {i: [[0]] for i in range(len(k_vec))}
+                if return_index:
+                    ibz_to_fbz_index = {i: [i] for i in range(len(k_vec))}
+                    return ir_indices, rot_indices, all_rots, ibz_to_fbz, ibz_to_fbz_index
+                return ir_indices, rot_indices, all_rots, ibz_to_fbz
         
         if self.rank == 0:
             print('The symmetry for building kpoint mapping is:', spglib.get_spacegroup(cell, symprec=1e-5),'\n')

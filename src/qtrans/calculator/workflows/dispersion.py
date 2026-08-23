@@ -1,8 +1,8 @@
-"""Mechanically extracted QTrans methods."""
+"""Electronic and phonon dispersion calculation workflows."""
 
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
-from qtrans.calculator.modes.spectrum import spectrum_function_cal
+from qtrans.calculator.spectra.spectrum import spectrum_function_cal
 from qtrans.core.constants import QTcts
 from qtrans.numerics.gaussian import w0gauss
 from qtrans.parallel.mpi import gather_to_rank_root
@@ -56,7 +56,7 @@ class _DispersionMixin:
         if self.disp_renormalize:
             self.cal_mode = 'self-energy'
             # q_grid_ibz, self.weight_q = self._get_ir_reciprocal_mesh(self.q_size, auxiliary_info=False, return_frac=True)
-            q_grid_fbz = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+            q_grid_fbz = self._get_monkhorst_pack(self.q_size, return_frac=True)
             self.weight_q = np.ones(len(q_grid_fbz)) / len(q_grid_fbz)
             # for solving fermi level only
             k_grid_ibz, self.weight_k = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=False)
@@ -121,7 +121,7 @@ class _DispersionMixin:
                         self.efermi = np.zeros(2, dtype=float)
                         self.carrier_density = np.zeros(2, dtype=float)
                         for ispin in range(2):
-                            self.efermi[ispin], self.carrier_density[ispin] = self._get_fermi_level_insulator(enks[ispin], iband_edge)
+                            self.efermi[ispin], self.carrier_density[ispin], _ = self._get_fermi_level_insulator(enks[ispin], iband_edge)
                             print("=" * 100)
                             if self.system_2D:
                                 print("Fermi energy = {:10.6f} eV, Carrier density = {:12.4e} cm^(-2) for spin {}.".format(
@@ -133,7 +133,7 @@ class _DispersionMixin:
                                     ))
                             print("=" * 100,'\n')
                     else:
-                        self.efermi, self.carrier_density = self._get_fermi_level_insulator(enks, iband_edge)
+                        self.efermi, self.carrier_density, _ = self._get_fermi_level_insulator(enks, iband_edge)
                         del enks
                         print("=" * 100)
                         if self.system_2D:
@@ -416,7 +416,7 @@ class _DispersionMixin:
                         self.efermi = np.zeros(2, dtype=float)
                         self.carrier_density = np.zeros(2, dtype=float)
                         for ispin in range(2):
-                            self.efermi[ispin], self.carrier_density[ispin] = self._get_fermi_level_insulator(enks[ispin], iband_edge)
+                            self.efermi[ispin], self.carrier_density[ispin], _ = self._get_fermi_level_insulator(enks[ispin], iband_edge)
                             print("=" * 100)
                             if self.system_2D:
                                 print("Fermi energy = {:10.6f} eV, Carrier density = {:12.4e} cm^(-2) for spin {}.".format(
@@ -428,7 +428,7 @@ class _DispersionMixin:
                                     ))
                             print("=" * 100,'\n')
                     else:
-                        self.efermi, self.carrier_density = self._get_fermi_level_insulator(enks, iband_edge)
+                        self.efermi, self.carrier_density, _ = self._get_fermi_level_insulator(enks, iband_edge)
                         print("=" * 100)
                         if self.system_2D:
                             print("Fermi energy = {:10.6f} eV, Carrier density = {:12.4e} cm^(-2).".format(
@@ -440,7 +440,7 @@ class _DispersionMixin:
                                 ))
                         print("=" * 100)
             
-            k_grid_fbz = self._get_monkhorst_pack(self.k_size, self.graph_data.latt)
+            k_grid_fbz = self._get_monkhorst_pack(self.k_size)
             nks_fbz = len(k_grid_fbz)
             if self.spinor_mode == 'none':
                 self.weight_k = np.ones(nks_fbz) / nks_fbz * 2.0

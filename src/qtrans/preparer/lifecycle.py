@@ -3,8 +3,9 @@
 from collections import Counter
 from mpi4py import MPI
 from qtrans._version import __version__
-from qtrans.config import apply_defaults, snapshot_configuration
+from qtrans.config import apply_defaults, copy_configuration
 from qtrans.core.defaults import preparer_default_parameters
+from qtrans.core.logging import log
 from qtrans.io.external import get_job_system
 from qtrans.preparer.registry import resolve_preparation
 
@@ -78,7 +79,7 @@ class _PreparerLifecycleMixin:
         apply_defaults(self, preparer_default_parameters)
 
         # read input
-        self._parse_input(config=snapshot_configuration(config))
+        self._parse_input(config=copy_configuration(config))
 
     def run(self):
         """
@@ -92,4 +93,4 @@ class _PreparerLifecycleMixin:
             self._show_job_success()
 
     def _show_job_success(self):
-        print("\n######################################## QTRANS JOB SUCCESS ########################################")
+        log("\n######################################## QTRANS JOB SUCCESS ########################################", rank=self.rank)

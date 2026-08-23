@@ -4,9 +4,10 @@ from collections import Counter
 from mpi4py import MPI
 from qtrans.calculator.registry import resolve_calculation
 from qtrans._version import __version__
-from qtrans.config import apply_defaults, snapshot_configuration
+from qtrans.config import apply_defaults, copy_configuration
 from qtrans.core.defaults import calculator_default_parameters
 from qtrans.core.errors import InputParameterError
+from qtrans.core.logging import log
 from qtrans.io.external import get_job_system
 
 
@@ -87,13 +88,9 @@ class _LifecycleMixin:
             raise RuntimeError(f"Error(9999): Fail to load default configuration.\n{e}")
         # read input
         try:
-            self._parse_input(config=snapshot_configuration(config))
+            self._parse_input(config=copy_configuration(config))
         except Exception as e:
             raise RuntimeError(f"Fail to load configuration.\n{e}")
-
-    def _log(self, msg:str=''):
-        if self.rank == 0:
-            print(msg)
 
     def _set(self, name, validator, block, error_code, *args):
         try:
@@ -117,4 +114,4 @@ class _LifecycleMixin:
         self._show_job_success()
 
     def _show_job_success(self):
-        self._log("\n######################################## QTRANS JOB SUCCESS ########################################")
+        log("\n######################################## QTRANS JOB SUCCESS ########################################", rank=self.rank)

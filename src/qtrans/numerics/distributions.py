@@ -4,13 +4,17 @@ import numpy as np
 
 
 def fermi_weight(E, kbT):
-    # Here E means E - \mu 
-    x = E / kbT
-    result = np.empty_like(x)
-    result[x > 100] = 0.0
-    result[x < -100] = 1.0
-    mask = (x >= -100) & (x <= 100)
-    result[mask] = 1.0 / (np.exp(x[mask]) + 1.0)
+    # Here E means E - \mu
+    scalar_input = np.isscalar(E) or np.ndim(E) == 0
+    x = np.asarray(E, dtype=np.float64) / kbT
+    with np.errstate(over='ignore'):
+        result = np.where(
+            x > 100,
+            0.0,
+            np.where(x < -100, 1.0, 1.0 / (np.exp(x) + 1.0)),
+        )
+    if scalar_input:
+        return result.item()
     return result
 
 def minus_dfermi(E, kbT):

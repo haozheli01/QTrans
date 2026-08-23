@@ -1,4 +1,4 @@
-"""Mechanically extracted QTrans methods."""
+"""Phonon-limited resistivity calculation workflow."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
@@ -37,7 +37,7 @@ class _ResistivityMixin:
         """
         # Accroding to the formula, we need the full grid for k and q.
         irr_k_grid, self.weight_k, k_grid, _ = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=True)
-        q_grid = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+        q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
         self.weight_q = np.ones(len(q_grid)) / len(q_grid)
         nks = len(k_grid)
         nqs = len(q_grid)

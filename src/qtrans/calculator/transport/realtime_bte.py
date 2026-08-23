@@ -701,23 +701,37 @@ class _RealtimeBTEMixin:
         Compute the drift velocity along the direction of the electric field.
 
         Args:
-            band_velocity (np.ndarray): Array of shape (nks, nbands, 3), the group velocity vectors for each band and k-point in Cartesian coordinates.
-            dist_ele (np.ndarray): Array of shape (nbands, nks), representing the electron distribution function f_{nk}(t).
+            band_velocity (np.ndarray): Array of shape (nks, nbands, 3), or
+                (nspin, nks, nbands, 3) for collinear spin channels.
+            dist_ele (np.ndarray): Array of shape (nbands, nks), or
+                (nspin, nbands, nks), matching band_velocity.
             efield (np.ndarray): Array of shape (3,), the external electric field vector.
-            carrier_concentration (float): Carrier concentration n_c (units: number per unit volume).
+            carrier_concentration (float or np.ndarray): Carrier concentration
+                n_c, with one value per spin channel when present.
             volume_uc (float): Unit cell volume (must be in consistent units with concentration).
 
         Returns:
-            float: Drift velocity component along the electric field direction ⟨v_parallel(t)⟩.
+            float or np.ndarray: Drift velocity component along the electric
+                field direction, with one value per spin channel when present.
         """
         # Normalize electric field vector
         efield_norm = efield / np.linalg.norm(efield)  # shape (3,)
         # Project velocity onto field direction: v_parallel = v \cdot E
-        v_parallel = np.einsum("ijk,k->ji", band_velocity, efield_norm)  # shape (nbands, nks)
+        band_velocity = np.asarray(band_velocity)
+        dist_ele = np.asarray(dist_ele)
+        if band_velocity.ndim < 3 or band_velocity.shape[-1] != 3:
+            raise ValueError("band_velocity must end with a Cartesian dimension of length 3.")
+        v_parallel = np.einsum("...i,i->...", band_velocity, efield_norm)
+        v_parallel = np.swapaxes(v_parallel, -1, -2)
+        if dist_ele.shape != v_parallel.shape:
+            raise ValueError("dist_ele must match band_velocity's (spin, band, k) dimensions.")
         # Sum f * v_parallel over all bands and k-points
-        numerator = np.sum(dist_ele * v_parallel)
+        if dist_ele.ndim > 2:
+            numerator = np.sum(dist_ele * v_parallel, axis=(-2, -1))
+        else:
+            numerator = np.sum(dist_ele * v_parallel)
         # Total number of k-points
-        nks = band_velocity.shape[1]
+        nks = band_velocity.shape[-3]
         # Compute drift velocity
         drift_velocity = numerator / (carrier_concentration * volume_uc * nks)
         return drift_velocity
@@ -740,7 +754,7 @@ class _RealtimeBTEMixin:
                 enks_local = np.stack((enks_local[self.bands_indices], enks_local[self.bands_indices+self.norbs]), axis=0)
                 # eigen_vecs: (2, nks_local, nbands, norbs)
                 eigen_vecs_local = np.stack((eigen_vecs_local[:, self.bands_indices], eigen_vecs_local[:, self.bands_indices+self.norbs]), axis=0)
-                nks_local = k_grid_local.size
+                nks_local = len(k_grid_local)
                 vnks = np.zeros((2, nks_local, nbands, 3))
                 for ispin in range(2):
                     vnks[ispin] = self._vel_nk_cal_from_HS(enks_local[ispin], eigen_vecs_local[ispin], k_grid_local, collinear_part_index=ispin) # (nks_local, nbands, 3)

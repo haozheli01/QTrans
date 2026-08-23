@@ -4,6 +4,7 @@ from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
 from pymatgen.symmetry.kpath import KPathSeek
 from qtrans.core.constants import QTcts
+from qtrans.core.logging import log
 from qtrans.io.filesystem import make_directory
 from qtrans.numerics.kpoints import kpoints_generator
 from typing import List
@@ -37,7 +38,7 @@ class _OutputMixin:
             hsk_labels = []
             for lbs in kpath_seek.kpath['path']:
                 hsk_labels += lbs
-            self._log('Automatically generating high-symmetry points..')
+            log('Automatically generating high-symmetry points..', rank=self.rank)
 
             # remove adjacent duplicates   
             res = [hsk_labels[0]]
@@ -54,8 +55,8 @@ class _OutputMixin:
         except:
             raise RuntimeError("kpoints_generator failed.", '1012')
         info_str = '\n'.join(["{:<6s}: {:6.4f}    {:6.4f}    {:6.4f}".format(hsk_labels[i], *hsk_points[i]) for i in range(len(hsk_labels))])
-        self._log("High-Symmetry Points:")
-        self._log(info_str)
+        log("High-Symmetry Points:", rank=self.rank)
+        log(info_str, rank=self.rank)
         return k_vec, k_dist, k_node, hsk_labels_plot
 
     def _read_dispersion(self, filepath:str):

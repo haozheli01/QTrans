@@ -1,6 +1,5 @@
-"""Configuration ownership helpers."""
+"""Configuration loading and ownership helpers."""
 
-from .snapshot import apply_defaults, snapshot_configuration
+from .loader import apply_defaults, copy_configuration, load_configuration
 
-__all__ = ["apply_defaults", "snapshot_configuration"]
-
+__all__ = ["apply_defaults", "copy_configuration", "load_configuration"]

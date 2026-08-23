@@ -1,6 +1,7 @@
 """Mechanically extracted QTrans methods."""
 
 from qtrans.core.constants import QTcts
+from qtrans.core.logging import log
 from qtrans.numerics.distributions import fermi_weight
 from qtrans.numerics.gaussian import w0gauss
 from qtrans.numerics.gaussian import wgauss
@@ -56,7 +57,7 @@ class _FermiMixin:
         Returns:
             efermi: The fermi energy in Hartree
             carrier_density: The carrier density in a.u.
-            band_edge: The CBM or VBM energy.
+            band_edge: The CBM or CBM energy.
         """
         efermi = 0.0
         nbnd = enks.shape[0]
@@ -65,7 +66,7 @@ class _FermiMixin:
         carrier_small_judge = QTcts.TENPM80 / (QTcts.CMtoBOHR ** 3)
         if self.is_hole:
             band_edge = self._get_evbm(enks, iband_edge)
-            self._log("VBM = {:10.6f} eV".format(band_edge * QTcts.HARTREEtoEV))
+            log("VBM = {:10.6f} eV".format(band_edge * QTcts.HARTREEtoEV), rank=self.rank)
             ks_exp = np.zeros((nbnd, nks))
             for ibnd in range(nbnd):
                 for ik in range(nks):
@@ -76,7 +77,8 @@ class _FermiMixin:
                         ks_exp[ibnd,ik] = np.exp(arg)
             eup = QTcts.TENPM160
             elw = QTcts.TENPP40 # 1.0
-            for i in range(self.fermi_maxiter):
+            converged = False
+            for _ in range(self.fermi_maxiter):
                 ef = np.sqrt(eup) * np.sqrt(elw)
                 hole_density = 0.0
                 for ibnd in range(iband_edge+1):
@@ -93,6 +95,7 @@ class _FermiMixin:
                     rel_err = (hole_density - np.abs(self.ncarrier)) / hole_density
                 if np.abs(rel_err) < QTcts.TENPM5:
                     efermi = band_edge - (np.log(ef) * self.temperature)
+                    converged = True
                     break
                 elif rel_err > QTcts.TENPM5:
                     elw = ef
@@ -104,7 +107,7 @@ class _FermiMixin:
                     carrier_density += (1.0 - fnk) * self.weight_k[ik]
         else:
             band_edge = self._get_ecbm(enks, iband_edge)
-            self._log("CBM = {:10.6f} eV".format(band_edge * QTcts.HARTREEtoEV))
+            log("CBM = {:10.6f} eV".format(band_edge * QTcts.HARTREEtoEV), rank=self.rank)
             ks_expcb = np.zeros((nbnd, nks))
             for ibnd in range(nbnd):
                 for ik in range(nks):
@@ -115,7 +118,8 @@ class _FermiMixin:
                         ks_expcb[ibnd,ik] = np.exp(arg)
             eup = QTcts.TENPM40 # 1.0
             elw = QTcts.TENPP80
-            for i in range(self.fermi_maxiter):
+            converged = False
+            for _ in range(self.fermi_maxiter):
                 ef = np.sqrt(eup) * np.sqrt(elw)
                 electron_density = 0.0
                 for ibnd in range(iband_edge, nbnd):
@@ -132,6 +136,7 @@ class _FermiMixin:
                     rel_err = (electron_density - np.abs(self.ncarrier)) / electron_density
                 if np.abs(rel_err) < QTcts.TENPM5:
                     efermi = band_edge - (np.log(ef) * self.temperature)
+                    converged = True
                     break
                 elif rel_err > QTcts.TENPM5:
                     eup = ef
@@ -141,7 +146,7 @@ class _FermiMixin:
                 for ik in range(nks):
                     fnk = fermi_weight(enks[ibnd,ik] - efermi, self.temperature)
                     carrier_density += fnk * self.weight_k[ik]
-        if i == (self.fermi_maxiter - 1):
+        if not converged:
             raise RuntimeError("The insulator fermi level cannot converge.", '6002')
         return efermi, carrier_density, band_edge
 
@@ -156,16 +161,18 @@ class _FermiMixin:
         if (sumkup - nelec) < -QTcts.TENPM10 or (sumklw - nelec) > QTcts.TENPM10:
             raise RuntimeError("Cannot bracket Ef.", '6002')
         ef = 0.0
-        for i in range(self.fermi_maxiter):
+        converged = False
+        for _ in range(self.fermi_maxiter):
             ef = (eup + elw) / 2.0
             sumkmid = self._sumkg(enks, degauss, ngauss, ef)
             if np.abs(sumkmid - nelec) < QTcts.TENPM10:
+                converged = True
                 break
             elif (sumkmid - nelec) < -QTcts.TENPM10:
                 elw = ef
             else:
                 eup = ef
-        if i == (self.fermi_maxiter - 1):
+        if not converged:
             raise RuntimeError("The metal fermi level cannot converge.", '6002')
         return ef
 

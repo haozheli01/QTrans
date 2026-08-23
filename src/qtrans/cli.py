@@ -2,15 +2,7 @@
 
 import argparse
 
-
-def _read_config(path):
-    import yaml
-
-    with open(path, encoding="utf-8") as stream:
-        data = yaml.safe_load(stream)
-    if not isinstance(data, dict):
-        raise ValueError("QTrans configuration must be a YAML mapping.")
-    return data
+from .config import load_configuration
 
 
 def _print_failure(rank, error):
@@ -48,7 +40,7 @@ def calculator_main(argv=None):
     rank = comm.Get_rank()
 
     try:
-        calculator = QTransCalculator(_read_config(args.config), comm)
+        calculator = QTransCalculator(load_configuration(args.config), comm)
         calculator.run()
     except Exception as error:
         _print_failure(rank, error)
@@ -66,9 +58,8 @@ def preparer_main(argv=None):
     calculator_comm = None if comm.Get_size() == 1 else comm
 
     try:
-        preparer = QTransPreparer(_read_config(args.config), calculator_comm)
+        preparer = QTransPreparer(load_configuration(args.config), calculator_comm)
         preparer.run()
     except Exception as error:
         _print_failure(rank, error)
         raise SystemExit(1)
-

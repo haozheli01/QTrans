@@ -1,7 +1,8 @@
-"""Mechanically extracted QTrans methods."""
+"""Pairing-spectrum calculation workflow."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
+from qtrans.core.logging import log
 from qtrans.core.logging import time_logger
 from qtrans.numerics.gaussian import w0gauss
 from qtrans.parallel.mpi import print_peak_memeory
@@ -10,12 +11,33 @@ import os
 
 
 class _PomegaMixin:
-    def eliashberg_spectrum_cal(self):
-        if self.read_sparse_grad_mat:
-            omegas, a2f = self._eliashberg_spectrum_cal_epc_sparse()
-        else:
-            omegas, a2f = self._eliashberg_spectrum_cal_epc_dense()
-        return omegas, a2f
+    def pomega_cal(self):
+        """
+        Calculate for Pomega.
+
+        Args:
+
+        Returns:
+        """
+        omegas, a2f = self._Pomega_cal_epc()
+        if self.spinor_mode == 'collinear':
+            a2f_tot = a2f[0] + a2f[1]  # tot a2f
+        if self.rank == 0:
+            fout = open(os.path.join(self.outdir, "pomega.dat"), 'w')
+            if self.spinor_mode == 'collinear':
+                fout.write(f"{'#omega (meV)':>6}    {'a2f_tot':>2}    {'a2f_up':>2}    {'a2f_dn':>2}\n")
+                for iomega, omega in enumerate(omegas):
+                    fout.write(
+                        f"{omega * QTcts.HARTREEtoMEV:6.4f}        "
+                        f"{a2f_tot[iomega]:6.4f}        "
+                        f"{a2f[0, iomega]:6.4f}        "
+                        f"{a2f[1, iomega]:6.4f}\n"
+                    )
+            else:
+                fout.write(f"{'#omega (meV)':>6}    {'a2f':>2}\n")
+                for iomega, omega in enumerate(omegas):
+                    fout.write(f"{omega * QTcts.HARTREEtoMEV:6.4f}        {a2f[iomega]:6.4f}\n")
+            fout.close()
 
     def _Pomega_cal_epc(self):
         r"""
@@ -76,11 +98,11 @@ class _PomegaMixin:
             base_electron_count = len(np.array(self.bands_indices)[self.bands_indices < self.CBM_band_index])
             num_electron_include = base_electron_count - self.doping_charge
         if self.rank == 0:
-            self._log(f"Number of electrons included in the calculation: {num_electron_include}")
+            log(f"Number of electrons included in the calculation: {num_electron_include}", rank=self.rank)
 
 
         k_grid, self.weight_k = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=False)
-        q_grid = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+        q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
 
         nks_fbz = self.k_size[0] * self.k_size[1] * self.k_size[2]
         nks_ibz = len(k_grid)

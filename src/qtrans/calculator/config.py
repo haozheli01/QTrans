@@ -5,6 +5,8 @@ from qtrans.calculator.registry import CALCULATION_MODES
 from qtrans.core.constants import QTcts
 from qtrans.core.defaults import calculator_default_parameters
 from qtrans.core.errors import InputParameterError
+from qtrans.core.logging import log
+from qtrans.core.logging import print_banner
 from qtrans.core.validators import validate_bool
 from qtrans.core.validators import validate_existed_dir
 from qtrans.core.validators import validate_int
@@ -53,7 +55,7 @@ class _ConfigMixin:
                 f"The atomic basis {self.basis_label} is not supported."
             )
 
-        self._log(f"Using {self.Ham_type.upper()} with a {self.nao_max}-orbital definition dictionary.\n")
+        log(f"Using {self.Ham_type.upper()} with a {self.nao_max}-orbital definition dictionary.\n", rank=self.rank)
 
         self.outdir = os.path.abspath(self.outdir)
         try:
@@ -89,7 +91,7 @@ class _ConfigMixin:
         self._set('tetra_integral',         validate_bool,         'advanced', 5028)
 
         if self.system_2D:
-            self._log('Dealing with a 2D system.\n')
+            log('Dealing with a 2D system.\n', rank=self.rank)
 
     def _initial_phonon(self):
         self._set('supercell_matrix',      validate_numpy_array,      'phonon', 5041, (3, 3), float)
@@ -130,7 +132,7 @@ class _ConfigMixin:
 
 
         if self.chiral_projection and not self.system_2D:
-            self._log("Warning: You are using chiral phonon projection in 3D system, please make sure you really want this.")
+            log("Warning: You are using chiral phonon projection in 3D system, please make sure you really want this.", rank=self.rank)
 
         if self.apply_correction:
             self._set('BECs', validate_numpy_array, 'phonon', 5047, (self.natoms, 3, 3), float)
@@ -260,12 +262,12 @@ class _ConfigMixin:
 
         if self.disp_renormalize:
             if disp_source in ['band', 'phonon']:
-                self._log(f"Calculating {disp_source} dispersion relation with renormalization.")
+                log(f"Calculating {disp_source} dispersion relation with renormalization.", rank=self.rank)
             else:
                 raise InputParameterError(5081, 'dispersion', 'disp_renormalize', f"Renormalization is not implemented for calculation mode {disp_source}.")
         if self.disp_lambda:
             if disp_source == 'phonon':
-                self._log(f"Calculating {disp_source} dispersion relation with lambda.")
+                log(f"Calculating {disp_source} dispersion relation with lambda.", rank=self.rank)
             else:
                 raise InputParameterError(5082, 'dispersion', 'disp_lambda', f"Lambda calculation is not implemented for calculation mode {disp_source}.")
 
@@ -276,7 +278,7 @@ class _ConfigMixin:
             self._set('plot_2D_ncuts',        validate_positive_int,      'dispersion', 5089)
             self._set('plot_2D_smear',        validate_positive_num,      'dispersion', 5090)
 
-            self._log(f"Plot 2D figures as {self.plot_2D_axes[0]}-{self.plot_2D_axes[1]}")
+            log(f"Plot 2D figures as {self.plot_2D_axes[0]}-{self.plot_2D_axes[1]}", rank=self.rank)
 
             plot_2D_x = np.linspace(-0.5, 0.5, self.high_symmetry_points[0])
             plot_2D_y = np.linspace(-0.5, 0.5, self.high_symmetry_points[1])
@@ -377,7 +379,7 @@ class _ConfigMixin:
 
         try:
             if self.read_sparse_grad_mat:
-                self._log(f"Loading sparse gradient matrix from {self.grad_mat_path}...")
+                log(f"Loading sparse gradient matrix from {self.grad_mat_path}...", rank=self.rank)
                 self.grad_mat_raw = np.load(self.grad_mat_path, allow_pickle=True)
                 cell_cut_set = set(self.cell_cut_list)
                 if self.spinor_mode == 'collinear':
@@ -387,7 +389,7 @@ class _ConfigMixin:
                 else:
                     self.grad_mat = {key: value for key, value in self.grad_mat_raw.item().items() if ((key[0] in cell_cut_set) and (key[1] in cell_cut_set))}
             else:
-                self._log(f"Loading dense gradient matrix from {self.grad_mat_path}...")
+                log(f"Loading dense gradient matrix from {self.grad_mat_path}...", rank=self.rank)
                 if self.spinor_mode == 'collinear':
                     self.grad_mat = np.load(self.grad_mat_path)[:,self.cell_cut_array[:,None], self.cell_cut_array[None,:]]
                 else:
@@ -400,7 +402,7 @@ class _ConfigMixin:
         if self.apply_correction or self.quadrupole_correction:
             self._set('q_cut', validate_num, 'epc', 5145)
             if self.LRC_taylor_order in (0, 1):
-                self._log(f"The long-range correction is calculated using a Taylor expansion up to order {self.LRC_taylor_order}.")
+                log(f"The long-range correction is calculated using a Taylor expansion up to order {self.LRC_taylor_order}.", rank=self.rank)
             else:
                 raise InputParameterError(5144, 'epc', 'LRC_taylor_order', f"The Taylor expansion order {self.LRC_taylor_order!r} is not supported.")
             self.q_cut = self.q_cut * np.linalg.norm(self.graph_data.rec_latt[0])
@@ -477,20 +479,20 @@ class _ConfigMixin:
         if self.MC_sampling in ('cauchy', 'uniform'):
             self._set('sampling_seed', validate_num,          'conductivity', 5205)
             self._set('nsamples',      validate_positive_int, 'conductivity', 5206)
-            self._log(f"Using importance sampling method with {self.MC_sampling.upper()} sampling distribution...")
+            log(f"Using importance sampling method with {self.MC_sampling.upper()} sampling distribution...", rank=self.rank)
             if self.MC_sampling == 'cauchy':
                 self._set('cauchy_scale', validate_positive_num, 'conductivity', 5204)
-                self._log(f"The Cauchy scale is {self.cauchy_scale:10.6f}.\n")
+                log(f"The Cauchy scale is {self.cauchy_scale:10.6f}.\n", rank=self.rank)
         elif self.MC_sampling == 'none':
-            self._log("Using uniform mesh sampling method...")
+            log("Using uniform mesh sampling method...", rank=self.rank)
         else:
             raise InputParameterError(5202, 'conductivity', 'MC_sampling', f"The MC sampling method {self.MC_sampling!r} is not supported.")
 
         self.polar_split = str(self.polar_split).lower()
         if self.polar_split == 'polar':
-            self._log("Considering only the polar part of the scattering rate...\n")
+            log("Considering only the polar part of the scattering rate...\n", rank=self.rank)
         elif self.polar_split == 'rmp':
-            self._log("Considering only the remainder part of the scattering rate...\n")
+            log("Considering only the remainder part of the scattering rate...\n", rank=self.rank)
         elif self.polar_split == 'none':
             pass
         else:
@@ -499,11 +501,11 @@ class _ConfigMixin:
 
         self.mob_level = str(self.mob_level).lower()
         if self.mob_level == 'erta':
-            self._log(f"Using {self.mob_level.upper()} method to calculate conductivity...\n")
+            log(f"Using {self.mob_level.upper()} method to calculate conductivity...\n", rank=self.rank)
         elif self.mob_level == 'ibte':
             self._set('ibte_error', validate_positive_num, 'conductivity', 5214)
             self._set('ibte_cycle', validate_positive_int, 'conductivity', 5215)
-            self._log(f"Using {self.mob_level.upper()} method to calculate conductivity...\n")
+            log(f"Using {self.mob_level.upper()} method to calculate conductivity...\n", rank=self.rank)
             if self.MC_sampling != 'none':
                 raise InputParameterError(5208, 'conductivity', 'mob_level',
                                           f"IBTE calculation with importance sampling method is not supported.")
@@ -545,19 +547,85 @@ class _ConfigMixin:
         """
         Initialize superconductivity block.
         """
-        
-        self._set('mus',         validate_numpy_array,  'superconductivity', 5241, (3,), float)
-        self._set('omega_range', validate_numpy_array,  'superconductivity', 5242, (2,), float)
-        self._set('omega_step',  validate_positive_num, 'superconductivity', 5243)
-
         self.sc_method = str(self.sc_method).strip().lower()
-        if self.sc_method not in ['allen_dynes']:
-            raise InputParameterError(5244, 'superconductivity', 'sc_method',
-                "The method \'{!r}\' for superconductivity calculation is not supported.".format(self.method))
+        valid_sc_methods = {'allen_dynes', 'eliashberg'}
+        if self.sc_method not in valid_sc_methods:
+            raise InputParameterError(
+                5244, 'superconductivity', 'sc_method',
+                "The sc_method must be 'allen_dynes' or 'eliashberg', got {!r}."
+                .format(self.sc_method)
+            )
+        self.eliashberg_approximation = str(
+            self.eliashberg_approximation
+        ).strip().lower()
+        valid_approximations = {
+            'iso_fsr', 'aniso_fsr', 'iso_fbw', 'aniso_fbw'
+        }
+        if self.eliashberg_approximation not in valid_approximations:
+            raise InputParameterError(
+                5245, 'superconductivity', 'eliashberg_approximation',
+                "Choose one of {}.".format(', '.join(sorted(valid_approximations)))
+            )
+
+        self._set('mus',                   validate_numpy_array,  'superconductivity', 5241, (3,), float)
+        self._set('omega_range',           validate_numpy_array,  'superconductivity', 5242, (2,), float)
+        self._set('omega_step',            validate_positive_num, 'superconductivity', 5243)
+        self._set('epc_restart',           validate_bool,         'superconductivity', 5246)
+        self._set('temperature_range',     validate_numpy_array,  'superconductivity', 5247, (3,), float)
+        self._set('matsubara_cutoff',      validate_positive_num, 'superconductivity', 5248)
+        self._set('coulomb_cutoff',        validate_positive_num, 'superconductivity', 5249)
+        self._set('max_iterations',        validate_positive_int, 'superconductivity', 5250)
+        self._set('eigen_max_iterations',  validate_positive_int, 'superconductivity', 5251)
+        self._set('max_matsubara_points',  validate_positive_int, 'superconductivity', 5252)
+        self._set('convergence_tol',       validate_positive_num, 'superconductivity', 5253)
+        self._set('eigen_tolerance',       validate_positive_num, 'superconductivity', 5254)
+        self._set('tc_tolerance',          validate_positive_num, 'superconductivity', 5255)
+        self._set('mixing',                validate_positive_num, 'superconductivity', 5256)
+        self._set('initial_gap',           validate_positive_num, 'superconductivity', 5257)
+        self._set('save_matsubara',        validate_bool,         'superconductivity', 5258)
+        self._set('restart',               validate_bool,         'superconductivity', 5259)
+
+        if self.mus[0] < 0.0 or self.mus[1] <= self.mus[0] or self.mus[2] <= 0.0:
+            raise InputParameterError(
+                5241, 'superconductivity', 'mus',
+                "mus must be [start, stop, step] with 0 <= start < stop and step > 0."
+            )
+        if (
+            self.temperature_range[0] <= 0.0
+            or self.temperature_range[1] <= self.temperature_range[0]
+            or self.temperature_range[2] <= 0.0
+        ):
+            raise InputParameterError(
+                5247, 'superconductivity', 'temperature_range',
+                "temperature_range must be [Tmin, Tmax, step] with 0 < Tmin < Tmax and step > 0."
+            )
+        if self.mixing > 1.0:
+            raise InputParameterError(
+                5256, 'superconductivity', 'mixing',
+                "mixing must be in the interval (0, 1]."
+            )
+
+        if self.sc_method == 'eliashberg':
+            if self.eliashberg_approximation != 'iso_fsr':
+                if self.eliashberg_data_path is not None:
+                    self._set(
+                        'eliashberg_data_path', validate_readable_path,
+                        'superconductivity', 5260
+                    )
 
         self.mus = np.arange(self.mus[0], self.mus[1], self.mus[2])
+        if self.mus.size == 0:
+            raise InputParameterError(
+                5241, 'superconductivity', 'mus',
+                "The requested mu_star scan is empty."
+            )
         self.omega_range *= QTcts.MEVtoHARTREE
         self.omega_step *= QTcts.MEVtoHARTREE
+        self.temperature_range *= QTcts.KELVINtoHARTREE
+        self.matsubara_cutoff *= QTcts.MEVtoHARTREE
+        self.coulomb_cutoff *= QTcts.MEVtoHARTREE
+        self.tc_tolerance *= QTcts.KELVINtoHARTREE
+        self.initial_gap *= QTcts.MEVtoHARTREE
 
     def _initial_pomega(self):
         """
@@ -600,7 +668,7 @@ class _ConfigMixin:
 
         self.boltz_solver = str(self.boltz_solver).lower()
         if self.boltz_solver in ('euler', 'rk4'):
-            self._log(f"Using {self.boltz_solver.upper()} solver to solve real-time Boltzmann transport equation...\n")
+            log(f"Using {self.boltz_solver.upper()} solver to solve real-time Boltzmann transport equation...\n", rank=self.rank)
         else:
             raise InputParameterError(5288, 'boltzmann', 'boltz_solver', f"The rt-BTE solver {self.boltz_solver!r} is not supported.")
 
@@ -618,7 +686,7 @@ class _ConfigMixin:
         else:
             self.adv_cal = False
         efield_str = "[" + ", ".join("{:.4f}".format(x) for x in self.efield) + "]"
-        self._log('The strength of external electric field (V/cm):'+efield_str)
+        log('The strength of external electric field (V/cm):'+efield_str, rank=self.rank)
         self.efield *= (100 / (QTcts.HARTREEtoEV / QTcts.BOHRtoM))
 
     def _initial_self_energy(self):
@@ -631,7 +699,7 @@ class _ConfigMixin:
 
         self.SE_type = str(self.SE_type).lower()
         if self.SE_type in ('electron', 'phonon'):
-            self._log(f"Calculate the self-energy for {self.SE_type}.\n")
+            log(f"Calculate the self-energy for {self.SE_type}.\n", rank=self.rank)
         else:
             raise InputParameterError(5301, 'self-energy', 'SE_type', f"Self-energy cannot be calculated for {self.SE_type!r}.")
 
@@ -659,13 +727,6 @@ class _ConfigMixin:
         Initialize fermi_surface block.
         """
         self._set('mesh_file', validate_readable_path, 'fermi_surface', 5321)
-
-    def _print_banner(self, title: str, width: int = 100):
-        """Print a centered '#' banner for a calculation mode."""
-        title_str = f' {title} '
-        left = (width - len(title_str)) // 2
-        right = width - len(title_str) - left
-        self._log('#' * left + title_str + '#' * right)
 
     def _init_scattering_blocks(self, config: dict):
         """
@@ -701,20 +762,22 @@ class _ConfigMixin:
         config.pop('basic')
 
         if self.cal_mode == 'dos':
-            self._print_banner('DOS Calculation')
+            if self.rank == 0:
+                print_banner('DOS Calculation')
             self._parse_input_optional(config=config, block_name='dos')
             self._initial_dos()
             config.pop('dos', 0)
             if self.dos_qp == 'electron':
-                self._log("Calculate density of states for electron.")
+                log("Calculate density of states for electron.", rank=self.rank)
             elif self.dos_qp == 'phonon':
-                self._log("Calculate density of states for phonon.")
+                log("Calculate density of states for phonon.", rank=self.rank)
                 self._parse_input_optional(config=config, block_name='phonon')
                 self._initial_phonon()
                 config.pop('phonon', 0)
             
         elif self.cal_mode == 'boltzmann':
-            self._print_banner('Boltzmann Calculation')
+            if self.rank == 0:
+                print_banner('Boltzmann Calculation')
             self._parse_input_optional(config=config, block_name='transport')
             self._init_scattering_blocks(config)
             self._initial_transport()
@@ -724,7 +787,8 @@ class _ConfigMixin:
             config.pop('boltzmann', 0)
 
         elif self.cal_mode == 'breakdown':
-            self._print_banner('Breakdown Calculation')
+            if self.rank == 0:
+                print_banner('Breakdown Calculation')
             self._init_scattering_blocks(config)
             self._parse_input_optional(config=config, block_name='transport')
             self._initial_transport()
@@ -734,7 +798,8 @@ class _ConfigMixin:
             config.pop('breakdown', 0)
 
         elif self.cal_mode == 'conductivity':
-            self._print_banner('Conductivity Calculation')
+            if self.rank == 0:
+                print_banner('Conductivity Calculation')
             self._parse_input_optional(config=config, block_name='transport')
             self._init_scattering_blocks(config)
             self._initial_transport()
@@ -744,7 +809,8 @@ class _ConfigMixin:
             config.pop('conductivity', 0)
 
         elif self.cal_mode == 'superconductivity':
-            self._print_banner('Superconductivity Calculation')
+            if self.rank == 0:
+                print_banner('Superconductivity Calculation')
             self._parse_input_optional(config=config, block_name='transport')
             self._init_scattering_blocks(config)
             self._initial_transport()
@@ -754,7 +820,8 @@ class _ConfigMixin:
             config.pop('superconductivity', 0)
 
         elif self.cal_mode == 'pomega':
-            self._print_banner('Pomega Calculation')
+            if self.rank == 0:
+                print_banner('Pomega Calculation')
             self._parse_input_optional(config=config, block_name='transport')
             self._init_scattering_blocks(config)
             self._initial_transport()
@@ -764,7 +831,8 @@ class _ConfigMixin:
             config.pop('pomega', 0)
 
         elif self.cal_mode == 'resistivity':
-            self._print_banner('Resistivity Calculation')
+            if self.rank == 0:
+                print_banner('Resistivity Calculation')
             self._parse_input_optional(config=config, block_name='transport')
             self._init_scattering_blocks(config)
             self._initial_transport()
@@ -774,7 +842,8 @@ class _ConfigMixin:
             config.pop('resistivity', 0)
 
         elif self.cal_mode == 'band':
-            self._print_banner('Band Calculation')
+            if self.rank == 0:
+                print_banner('Band Calculation')
             self._parse_input_optional(config=config, block_name='dispersion')
             self._initial_dispersion()
             if self.disp_renormalize:
@@ -792,7 +861,8 @@ class _ConfigMixin:
             config.pop('dispersion', 0)
 
         elif self.cal_mode == 'phonon':
-            self._print_banner('Phonon Calculation')
+            if self.rank == 0:
+                print_banner('Phonon Calculation')
             self._parse_input_optional(config=config, block_name='phonon')
             self._initial_phonon()
             self._parse_input_optional(config=config, block_name='dispersion')
@@ -818,14 +888,16 @@ class _ConfigMixin:
             config.pop('dispersion', 0)
 
         elif self.cal_mode == 'epc':
-            self._print_banner('EPC Calculation')
+            if self.rank == 0:
+                print_banner('EPC Calculation')
             self._init_scattering_blocks(config)
             self._parse_input_optional(config=config, block_name='dispersion')
             self._initial_dispersion()
             config.pop('dispersion', 0)
         
         elif self.cal_mode == 'fermi_surface':
-            self._print_banner('Fermi Surface Calculation')
+            if self.rank == 0:
+                print_banner('Fermi Surface Calculation')
             self._parse_input_optional(config=config, block_name='fermi_surface')
             self._initial_fermi_surface()
             config.pop('fermi_surface', 0)

@@ -127,7 +127,22 @@ class InputParameterError(Exception):
     5242: The 'omega_range' in <superconductivity> block must be a list of 2 numbers.
     5243: The 'omega_step' in <superconductivity> block must be a positive number.
     5244: The 'sc_method' in <superconductivity> block is not supported.
-    5245: ...
+    5245: The Eliashberg approximation is not supported.
+    5246: The 'epc_restart' flag must be a boolean.
+    5247: The Eliashberg temperature range is invalid.
+    5248: The Matsubara cutoff must be positive.
+    5249: The Coulomb cutoff must be positive.
+    5250: The nonlinear iteration limit must be a positive integer.
+    5251: The eigenvalue iteration limit must be a positive integer.
+    5252: The Matsubara point limit must be a positive integer.
+    5253: The nonlinear convergence tolerance must be positive.
+    5254: The eigenvalue tolerance must be positive.
+    5255: The Tc tolerance must be positive.
+    5256: The mixing fraction must be in (0, 1].
+    5257: The initial gap must be positive.
+    5258: The 'save_matsubara' flag must be a boolean.
+    5259: The Eliashberg 'restart' flag must be a boolean.
+    5260: A readable state-resolved Eliashberg data file is required.
     5261: The 'fbd_erange' in <breakdown> block must be a list of 3 numbers.
     5262: The file specified by 'fbd_rate_file' in the <breakdown> block does not exist or is not readable.
     5263: The 'fbd_effective_mass' in <breakdown> block must be a positive number.

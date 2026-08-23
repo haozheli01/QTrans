@@ -1,7 +1,8 @@
-"""Mechanically extracted QTrans methods."""
+"""EPC pairing spectra and their spectral moments."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
+from qtrans.core.logging import log
 from qtrans.core.logging import time_logger
 from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse
 from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse_soc
@@ -12,7 +13,13 @@ import numpy as np
 import os
 
 
-class _EliashbergMixin:
+class _PairingSpectrumMixin:
+    def eliashberg_spectrum_cal(self):
+        """Calculate the superconducting EPC spectrum on the configured grids."""
+        if self.read_sparse_grad_mat:
+            return self._eliashberg_spectrum_cal_epc_sparse()
+        return self._eliashberg_spectrum_cal_epc_dense()
+
     def _eliashberg_spectrum_cal_epc_dense(self):
         """
         Calculate the Eliashberg spectral function alpha^{2} F(omega) on dense k/q grids.
@@ -62,11 +69,11 @@ class _EliashbergMixin:
             base_electron_count = len(np.array(self.bands_indices)[self.bands_indices < self.CBM_band_index])
             num_electron_include = base_electron_count - self.doping_charge
         if self.rank == 0:
-            self._log(f"Number of electrons included in the calculation: {num_electron_include}")
+            log(f"Number of electrons included in the calculation: {num_electron_include}", rank=self.rank)
 
         # generate the meshes for kpts and qpts
         k_grid, self.weight_k = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=False)
-        q_grid = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+        q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
 
         # initial the omega
         if self.omega_range[0] < QTcts.TENPM10:
@@ -109,11 +116,11 @@ class _EliashbergMixin:
             raise RuntimeError(f"Error(7001): Superconductivity can only be calculated for metallic systems.")
         dos_ef = self._get_ef_dos(enks, self.efermi, self.inv_smeark, self.gauss_type)
         if self.spinor_mode == 'collinear':
-            self._log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (sum of two spin channels) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV))
+            log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (sum of two spin channels) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV), rank=self.rank)
         else:
             # N(Ef) in lambda formula is the DOS per spin
             dos_ef = dos_ef / 2.0
-            self._log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (spin factor not included) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV))
+            log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (spin factor not included) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV), rank=self.rank)
         # resplit the k points
         mask = np.abs(enks - self.efermi) < self.e_thr
         _, kpt_indices_useful = np.where(mask)
@@ -307,7 +314,7 @@ class _EliashbergMixin:
         # === Check for restart: load previously saved epc_strengths ===
         epc_restart_path = os.path.join(self.outdir, 'epc_strengths_restart.npz')
         if os.path.isfile(epc_restart_path) and self.epc_restart:
-            self._log("Restart file found: {}. Loading epc_strengths and skipping EPC main loop.".format(epc_restart_path))
+            log("Restart file found: {}. Loading epc_strengths and skipping EPC main loop.".format(epc_restart_path), rank=self.rank)
             restart_data = np.load(epc_restart_path)
             epc_strengths = restart_data['epc_strengths']
             freq_grid_all = restart_data['freq_grid']
@@ -350,11 +357,11 @@ class _EliashbergMixin:
             base_electron_count = len(np.array(self.bands_indices)[self.bands_indices < self.CBM_band_index])
             num_electron_include = base_electron_count - self.doping_charge
         if self.rank == 0:
-            self._log(f"Number of electrons included in the calculation: {num_electron_include}")
+            log(f"Number of electrons included in the calculation: {num_electron_include}", rank=self.rank)
 
         # generate the meshes for kpts and qpts
         k_grid, self.weight_k = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=False)
-        q_grid = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+        q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
 
         # initial the omega
         if self.omega_range[0] < QTcts.TENPM10:
@@ -397,11 +404,11 @@ class _EliashbergMixin:
             raise RuntimeError(f"Error(7001): Superconductivity can only be calculated for metallic systems.")
         dos_ef = self._get_ef_dos(enks, self.efermi, self.inv_smeark, self.gauss_type)
         if self.spinor_mode == 'collinear':
-            self._log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (sum of two spin channels) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV))
+            log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (sum of two spin channels) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV), rank=self.rank)
         else:
             # N(Ef) in lambda formula is the DOS per spin
             dos_ef = dos_ef / 2.0
-            self._log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (spin factor not included) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV))
+            log("Fermi energy = {:10.6f} eV\nDOS of Fermi level (spin factor not included) = {:10.6f}".format(self.efermi * QTcts.HARTREEtoEV, dos_ef / QTcts.HARTREEtoEV), rank=self.rank)
         # resplit the k points
         mask = np.abs(enks - self.efermi) < self.e_thr
         _, kpt_indices_useful = np.where(mask)
@@ -712,19 +719,3 @@ class _EliashbergMixin:
         inner_term = np.sum(a2f[mask] / omegas[mask] * np.log(omegas_abs[mask])) * self.omega_step / epc_strength 
         inner_term *= 2.0
         return np.exp(inner_term)
-
-    def _Allen_Dynes_Tc_cal(self, epc_strength:float, mu:np.ndarray, omega_logave:float):
-        """
-        Calculate the Tc in Allen-Dynes theory.
-
-        args:
-            epc_strength: The lambda.
-            mu: A list of effective Coulomb potential.
-            omega_logave: The logarithmic average of the x frequencies
-
-        return:
-            Tc: The Tc in Hartree.
-        """
-        exp_term = np.exp(-1.04 * (1.0 + epc_strength) / (epc_strength - mu * (1.0 + 0.62 * epc_strength)))
-        Tc = omega_logave / 1.2 * exp_term 
-        return Tc

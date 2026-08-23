@@ -1,4 +1,4 @@
-"""Mechanically extracted QTrans methods."""
+"""Self-energy data processing and output helpers."""
 
 from pathlib import Path
 from qtrans.core.constants import QTcts
@@ -247,30 +247,3 @@ class _SelfEnergyMixin:
                     filepath = se_folder_path / f"{type_prefix}-se-{ip+1}.dat"
                     header_this = "point = {:10.5f} {:10.5f} {:10.5f}\n".format(*p_grid[ip]) + header
                     self._write_self_energy_file(filepath, header_this, fmt_str, se_this, omega_list=omega_list)
-
-    def _cal_coupling_strength_from_self_energy(self, self_energy_real:np.ndarray, omega_list:np.ndarray,
-                                           enks:np.ndarray, weight_k:np.ndarray, dos_ef:float, 
-                                           fit_points:int=5):
-        nks, nbands, nomegas = self_energy_real.shape
-        lambdas = np.full((nks, nbands), np.nan)
-        index0 = np.argmin(np.abs(omega_list))
-        if np.abs(omega_list[index0]) > (omega_list[1] - omega_list[0]):
-            raise RuntimeError("Error(7004): When derive coupling strength from electron self energy, the energy range of it must contain zero.")
-        index_min = max(index0 - fit_points, 0)
-        index_max = min(index0 + fit_points + 1, nomegas)
-        index_fit = np.arange(index_min, index_max)
-        omega_fit = omega_list[index_fit]
-        for ik in range(nks):
-            for iband in range(nbands):
-                self_energy_fit = self_energy_real[ik, iband, index_fit]
-                if len(omega_fit) >= 3:
-                    coeffs = np.polyfit(omega_fit, self_energy_fit, 1)
-                    slope = coeffs[0]
-                    lambdas[ik, iband] = -slope
-                else:
-                    lambdas[ik, iband] = 0.0
-        mask = np.abs(enks - self.efermi) < self.e_thr
-        delta_nk = w0gauss((enks - self.efermi) * self.inv_smeark) * self.inv_smeark
-        terms = lambdas * delta_nk * weight_k[:, None]
-        lambda_ave = np.sum(terms[mask]) / dos_ef
-        return lambda_ave, lambdas

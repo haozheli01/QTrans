@@ -1,4 +1,4 @@
-"""Mechanically extracted QTrans methods."""
+"""Density-of-states calculation workflows."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts

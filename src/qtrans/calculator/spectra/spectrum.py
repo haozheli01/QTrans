@@ -1,4 +1,4 @@
-"""Spectrum calculations."""
+"""Electronic and phonon spectral-function calculations."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts

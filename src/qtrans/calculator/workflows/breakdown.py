@@ -1,4 +1,4 @@
-"""Mechanically extracted QTrans methods."""
+"""Scattering-rate breakdown calculation workflow."""
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
@@ -255,7 +255,7 @@ class _BreakdownMixin:
         """
         k_grid, self.weight_k = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=False)
         self.weight_k *= 2.0
-        q_grid = self._get_monkhorst_pack(self.q_size, self.graph_data.latt, return_frac=True)
+        q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
         self.weight_q = np.ones(len(q_grid)) / len(q_grid)
         band_edge_index = self.CBM_band_index
         iband_edge = np.where(np.array(self.bands_indices)==band_edge_index)[0][0]

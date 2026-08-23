@@ -96,11 +96,26 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'ibte_cycle': 200,
     },
     'superconductivity': {
-        'sc_method': "allen_dynes",
+        'sc_method': 'allen_dynes',
+        'eliashberg_approximation': 'iso_fsr',
         'mus': [0.05, 0.25, 0.01],
         'omega_range': [0.0, 100.0], # meV
         'omega_step': 0.01,  # meV
         'epc_restart': False,
+        'temperature_range': [1.0, 60.0, 1.0], # K [Tmin, Tmax, scan step]
+        'matsubara_cutoff': 1000.0, # meV
+        'coulomb_cutoff': 1000.0, # meV
+        'max_iterations': 500,
+        'eigen_max_iterations': 300,
+        'max_matsubara_points': 20000,
+        'convergence_tol': 1.0e-8,
+        'eigen_tolerance': 1.0e-7,
+        'tc_tolerance': 0.1, # K
+        'mixing': 0.3,
+        'initial_gap': 0.1, # meV
+        'save_matsubara': True,
+        'restart': True,
+        'eliashberg_data_path': None,
     },
     'pomega': {
         'omega_range': [0.0, 100.0], # meV
