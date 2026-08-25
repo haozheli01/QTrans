@@ -86,7 +86,7 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'cauchy_scale': 0.035,
         'sampling_seed': 1,
         'nsamples': 1000000,
-        'ncarrier': 10000000000000000,  # 10^16 cm^-3
+        'ncarrier': 10000000000000000.0,  # 10^16 cm^-3
         'mob_level': "ERTA", # 'ERTA'
         'polar_rate_path': None,
         'rmp_rate_path': None,
@@ -135,7 +135,7 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
     },
     'boltzmann': {
         'over_band_edge': 0.2,    # eV
-        'ncarrier': 10000000000000000,  # 10^16 cm^-3
+        'ncarrier': 10000000000000000.0,  # 10^16 cm^-3
         'temperature_lat': 300.0,    # K
         'time_step': 1.0,    # fs
         'energy_step': 1.0,    # meV
@@ -146,12 +146,10 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'efield': [0.0,0.0,0.0], # external E field, V/cm
     },
     'self-energy': {
-        'SE_type': None, # electron, phonon
+        'SE_type': 'electron', # electron, phonon
         'SE_erange': [-1.0, 1.0, 0.01],  # [emin, emax, estep] in eV
         'over_band_edge': 0.2, # eV
-        'ncarrier': 10000000000000000,  # 10^16 cm^-3
-        'epc_se_path': None,
-        'disp_path': None,
+        'ncarrier': 10000000000000000.0,  # 10^16 cm^-3
     },
     'fermi_surface': {
         'mesh_file': './kpt.dat',

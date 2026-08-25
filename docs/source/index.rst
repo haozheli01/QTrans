@@ -6,7 +6,7 @@ QTrans: Calculations for transport properties
 .. image:: ./_static/intro.png
    :alt: intro.png
    :width: 800px
-   :height: 600px
+   :height: 800px
    :scale: 100 %
    :align: center
    :class: custom-class

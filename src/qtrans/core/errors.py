@@ -163,10 +163,7 @@ class InputParameterError(Exception):
     5302: The 'SE_erange' in <self-energy> block must be a list of 3 numbers.
     5303: The 'over_band_edge' in <self-energy> block must be a number.
     5304: The 'ncarrier' in <self-energy> block must be a number.
-    5305: The file specified by 'epc_se_path' in the <self-energy> block does not exist or is not readable.
-    5306: ...
-    5307: The file specified by 'disp_path' in the <self-energy> block does not exist or is not readable.
-    5308: ...
+    5305: ...
     5321: The file specified by 'mesh_file' in the <fermi_surface> block does not exist or is not readable.
 
     5441: The 'omega_range' in <pomega> block must be a list of 2 numbers.

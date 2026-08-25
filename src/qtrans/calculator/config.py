@@ -703,11 +703,6 @@ class _ConfigMixin:
         else:
             raise InputParameterError(5301, 'self-energy', 'SE_type', f"Self-energy cannot be calculated for {self.SE_type!r}.")
 
-        if self.epc_se_path:
-            self._set('epc_se_path', validate_readable_path, 'self-energy', 5305)
-        if self.disp_path:
-            self._set('disp_path', validate_readable_path, 'self-energy', 5307)
-
         if self.cal_mode == 'band':
             self.SE_type = 'electron'
         elif self.cal_mode == 'phonon':

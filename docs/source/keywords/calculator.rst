@@ -117,13 +117,13 @@ Blocks
 
         **Block <conductivity>:**
 
-            :ref:`over_band_edge <cal_over_band_edge>`,
+            :ref:`over_band_edge <cal_over_band_edge_conductivity>`,
             :ref:`MC_sampling <cal_MC_sampling>`,
             :ref:`polar_split <cal_polar_split>`,
             :ref:`cauchy_scale <cal_cauchy_scale>`,
             :ref:`sampling_seed <cal_sampling_seed>`,
             :ref:`nsamples <cal_nsamples>`,
-            :ref:`ncarrier <cal_ncarrier>`,
+            :ref:`ncarrier <cal_ncarrier_conductivity>`,
             :ref:`mob_level <cal_mob_level>`,
             :ref:`polar_rate_path <cal_polar_rate_path>`,
             :ref:`rmp_rate_path <cal_rmp_rate_path>`,
@@ -155,12 +155,13 @@ Blocks
         **Block <resistivity>**
 
             :ref:`ziman_nc <cal_ziman_nc>`,
-            :ref:`omega_range <cal_omega_range_r>`,
-            :ref:`omega_step <cal_omega_step_r>`
+            :ref:`omega_range <cal_omega_range_resistivity>`,
+            :ref:`omega_step <cal_omega_step_resistivity>`
 
         **Block <boltzmann>**
-            :ref:`over_band_edge <cal_over_band_edge>`,
-            :ref:`ncarrier <cal_ncarrier>`,
+
+            :ref:`over_band_edge <cal_over_band_edge_boltzmann>`,
+            :ref:`ncarrier <cal_ncarrier_boltzmann>`,
             :ref:`temperature_lat <cal_temperature_lat>`,
             :ref:`time_step <cal_time_step>`,
             :ref:`energy_step <cal_energy_step>`,
@@ -170,13 +171,21 @@ Blocks
             :ref:`output_step <cal_output_step>`,
             :ref:`efield <cal_efield>`
 
+        **Block <self-energy>**
+
+            :ref:`SE_type <cal_SE_type>`,
+            :ref:`SE_erange <cal_SE_erange>`,
+            :ref:`over_band_edge <cal_over_band_edge_self_energy>`,
+            :ref:`ncarrier <cal_ncarrier_self_energy>`
+
 
 basic block
 ^^^^^^^^^^^^^^
 
 .. _cal_cal_mode:
 .. param-card:: cal_mode
-   :options: 'band' | 'phonon' | 'dos' | 'epc' | 'superconductivity' | 'pomega' | 'conductivity' | 'breakdown' | 'resistivity' | 'boltzmann'
+   :options: 'band' | 'phonon' | 'dos' | 'epc' | 'superconductivity' | 'pomega' | 'conductivity' | </br>
+    'breakdown' | 'resistivity' | 'boltzmann'
    :default: <b><i>MUST SET BY USER</i></b>
    :block: basic
 
@@ -873,14 +882,14 @@ transport block
 conductivity block
 ^^^^^^^^^^^^^^^^^^^
 
-.. _cal_over_band_edge:
+.. _cal_over_band_edge_conductivity:
 .. param-card:: over_band_edge
    :options: <b><i>*FLOAT*</i></b>
    :default: 0.2
    :block: conductivity
 
     Specifies the width (in eV) of the energy window centered around 
-    the Fermi level or band edge.This window determines the range of 
+    the Fermi level or band edge. This window determines the range of 
     electronic states included in transport-related calculations.
 
 :ref:`Back to top <cal_title_keywords>`
@@ -956,10 +965,10 @@ conductivity block
 
 :ref:`Back to top <cal_title_keywords>`
 
-.. _cal_ncarrier:
+.. _cal_ncarrier_conductivity:
 .. param-card:: ncarrier
-   :options: <b><i>*INT*</i></b>
-   :default: 10000000000000000
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 10000000000000000.0
    :block: conductivity
 
     The carrier concentration in :math:`\text{cm}^{-3}`.
@@ -1043,7 +1052,7 @@ conductivity block
 :ref:`Back to top <cal_title_keywords>`
 
 superconductivity block
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. _cal_sc_method:
 .. param-card:: sc_method
@@ -1091,8 +1100,45 @@ superconductivity block
 
 :ref:`Back to top <cal_title_keywords>`
 
+pomega block
+^^^^^^^^^^^^^
+
+.. _cal_omega_range_po:
+.. param-card:: omega_range
+   :options: <b><i>*LIST[FLOAT, FLOAT]*</i></b>
+   :default: [0.0, 100.0]
+   :block: pomega
+
+    Specifies the energy range (in meV),
+    given as **[min, max]**,
+    over which the frequency-dependent nesting function will be calculated.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_omega_step_po:
+.. param-card:: omega_step
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 0.01
+   :block: pomega
+
+    Specifies the energy step (in meV)
+    used for the frequency-dependent nesting function.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_pomega_restart:
+.. param-card:: pomega_restart
+   :options: True | False
+   :default: False
+   :block: pomega
+
+    If True, the Pomega calculation will be restarted from '{self.outdir}/Pomega_restart.npz'.
+
+:ref:`Back to top <cal_title_keywords>`
+
+
 breakdown block
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 .. _cal_fbd_erange:
 .. param-card:: fbd_erange
@@ -1149,17 +1195,6 @@ breakdown block
 resistivity block
 ^^^^^^^^^^^^^^^^^^
 
-.. _cal_resistance_channel:
-.. param-card:: resistance_channel
-   :options: 'electrical'
-   :default: 'electrical'
-   :block: resistivity
-
-    Specifies the type of resistivity to calculate.  
-    Currently, only ``'electrical'`` is supported.
-
-:ref:`Back to top <cal_title_keywords>`
-
 .. _cal_ziman_nc:
 .. param-card:: ziman_nc
    :options: <b><i>*FLOAT*</i></b>
@@ -1172,7 +1207,7 @@ resistivity block
 
 :ref:`Back to top <cal_title_keywords>`
 
-.. _cal_omega_range_r:
+.. _cal_omega_range_resistivity:
 .. param-card:: omega_range
    :options: <b><i>*LIST[FLOAT,FLOAT]*</i></b>
    :default: [0, 100]
@@ -1186,7 +1221,7 @@ resistivity block
 
 :ref:`Back to top <cal_title_keywords>`
 
-.. _cal_omega_step_r:
+.. _cal_omega_step_resistivity:
 .. param-card:: omega_step
    :options: <b><i>*INT*</i></b>
    :default: 200
@@ -1195,5 +1230,155 @@ resistivity block
     Specifies the energy step (in meV)
     used for calculating the Eliashberg spectral function :math:`\alpha^2 F(\omega)`
     or the Eliashberg transport spectral function :math:`\alpha_{tr}^2 F(\omega)`.
+
+:ref:`Back to top <cal_title_keywords>`
+
+boltzmann block
+^^^^^^^^^^^^^^^^
+
+.. _cal_over_band_edge_boltzmann:
+.. param-card:: over_band_edge
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 0.2
+   :block: boltzmann
+
+    Specifies the width (in eV) of the energy window centered around 
+    the Fermi level or band edge. This window determines the range of 
+    electronic states included in Boltzmann calculations.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_ncarrier_boltzmann:
+.. param-card:: ncarrier
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 10000000000000000.0
+   :block: boltzmann
+
+    The carrier concentration in :math:`\text{cm}^{-3}`.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_temperature_lat:
+.. param-card:: temperature_lat
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 300.0
+   :block: boltzmann
+
+    Temperature of the lattice system, in Klevin.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_time_step:
+.. param-card:: time_step
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 1.0
+   :block: boltzmann
+
+    Time step for solving the real-time Boltzmann equation, in femtosecond.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_energy_step:
+.. param-card:: energy_step
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 1.0
+   :block: boltzmann
+
+    Energy step for solving the real-time Boltzmann equation, in meV.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_num_step:
+.. param-card:: num_step
+   :options: <b><i>*INT*</i></b>
+   :default: 100
+   :block: boltzmann
+
+    Number of steps for solving the real-time Boltzmann equation.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_norm_dist:
+.. param-card:: norm_dist
+   :options: True | False
+   :default: False
+   :block: boltzmann
+
+    If True, the distribution will be normalized after each iteration when solving the real-time Boltzmann transport equation.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_boltz_solver:
+.. param-card:: boltz_solver
+    :options: 'euler' | 'rk4'
+    :default: 'euler'
+    :block: boltzmann
+
+    Solution method for the real-time Boltzmann transport equation.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_output_step:
+.. param-card:: output_step
+   :options: <b><i>*INT*</i></b>
+   :default: 1
+   :block: boltzmann
+
+    Number of steps between outputs when solving the real-time Boltzmann equation.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_efield:
+.. param-card:: efield
+    :options: <b><i>*LIST[FLOAT,FLOAT,FLOAT]*</i></b>
+    :default: [0.0,0.0,0.0]
+    :block: boltzmann
+
+    The external electric field strength used when solving the real-time Boltzmann equation, in V/cm.
+
+:ref:`Back to top <cal_title_keywords>`
+
+self-energy block
+^^^^^^^^^^^^^^^^^^
+
+.. _cal_SE_type:
+.. param-card:: SE_type
+   :options: 'electron'
+   :default: 'electron'
+   :block: self-energy
+
+    Specifies the quasiparticle type of which the self-energy will be calculated.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_SE_erange:
+.. param-card:: SE_erange
+    :options: <b><i>*LIST[FLOAT,FLOAT,FLOAT]*</i></b>
+    :default: [0.0,0.0,0.0]
+    :block: self-energy
+
+    Specifies the energy range (in eV), given as **[min, max, step]**, over which the spectral function will be calculated.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_over_band_edge_self_energy:
+.. param-card:: over_band_edge
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 0.2
+   :block: self-energy
+
+    Specifies the width (in eV) of the energy window centered around 
+    the Fermi level or band edge. This window determines the range of 
+    electronic states included in self-energy calculations.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_ncarrier_self_energy:
+.. param-card:: ncarrier
+   :options: <b><i>*FLOAT*</i></b>
+   :default: 10000000000000000.0
+   :block: self-energy
+
+    The carrier concentration in :math:`\text{cm}^{-3}`.
 
 :ref:`Back to top <cal_title_keywords>`
