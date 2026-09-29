@@ -13,27 +13,101 @@ import sys
 
 class _TransportSolverMixin:
     def _read_rate_file(self, filepath:str, shape:List[int]):
-        rate_ir = None
-        data = np.atleast_2d(np.loadtxt(filepath, skiprows=2))
-        if data.size == 0:
-            if self.cal_mode == 'conductivity' and self.magnetic_type == 'collinear':
-                return np.full([2] + shape, np.inf)
-            else:
-                return np.full(shape, np.inf)
-        ik_arr = data[:, 0].astype(int)
-        ibnd_arr = data[:, 1].astype(int)
+        """Read internal-unit rates, preserving missing states as infinity."""
+        if len(shape) != 2 or any(int(size) <= 0 for size in shape):
+            raise ValueError(f"Invalid rate array shape {shape}; expected [nbands, nks] with positive sizes.")
+        nbands, nks = (int(size) for size in shape)
+
         if self.cal_mode == 'conductivity':
             if self.magnetic_type == 'collinear':
-                rate_ir = np.full([2] + shape, np.inf)
-                rate_ir[0, ibnd_arr, ik_arr] = data[:, 4]
-                rate_ir[1, ibnd_arr, ik_arr] = data[:, 6]
+                rate_shape = (2, nbands, nks)
+                expected_columns = 7
+                rate_columns = (4, 6)
             else:
-                rate_ir = np.full(shape, np.inf)
-                rate_ir[ibnd_arr, ik_arr] = data[:, 4]
+                rate_shape = (nbands, nks)
+                expected_columns = 5
+                rate_columns = (4,)
         elif self.cal_mode == 'breakdown':
-            rate_ir = np.full(shape, np.inf)
-            rate_ir[0, ibnd_arr, ik_arr] = data[:, 4]
-            rate_ir[1, ibnd_arr, ik_arr] = data[:, 5]
+            rate_shape = (2, nbands, nks)
+            expected_columns = 6
+            rate_columns = (4, 5)
+        else:
+            raise ValueError(f"Cannot read rate file for unsupported calculation mode '{self.cal_mode}'.")
+
+        # Rate files can have one, two, or no comment header lines.  Inspect
+        # the leading lines instead of unconditionally discarding two rows.
+        header_lines = []
+        skiprows = 0
+        has_data = False
+        with open(filepath, 'r') as fin:
+            for iline, line in enumerate(fin):
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                if stripped.startswith('#'):
+                    header_lines.append(stripped[1:].strip())
+                    continue
+                first_token = stripped.split(maxsplit=1)[0]
+                try:
+                    float(first_token)
+                except ValueError:
+                    header_lines.append(stripped)
+                    skiprows = iline + 1
+                    continue
+                has_data = True
+                break
+
+        normalized_header = ''.join(' '.join(header_lines).lower().split())
+        physical_unit_markers = (
+            'enk(ev)', 'scattering_rate(1/ps)', 'energy_loss_rate(ev/ps)',
+            'enk[up](ev)', 'enk[down](ev)',
+            'scatt_rate[up](1/ps)', 'scatt_rate[down](1/ps)',
+        )
+        if any(marker in normalized_header for marker in physical_unit_markers):
+            raise ValueError(
+                f"Rate file '{filepath}' uses eV/ps output units, but QTrans expects its "
+                "current internal Hartree-unit format. Convert the file before reading it."
+            )
+
+        rate_ir = np.full(rate_shape, np.inf)
+        if not has_data:
+            return rate_ir
+
+        try:
+            data = np.loadtxt(filepath, comments='#', skiprows=skiprows, ndmin=2)
+        except ValueError as exc:
+            raise ValueError(
+                f"Cannot parse rate file '{filepath}' for '{self.cal_mode}': {exc}"
+            ) from exc
+        if data.shape[1] != expected_columns:
+            raise ValueError(
+                f"Rate file '{filepath}' has {data.shape[1]} columns for '{self.cal_mode}', "
+                f"but {expected_columns} columns are required."
+            )
+
+        index_data = data[:, :2]
+        if not np.all(np.isfinite(index_data)) or not np.all(index_data == np.floor(index_data)):
+            raise ValueError(f"Rate file '{filepath}' contains non-integer ik or ibnd indices.")
+        ik_arr = index_data[:, 0]
+        ibnd_arr = index_data[:, 1]
+        invalid_index = (ik_arr < 0) | (ik_arr >= nks) | (ibnd_arr < 0) | (ibnd_arr >= nbands)
+        if np.any(invalid_index):
+            irow = int(np.flatnonzero(invalid_index)[0])
+            raise ValueError(
+                f"Rate file '{filepath}' data row {irow + 1} has ibnd={ibnd_arr[irow]:g}, "
+                f"ik={ik_arr[irow]:g}; expected 0 <= ibnd < {nbands} and 0 <= ik < {nks}."
+            )
+        ik_arr = ik_arr.astype(int)
+        ibnd_arr = ibnd_arr.astype(int)
+        flat_indices = ibnd_arr * nks + ik_arr
+        if np.unique(flat_indices).size != flat_indices.size:
+            raise ValueError(f"Rate file '{filepath}' contains duplicate (ibnd, ik) entries.")
+
+        if len(rate_columns) == 1:
+            rate_ir[ibnd_arr, ik_arr] = data[:, rate_columns[0]]
+        else:
+            rate_ir[0, ibnd_arr, ik_arr] = data[:, rate_columns[0]]
+            rate_ir[1, ibnd_arr, ik_arr] = data[:, rate_columns[1]]
 
         return rate_ir
 
@@ -66,7 +140,10 @@ class _TransportSolverMixin:
                     fout.write('\n')
             elif out_case == 5:
                 if with_header:
-                    fout.write(f"#{'ik_ibz':<8}{'ibnd':<6}{'weight_k':<18}{'enk(Hartree)':<18}{'scattering_rate(Hartree)':<24}{'energy_loss_rate(Hartree)':<24}\n")
+                    fout.write(
+                        "# ik_ibz  ibnd  weight_k  enk(Hartree)  scattering_rate(Hartree)  "
+                        "energy_loss_rate(Hartree^2)\n"
+                    )
                 mask = ~np.isinf(rate[0, ibnd_flat, ik_flat])
                 iks, ibnds = ik_flat[mask], ibnd_flat[mask]
                 lines = [f"{ik:<9}{ibnd:<6}{weight_k[ik]:<18.12f}{enks[ibnd, ik]:<18.12f}{rate[0, ibnd, ik]:<24.16e}{rate[1, ibnd, ik]:<24.16e}"
@@ -81,9 +158,8 @@ class _TransportSolverMixin:
                     else:
                         fout.write(f"#Fermi level = {self.efermi[0]:.8f} Hartree and {self.efermi[1]:.8f} Hartree   Density of carrier = {self.carrier_density[0]:.8e} and {self.carrier_density[1]:.8e}\n")
                     fout.write(
-                        f"#{'ik_ibz':<8}{'ibnd':<6}{'weight_k':<18}"
-                        f"{'enk[up](Hartree)':<18}{'scatt_rate[up](Hartree)':<24}"
-                        f"{'enk[down](Hartree)':<18}{'scatt_rate[down](Hartree)':<24}\n"
+                        "# ik_ibz  ibnd  weight_k  enk[up](Hartree)  scatt_rate[up](Hartree)  "
+                        "enk[down](Hartree)  scatt_rate[down](Hartree)\n"
                     )
                 mask = ~np.isinf(rate[:, ibnd_flat, ik_flat]).all(axis=0)
                 iks, ibnds = ik_flat[mask], ibnd_flat[mask]
