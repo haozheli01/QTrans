@@ -90,6 +90,15 @@ class _ConfigMixin:
         self._set('system_2D',              validate_bool,         'advanced', 5027)
         self._set('tetra_integral',         validate_bool,         'advanced', 5028)
 
+        self.q_split_mode = str(self.q_split_mode).strip().lower().replace('_', '-')
+        if self.q_split_mode not in ('block', 'contiguous', 'hash-cyclic'):
+            raise InputParameterError(
+                5032, 'advanced', 'q_split_mode',
+                f"The q split mode {self.q_split_mode!r} is not supported."
+            )
+        if self.rank == 0 and self.q_split_mode == 'block':
+            log("q_split_mode='block' is an alias for 'contiguous'.\n", rank=self.rank)
+
         if self.system_2D:
             log('Dealing with a 2D system.\n', rank=self.rank)
 

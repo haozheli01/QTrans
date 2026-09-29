@@ -5,12 +5,170 @@ from qtrans.core.constants import QTcts
 from qtrans.core.logging import log
 from qtrans.core.logging import time_logger
 from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse
+from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse_batch
+from qtrans.extensions import prepare_sparse_grad_cache
+from qtrans.extensions import NativeExtensionUnavailable
 from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse_soc
 from qtrans.numerics.gaussian import w0gauss
 from qtrans.parallel.mpi import gather_to_rank_root
+from qtrans.parallel.mpi import get_q_rank_indices
 from qtrans.parallel.mpi import print_peak_memeory
 import numpy as np
 import os
+
+
+def _bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=512 * 1024 ** 2):
+    """Allgather a leading-axis array with typed, bounded broadcasts.
+
+    ``mpi4py.Comm.allgather`` pickles each NumPy array and can overflow its
+    signed byte-count for large wave-function tables.  Broadcasting one rank's
+    contiguous chunks at a time keeps every MPI message below ``chunk_bytes``
+    while preserving rank (and therefore global k-point) order.
+    """
+    data_local = np.ascontiguousarray(data_local)
+    if comm is None:
+        return data_local.copy()
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    shape_tail = tuple(data_local.shape[1:])
+    dtype = data_local.dtype
+    metadata = comm.allgather((int(data_local.shape[0]), shape_tail, dtype.str))
+    if any(tuple(item[1]) != shape_tail or item[2] != dtype.str for item in metadata):
+        raise RuntimeError("Inconsistent wave-function array shape or dtype across ranks.")
+    counts = [item[0] for item in metadata]
+    row_bytes = max(1, int(np.prod(shape_tail, dtype=np.int64)) * dtype.itemsize)
+    rows_per_chunk = max(1, int(chunk_bytes) // row_bytes)
+    result = np.empty((sum(counts),) + shape_tail, dtype=dtype)
+    offset_global = 0
+    for owner, count in enumerate(counts):
+        owner_offset = 0
+        while owner_offset < count:
+            nrows = min(rows_per_chunk, count - owner_offset)
+            if rank == owner:
+                chunk = np.ascontiguousarray(data_local[owner_offset:owner_offset + nrows])
+            else:
+                chunk = np.empty((nrows,) + shape_tail, dtype=dtype)
+            comm.Bcast(chunk, root=owner)
+            result[offset_global + owner_offset:offset_global + owner_offset + nrows] = chunk
+            owner_offset += nrows
+        offset_global += count
+    return result
+
+
+def _sparse_epc_q_none_batched(calculator, q, freq, phon_vec_q,
+                               k_grid_useful, enks_useful, wave_ks_useful,
+                               weights_k_useful, phase_k_all,
+                               kpq_energy_table=None, grid2ir_idx=None,
+                               batch_size=1024, grad_cache=None):
+    """Process one non-spin q slice in bounded k batches.
+
+    If ``grad_cache`` is a prepared ``SparseGradCache`` capsule, one native
+    batch call handles all valid k points in each block.  The scalar helper is
+    retained as a numerical fallback for an older native library (or for a
+    path that needs a long-range correction).  If an IBZ energy table is
+    supplied, it is used before calculating k+q wavefunctions; this is the
+    commensurate-grid fast path.
+    """
+    nbranches = len(freq)
+    norbs = int(getattr(calculator, 'norbs', 0))
+    wave_bytes_per_k = max(1, norbs * norbs * np.dtype(np.complex128).itemsize)
+    # Keep the requested 1024 upper bound, but avoid allocating multi-GiB
+    # temporary eigenvector matrices with the current full-matrix solver.
+    effective_batch = min(batch_size, max(1, (256 * 1024 ** 2) // wave_bytes_per_k))
+    epc_q = np.zeros(nbranches, dtype=float)
+    atomic_phase = np.exp(QTcts.JTWOPI * (calculator.graph_data.pos @ q))
+    phvec_wap = np.ascontiguousarray(atomic_phase[None, :, None] * phon_vec_q)
+    valid_branches = np.where(freq >= calculator.phonon_frequency_cutoff)[0]
+    phase_q = np.exp(QTcts.JTWOPI * (calculator.nbr_shift_of_cell_sc @ q))
+    for start in range(0, len(k_grid_useful), effective_batch):
+        stop = min(start + effective_batch, len(k_grid_useful))
+        k_block = k_grid_useful[start:stop]
+        if kpq_energy_table is not None and grid2ir_idx is not None:
+            bz = calculator._get_kpq_BZ_index(k_block + q)
+            eig_block = np.ascontiguousarray(kpq_energy_table[grid2ir_idx[bz]])
+            ematch_block = np.abs(eig_block - calculator.efermi) < calculator.e_thr
+            valid = np.flatnonzero(np.any(ematch_block, axis=1))
+            if valid.size == 0:
+                continue
+            solve_indices = valid
+            eig_kpq = eig_block[solve_indices]
+        else:
+            kpqs = np.ascontiguousarray(k_block + q)
+            eig_raw, wave_raw = calculator._elec_cal_torch(kpqs)
+            eig_block = np.ascontiguousarray(eig_raw[calculator.bands_indices].T)
+            ematch_block = np.abs(eig_block - calculator.efermi) < calculator.e_thr
+            valid = np.flatnonzero(np.any(ematch_block, axis=1))
+            if valid.size == 0:
+                continue
+            solve_indices = valid
+            eig_kpq = eig_block[solve_indices]
+            wave_raw = wave_raw[solve_indices]
+        if kpq_energy_table is not None and grid2ir_idx is not None:
+            kpqs = np.ascontiguousarray(k_block[solve_indices] + q)
+            eig_raw, wave_raw = calculator._elec_cal_torch(kpqs)
+        wave_kpq = np.ascontiguousarray(wave_raw[:, calculator.bands_indices, :])
+
+        # The native batch kernel consumes a leading k axis.  Build all
+        # per-k arrays once for this block, then accumulate its (B,branch)
+        # output.  Keep the scalar loop below as a strict fallback.
+        batch_used = False
+        if grad_cache is not None:
+            phase_k_batch = np.ascontiguousarray(
+                phase_k_all[:, start:stop].T[solve_indices])
+            phase_kpq_batch = np.ascontiguousarray(
+                (phase_k_all[:, start:stop] * phase_q[:, None]).T[solve_indices])
+            wave_k_batch = np.ascontiguousarray(wave_ks_useful[start:stop][solve_indices])
+            eig_k_batch = np.ascontiguousarray(
+                enks_useful[:, start:stop].T[solve_indices])
+            enk_batch = np.ascontiguousarray(
+                np.abs(eig_k_batch - calculator.efermi) < calculator.e_thr)
+            ematch_batch = np.ascontiguousarray(ematch_block[solve_indices])
+            eig_kpq_batch = np.ascontiguousarray(eig_kpq)
+            weights_batch = np.ascontiguousarray(weights_k_useful[start:stop][solve_indices])
+            epc_batch = np.zeros((len(solve_indices), nbranches), dtype=np.float64, order='C')
+            try:
+                eliashberg_spectrum_cal_EPC_helper_sparse_batch(
+                    np.ascontiguousarray(freq), np.ascontiguousarray(calculator.atomic_mass),
+                    phvec_wap, phase_k_batch, phase_kpq_batch, grad_cache,
+                    wave_k_batch, wave_kpq, enk_batch, ematch_batch,
+                    eig_k_batch, eig_kpq_batch, weights_batch, epc_batch,
+                    calculator.phonon_frequency_cutoff, calculator.inv_smeark,
+                    calculator.efermi)
+                epc_q += np.sum(epc_batch, axis=0)
+                batch_used = True
+            except NativeExtensionUnavailable:
+                # A pre-existing installation may not contain the new symbol;
+                # retain the scalar implementation without changing results.
+                batch_used = False
+                grad_cache = None
+
+        if batch_used:
+            continue
+
+        phase_kpq_all = phase_k_all[:, start:stop][:, solve_indices] * phase_q[:, None]
+        for local_solve, local_idx in enumerate(solve_indices):
+            global_idx = start + int(local_idx)
+            inside = np.asarray(np.abs(enks_useful[:, global_idx] - calculator.efermi)
+                                < calculator.e_thr, dtype=bool)
+            if not inside.any():
+                continue
+            eig_k = enks_useful[:, global_idx]
+            wave_k = wave_ks_useful[global_idx]
+            phase_k = phase_k_all[:, global_idx]
+            phase_kpq = phase_kpq_all[:, local_solve]
+            for ibnd in np.where(inside)[0]:
+                delta_nk = w0gauss((eig_k[ibnd] - calculator.efermi) * calculator.inv_smeark) * calculator.inv_smeark
+                for jbnd in np.where(np.abs(eig_kpq[local_solve] - calculator.efermi) < calculator.e_thr)[0]:
+                    delta_mkq = w0gauss((eig_kpq[local_solve, jbnd] - calculator.efermi) * calculator.inv_smeark) * calculator.inv_smeark
+                    tmp1 = np.outer(np.conj(wave_kpq[local_solve, jbnd]), wave_k[ibnd])
+                    weight_factor = delta_nk * delta_mkq * weights_k_useful[global_idx]
+                    for ibranch in valid_branches:
+                        epc = calculator._epc_cal_element(
+                            k_grid_useful[global_idx], q, freq[ibranch],
+                            phvec_wap[ibranch], tmp1, calculator.grad_mat,
+                            phase_k, phase_kpq, dipole_correction=False)
+                        epc_q[ibranch] += (epc * np.conj(epc)).real * weight_factor
+    return epc_q
 
 
 class _PairingSpectrumMixin:
@@ -375,8 +533,25 @@ class _PairingSpectrumMixin:
 
         self.weight_q = 1.0 / nqs
 
+        # ``_transport_prepare(..., reduced_type='k')`` historically performs
+        # a contiguous q split.  Reorder the global q list before entering it
+        # so the existing splitter produces deterministic hash-cyclic chunks.
+        # This branch is deliberately restricted to the optimized scalar-spin
+        # sparse path; all other modes retain the historical ordering.
+        q_global_order = np.arange(nqs, dtype=int)
+        if (self.spinor_mode == 'none' and not self.soc_switch and
+                getattr(self, 'q_split_mode', 'contiguous') == 'hash-cyclic' and
+                self.comm is not None):
+            q_chunks = [get_q_rank_indices(
+                q_grid, irank, self.rank_size, split_mode='hash-cyclic',
+                q_size=self.q_size) for irank in range(self.rank_size)]
+            q_global_order = np.concatenate(q_chunks)
+            q_grid = q_grid[q_global_order]
+
         k_grid_all, enks_local, wave_ks_local, q_grid_local, weights_q_local, freq_grid, phon_vecs= \
             self._transport_prepare(k_grid, q_grid, self.bands_indices, None)
+        q_local_positions = np.array_split(np.arange(nqs, dtype=int), self.rank_size)[self.rank]
+        q_global_indices_local = q_global_order[q_local_positions]
 
         nomegas = len(omegas_list)
         nbands = len(self.bands_indices)
@@ -393,11 +568,19 @@ class _PairingSpectrumMixin:
             self.weight_k *= 2.0
 
         enks_all = self.comm.allgather(enks_local.reshape(nbands_col, nks_local))
-        wave_ks_all = self.comm.allgather(wave_ks_local)
+        if (self.spinor_mode == 'none' and not self.soc_switch):
+            # Avoid mpi4py pickle for the large initial wave table.  The
+            # helper uses bounded typed broadcasts and preserves the
+            # contiguous rank order used by k_grid_all.
+            wave_ks = _bcast_array_by_rank_chunks(wave_ks_local, self.comm)
+            wave_ks_all = None
+        else:
+            wave_ks_all = self.comm.allgather(wave_ks_local)
         del enks_local, wave_ks_local
 
         enks = np.concatenate(enks_all, axis=-1)    # (nbands, nks) or (2*nbands, nks) for collinear
-        wave_ks = np.concatenate(wave_ks_all, axis=-3) # (nks, nbands, norbs) or (2, nks, nbands, norbs) for collinear
+        if wave_ks_all is not None:
+            wave_ks = np.concatenate(wave_ks_all, axis=-3) # (nks, nbands, norbs) or (2, nks, nbands, norbs) for collinear
         self.efermi = self._get_fermi_level_metal(enks, self.smeark, self.gauss_type, num_electron_include) + self.fermi_shift
         is_metal = self._get_is_metal(enks, self.efermi)
         if not is_metal:
@@ -435,105 +618,71 @@ class _PairingSpectrumMixin:
         phase_k_all = np.exp(QTcts.JTWOPI * (self.nbr_shift_of_cell_sc @ k_grid_useful.T))  # (ncells, nks_useful_local)
         atomic_mass = np.ascontiguousarray(self.atomic_mass)
 
-        # === Pre-allocate reusable buffer ===
-        epc_strengths_q = np.zeros((self.natoms*3,), dtype=float, order='C')
         if self.rank == 0:
             logger = time_logger(nqs_local, 'eliashberg_spectrum_cal_epc_sparse')
 
-        # calculate electron-phonon coupling strength
-        for iq, q in enumerate(q_grid_local):
-            # phonon spectrum
-            phon_vec_q = phon_vecs[iq].reshape(-1, self.natoms, 3)
-            atomic_phase = np.exp(QTcts.JTWOPI*np.sum(self.graph_data.pos*q[None,:], axis=-1)) # shape (natoms, )
-            phvec_wap = atomic_phase[None,:,None] * phon_vec_q # shape (nbranches, natoms, 3)
+        # Build FBZ->IBZ mapping once for the commensurate energy-table path.
+        # The table stores only selected-band energies; wavefunctions remain on demand.
+        grid2ir_idx = None
+        kpq_energy_table = None
+        if (self.spinor_mode == 'none' and not self.soc_switch and
+                all(int(k) % int(q) == 0 for k, q in zip(self.k_size, self.q_size))):
+            _, _, _, grid2ir_idx = self._get_ir_reciprocal_mesh(
+                self.k_size, auxiliary_info=True, return_frac=True)
+            kpq_energy_table = np.ascontiguousarray(enks.T)
 
-            # === Batch compute all k+q electronic structure in ONE call ===
-            kpqs = k_grid_useful + q  # (nks_useful_local, 3)
-            eig_kpqs, wave_kpqs = self._elec_cal_torch(kpqs)
+        # Prepare CSR metadata once per rank.  The batch helper consumes this
+        # capsule directly and therefore never reparses the Python gradient
+        # dictionary for each k point or q point.  Long-range correction
+        # paths are intentionally kept on the scalar implementation.
+        grad_cache = None
+        batch_allowed = (self.spinor_mode == 'none' and not self.soc_switch)
+        for _correction_name in ('apply_correction', 'quadrupole_correction'):
+            _correction_value = getattr(self, _correction_name, False)
+            if isinstance(_correction_value, (bool, np.bool_)) and _correction_value:
+                batch_allowed = False
+        if batch_allowed:
+            try:
+                grad_cache = prepare_sparse_grad_cache(self.grad_mat)
+            except NativeExtensionUnavailable:
+                # Older installed native libraries have no cache entry point;
+                # the scalar helper below remains numerically equivalent.
+                grad_cache = None
 
-            # === Select bands for k+q and compute second energy filter ===
-            if self.spinor_mode == 'collinear':
-                # eig_kpqs: (2*norbs, nks_useful_local), eigen_vecs_kpqs: (nks_useful_local, 2*norbs, norbs)
-                eig_kpqs = np.stack((eig_kpqs[self.bands_indices], eig_kpqs[self.bands_indices+self.norbs]), axis=0)  # (2, nbands, nks_useful_local)
-                wave_kpqs = np.stack((wave_kpqs[:, self.bands_indices, :], wave_kpqs[:, self.bands_indices+self.norbs, :]), axis=0)  # (2, nks_useful_local, nbands, norbs)
-                emkq_match_tables = np.abs(eig_kpqs - self.efermi) < self.e_thr  # (2, nbands, nks_useful_local)
-                emkq_any_valid = np.any(emkq_match_tables, axis=(0, 1))  # (nks_useful_local, )
-            else:
-                # eig_kpq_batch: (norbs, nks_useful_local), vecs_kpq_batch: (nks_useful_local, norbs, norbs)
-                eig_kpqs = eig_kpqs[self.bands_indices]  # (nbands, nks_useful_local)
-                wave_kpqs = wave_kpqs[:, self.bands_indices, :]  # (nks_useful_local, nbands, norbs)
-                emkq_match_tables = np.abs(eig_kpqs - self.efermi) < self.e_thr  # (nbands, nks_useful_local)
-                emkq_any_valid = np.any(emkq_match_tables, axis=0)  # (nks_useful_local,)
-
-            # === Early skip if no doubly-valid k-points ===
-            doubly_valid = np.where(emkq_any_valid)[0]
-            if len(doubly_valid) == 0:
+        try:
+            # Calculate one q at a time, but bound k+q electronic temporaries.
+            for iq, q in enumerate(q_grid_local):
+                epc_strengths[iq] = _sparse_epc_q_none_batched(
+                    self, q, freq_grid[iq], phon_vecs[iq].reshape(-1, self.natoms, 3),
+                    k_grid_useful, enks_useful, wave_ks_useful,
+                    weights_k_useful, phase_k_all,
+                    kpq_energy_table=kpq_energy_table, grid2ir_idx=grid2ir_idx,
+                    batch_size=1024, grad_cache=grad_cache)
                 if self.rank == 0:
-                    logger.step(iq+1)
-                continue
-
-            # === Phase factorization: phase(k+q) = phase(k) * phase(q) (优化 2) ===
-            phase_q = np.exp(QTcts.JTWOPI * (self.nbr_shift_of_cell_sc @ q))  # (ncells,)
-            phase_kpq_all = phase_k_all * phase_q[:, None]  # (ncells, nks_useful_local)
-
-            # === Only loop over doubly-valid k-points (pass both energy filters) ===
-            for idx in doubly_valid:
-                phase_k = phase_k_all[:, idx]  # (ncells,)
-                phase_kpq = phase_kpq_all[:, idx]  # (ncells,)
-
-                if self.spinor_mode == 'collinear':
-                    eig_k = enks_useful[:, :, idx]  # (2, nbands)
-                    wave_k = wave_ks_useful[:, idx]  # (2, nbands, norbs)
-                    enk_match_table = enk_match_tables[:, :, idx]  # (2, nbands)
-                    eig_kpq = eig_kpqs[:, :, idx]  # (2, nbands)
-                    wave_kpq = wave_kpqs[:, idx]  # (2, nbands, norbs)
-                    emkq_match_table = emkq_match_tables[:, :, idx]  # (2, nbands)
-                    for ispin in range(2):
-                        epc_strengths_q[:] = 0.0
-                        eliashberg_spectrum_cal_EPC_helper_sparse(np.ascontiguousarray(freq_grid[iq]), atomic_mass, np.ascontiguousarray(phvec_wap),
-                                                            np.ascontiguousarray(phase_k), np.ascontiguousarray(phase_kpq), self.grad_mat[ispin],
-                                                            np.ascontiguousarray(wave_k[ispin]), np.ascontiguousarray(wave_kpq[ispin]),
-                                                            np.ascontiguousarray(enk_match_table[ispin]), np.ascontiguousarray(emkq_match_table[ispin]),
-                                                            np.ascontiguousarray(eig_k[ispin]), np.ascontiguousarray(eig_kpq[ispin]), epc_strengths_q,
-                                                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
-                        epc_strengths[ispin, iq] += epc_strengths_q
-                else:
-                    eig_k = enks_useful[:, idx]  # (nbands,)
-                    wave_k = wave_ks_useful[idx]  # (nbands, norbs)
-                    enk_match_table = enk_match_tables[:, idx]  # (nbands,)
-                    eig_kpq = eig_kpqs[:, idx]  # (nbands,)
-                    wave_kpq = wave_kpqs[idx]  # (nbands, norbs)
-                    emkq_match_table = emkq_match_tables[:, idx]  # (nbands,)
-                    epc_strengths_q[:] = 0.0
-                    if self.soc_switch:
-                        eliashberg_spectrum_cal_EPC_helper_sparse_soc(np.ascontiguousarray(freq_grid[iq]), atomic_mass, np.ascontiguousarray(phvec_wap),
-                                                            np.ascontiguousarray(phase_k), np.ascontiguousarray(phase_kpq), self.grad_mat,
-                                                            np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
-                                                            np.ascontiguousarray(enk_match_table), np.ascontiguousarray(emkq_match_table),
-                                                            np.ascontiguousarray(eig_k), np.ascontiguousarray(eig_kpq), epc_strengths_q,
-                                                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
-                    else:
-                        eliashberg_spectrum_cal_EPC_helper_sparse(np.ascontiguousarray(freq_grid[iq]), atomic_mass, np.ascontiguousarray(phvec_wap),
-                                                            np.ascontiguousarray(phase_k), np.ascontiguousarray(phase_kpq), self.grad_mat,
-                                                            np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
-                                                            np.ascontiguousarray(enk_match_table), np.ascontiguousarray(emkq_match_table),
-                                                            np.ascontiguousarray(eig_k), np.ascontiguousarray(eig_kpq), epc_strengths_q,
-                                                            self.phonon_frequency_cutoff, self.inv_smeark, self.efermi, weights_k_useful[idx])
-                    epc_strengths[iq] += epc_strengths_q
-            if self.rank==0:
-                logger.step(iq+1)
+                    logger.step(iq + 1)
+        finally:
+            # SparseGradCache owns references to every CSR ndarray; dropping
+            # the capsule invokes its destructor and releases native metadata.
+            grad_cache = None
         # The formula divide by an extra w_qv, but we do not do it here, because it will be eliminated in the a2f calculation.
 
         # === Save epc_strengths for restart ===
         # Gather local epc_strengths and freq_grid from all ranks to rank 0
         epc_strengths_gathered = gather_to_rank_root(epc_strengths, self.comm, root=0)
         freq_grid_gathered = gather_to_rank_root(freq_grid, self.comm, root=0)
+        q_indices_gathered = self.comm.gather(q_global_indices_local, root=0)
         if self.rank == 0:
             epc_strengths_all = np.concatenate(epc_strengths_gathered, axis=-2)  # (2, nqs, nbranches)
             freq_grid_all = np.concatenate(freq_grid_gathered, axis=0)  # (nqs, nbranches)
+            q_indices_all = np.concatenate(q_indices_gathered, axis=0)
+            q_order = np.argsort(q_indices_all, kind='stable')
+            epc_strengths_all = epc_strengths_all[..., q_order, :]
+            freq_grid_all = freq_grid_all[q_order]
+            q_indices_all = q_indices_all[q_order]
             np.savez(epc_restart_path,
                      epc_strengths=epc_strengths_all,
                      freq_grid=freq_grid_all,
+                     q_indices=q_indices_all,
                      dos_ef=np.array(dos_ef),
                      efermi=np.array(self.efermi),
                      weight_q=np.array(self.weight_q))
