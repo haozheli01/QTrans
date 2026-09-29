@@ -10,6 +10,7 @@
 
 // PyObject *eliashberg_spectrum_cal_helper(PyObject *self, PyObject *args);
 PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *args);
+PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_batch(PyObject *self, PyObject *args);
 PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject *args);
 
 PyObject *epc_elements_cal_helper_sparse(PyObject *self, PyObject *args);
@@ -24,9 +25,16 @@ PyObject *transport_eliashberg_function_cal_EPC_iso_helper_sparse(PyObject *self
 PyObject *dynamics_setup_helper_sparse(PyObject *self, PyObject *args);
 
 PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *args);
+PyObject *prepare_sparse_grad_cache(PyObject *self, PyObject *args);
+PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObject *args);
+PyObject *prepare_grad_mat(PyObject *self, PyObject *args);
+PyObject *free_grad_mat_context(PyObject *self, PyObject *args);
+PyObject *epc_profile_reset(PyObject *self, PyObject *args);
+PyObject *epc_profile_snapshot(PyObject *self, PyObject *args);
 
 static PyMethodDef functions[] = {
     {"eliashberg_spectrum_cal_EPC_helper_sparse", (PyCFunction)eliashberg_spectrum_cal_EPC_helper_sparse, METH_VARARGS, 0},
+    {"eliashberg_spectrum_cal_EPC_helper_sparse_batch", (PyCFunction)eliashberg_spectrum_cal_EPC_helper_sparse_batch, METH_VARARGS, 0},
     {"eliashberg_spectrum_cal_EPC_helper_sparse_soc", (PyCFunction)eliashberg_spectrum_cal_EPC_helper_sparse_soc, METH_VARARGS, 0},
     {"epc_elements_cal_helper_sparse", (PyCFunction)epc_elements_cal_helper_sparse, METH_VARARGS, 0},
     {"scattering_rate_cal_EPC_helper_sparse_soc", (PyCFunction)scattering_rate_cal_EPC_helper_sparse_soc, METH_VARARGS, 0},
@@ -35,6 +43,12 @@ static PyMethodDef functions[] = {
     {"transport_eliashberg_function_cal_EPC_iso_helper_sparse", (PyCFunction)transport_eliashberg_function_cal_EPC_iso_helper_sparse, METH_VARARGS, 0},
     {"dynamics_setup_helper_sparse", (PyCFunction)dynamics_setup_helper_sparse, METH_VARARGS, 0},
     {"electron_self_energy_cal_EPC_helper_sparse", (PyCFunction)electron_self_energy_cal_EPC_helper_sparse, METH_VARARGS, 0},
+    {"prepare_sparse_grad_cache", (PyCFunction)prepare_sparse_grad_cache, METH_VARARGS, 0},
+    {"electron_self_energy_cal_EPC_helper_sparse_batch", (PyCFunction)electron_self_energy_cal_EPC_helper_sparse_batch, METH_VARARGS, 0},
+    {"prepare_grad_mat", (PyCFunction)prepare_grad_mat, METH_VARARGS, 0},
+    {"free_grad_mat_context", (PyCFunction)free_grad_mat_context, METH_VARARGS, 0},
+    {"epc_profile_reset", (PyCFunction)epc_profile_reset, METH_NOARGS, 0},
+    {"epc_profile_snapshot", (PyCFunction)epc_profile_snapshot, METH_NOARGS, 0},
     {NULL, NULL, 0, NULL}};
 
 static struct PyModuleDef moduledef = {
@@ -50,5 +64,3 @@ PyMODINIT_FUNC PyInit__native(void)
     import_array();
     return PyModule_Create(&moduledef);
 }
-
-
