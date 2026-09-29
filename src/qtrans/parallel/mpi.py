@@ -37,6 +37,73 @@ def split_into_rank(data:Sequence, axis:int, rank_id:int, rank_size:int, split_i
     else:
         return local_chunk
 
+
+def _splitmix64(values: np.ndarray) -> np.ndarray:
+    """Return the deterministic 64-bit SplitMix hash used by QTrans20260721."""
+    values = np.asarray(values, dtype=np.uint64)
+    values = values + np.uint64(0x9E3779B97F4A7C15)
+    values = (values ^ (values >> np.uint64(30))) * np.uint64(0xBF58476D1CE4E5B9)
+    values = (values ^ (values >> np.uint64(27))) * np.uint64(0x94D049BB133111EB)
+    return values ^ (values >> np.uint64(31))
+
+
+def get_rank_indices(data_len: int, rank_id: int, rank_size: int,
+                     split_mode: str = "block") -> np.ndarray:
+    """Return deterministic local indices for a one-dimensional data set."""
+    if rank_size < 1:
+        raise ValueError("rank_size must be positive.")
+    if not (0 <= rank_id < rank_size):
+        raise ValueError("rank_id is outside [0, rank_size).")
+    if data_len < 0:
+        raise ValueError("data_len must be non-negative.")
+    mode = str(split_mode).strip().lower().replace('_', '-')
+    indices = np.arange(data_len, dtype=int)
+    if mode in ("block", "contiguous"):
+        return np.array_split(indices, rank_size)[rank_id]
+    if mode == "hash-cyclic":
+        permutation = np.argsort(_splitmix64(indices), kind="stable")
+        return indices[permutation][rank_id::rank_size]
+    raise ValueError(f"Unsupported q_split_mode={split_mode!r}.")
+
+
+def get_q_rank_indices(q_grid: np.ndarray, rank_id: int, rank_size: int,
+                       split_mode: str = "hash-cyclic",
+                       q_size: Union[np.ndarray, Sequence[int], None] = None) -> np.ndarray:
+    """Map q points to ranks, matching QTrans20260721 hash-cyclic semantics."""
+    q_grid = np.asarray(q_grid)
+    if q_grid.ndim != 2 or q_grid.shape[1] != 3:
+        raise ValueError("q_grid must have shape (nq, 3).")
+    mode = str(split_mode).strip().lower().replace('_', '-')
+    if mode in ("block", "contiguous"):
+        return get_rank_indices(len(q_grid), rank_id, rank_size, mode)
+    if mode != "hash-cyclic":
+        raise ValueError(f"Unsupported q_split_mode={split_mode!r}.")
+    if rank_size < 1:
+        raise ValueError("rank_size must be positive.")
+    if not (0 <= rank_id < rank_size):
+        raise ValueError("rank_id is outside [0, rank_size).")
+    if q_size is None:
+        hash_input = np.arange(len(q_grid), dtype=np.uint64)
+    else:
+        q_size = np.asarray(q_size, dtype=np.int64)
+        if q_size.shape != (3,) or np.any(q_size < 1):
+            raise ValueError("q_size must contain three positive integers.")
+        q_coords = np.rint(np.mod(q_grid, 1.0) * q_size[None, :]).astype(np.int64)
+        q_coords = np.mod(q_coords, q_size[None, :]).astype(np.uint64)
+        qs = q_size.astype(np.uint64)
+        hash_input = q_coords[:, 0] + qs[0] * (q_coords[:, 1] + qs[1] * q_coords[:, 2])
+    indices = np.arange(len(q_grid), dtype=int)
+    permutation = np.argsort(_splitmix64(hash_input), kind="stable")
+    return indices[permutation][rank_id::rank_size]
+
+
+def split_by_rank_indices(data: Sequence, axis: int, indices: np.ndarray) -> np.ndarray:
+    data = np.asarray(data)
+    indices = np.asarray(indices, dtype=int)
+    if indices.ndim != 1 or np.any(indices < 0) or np.any(indices >= data.shape[axis]):
+        raise ValueError("indices are outside the selected data axis.")
+    return np.take(data, indices, axis=axis)
+
 def gather_to_rank_root(data_local:Any, comm:Union[Intracomm, None], root:int=0) -> Union[List[Any], None]:
     data_type = type(data_local)
     if comm is None:
