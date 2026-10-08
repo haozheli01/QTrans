@@ -36,6 +36,10 @@ def eliashberg_spectrum_cal_EPC_helper_sparse(*args):
     return _call("eliashberg_spectrum_cal_EPC_helper_sparse", *args)
 
 
+def eliashberg_spectrum_cal_EPC_helper_sparse_batch(*args):
+    return _call("eliashberg_spectrum_cal_EPC_helper_sparse_batch", *args)
+
+
 def eliashberg_spectrum_cal_EPC_helper_sparse_soc(*args):
     return _call("eliashberg_spectrum_cal_EPC_helper_sparse_soc", *args)
 
@@ -67,3 +71,26 @@ def dynamics_setup_helper_sparse(*args):
 def electron_self_energy_cal_EPC_helper_sparse(*args):
     return _call("electron_self_energy_cal_EPC_helper_sparse", *args)
 
+
+def prepare_sparse_grad_cache(*args):
+    return _call("prepare_sparse_grad_cache", *args)
+
+
+def electron_self_energy_cal_EPC_helper_sparse_batch(*args):
+    return _call("electron_self_energy_cal_EPC_helper_sparse_batch", *args)
+
+
+def prepare_grad_mat(*args):
+    return _call("prepare_grad_mat", *args)
+
+
+def free_grad_mat_context(*args):
+    return _call("free_grad_mat_context", *args)
+
+
+def epc_profile_reset():
+    return _call("epc_profile_reset")
+
+
+def epc_profile_snapshot():
+    return _call("epc_profile_snapshot")

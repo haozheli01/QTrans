@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define INTP(a) ((int *)PyArray_DATA(a))
 #define DOUBLEP(a) ((double *)PyArray_DATA(a))
@@ -94,6 +95,382 @@ typedef struct {
     double complex phase_product; // conj(phase_kpq[icell]) * phase_k[jcell]
 } DictEntry;
 
+/* Process-local prepared CSR metadata.  The referenced NumPy arrays are kept
+ * alive so the raw pointers remain valid for the lifetime of the context. */
+typedef struct EPCGradMatContext {
+    PyObject *grad_mat_obj;
+    Py_ssize_t n_entries;
+    int released;
+    int *icell_arr, *jcell_arr, *iatom_arr, *idir_arr;
+    double **data_arr;
+    int **indices_arr, **indptr_arr;
+    PyObject **data_obj, **indices_obj, **indptr_obj;
+    struct EPCGradMatContext *next;
+} EPCGradMatContext;
+
+/* Batch self-energy uses a compact cache with the same ownership semantics as
+ * the historical QTrans20260721 SparseGradCache.  Keeping this separate from
+ * EPCGradMatContext preserves the scalar helper API while allowing the batch
+ * kernel to consume stable CSR pointers without touching Python dictionaries. */
+#define SPARSE_GRAD_CACHE_CAPSULE "QTrans.SparseGradCache"
+typedef struct SparseGradCache {
+    Py_ssize_t n_entries;
+    int norbs;
+    int *icell, *jcell, *iatom, *idir;
+    double **data;
+    int **indices, **indptr;
+    PyObject *owner;
+} SparseGradCache;
+
+static void sparse_grad_cache_release(SparseGradCache *cache)
+{
+    if (cache == NULL) return;
+    free(cache->icell); free(cache->jcell); free(cache->iatom);
+    free(cache->idir); free(cache->data); free(cache->indices);
+    free(cache->indptr); Py_XDECREF(cache->owner); free(cache);
+}
+
+static void sparse_grad_cache_capsule_destructor(PyObject *capsule)
+{
+    SparseGradCache *cache = (SparseGradCache *)PyCapsule_GetPointer(
+        capsule, SPARSE_GRAD_CACHE_CAPSULE);
+    if (cache == NULL) { PyErr_Clear(); return; }
+    sparse_grad_cache_release(cache);
+}
+
+static int sparse_cache_require_vector(PyObject *obj, int typenum,
+                                       const char *name,
+                                       PyArrayObject **array_out)
+{
+    if (!PyArray_Check(obj)) {
+        PyErr_Format(PyExc_TypeError, "%s must be a NumPy array", name);
+        return 0;
+    }
+    PyArrayObject *array = (PyArrayObject *)obj;
+    if (PyArray_TYPE(array) != typenum || PyArray_NDIM(array) != 1 ||
+        !PyArray_ISCARRAY_RO(array)) {
+        PyErr_Format(PyExc_ValueError,
+                     "%s must be a one-dimensional C-contiguous array with dtype %s",
+                     name, typenum == NPY_DOUBLE ? "float64" : "int32");
+        return 0;
+    }
+    *array_out = array;
+    return 1;
+}
+
+static int require_c_array(PyObject *obj, int typenum, int ndim, int writable,
+                           const char *name, PyArrayObject **array_out)
+{
+    if (!PyArray_Check(obj)) {
+        PyErr_Format(PyExc_TypeError, "%s must be a NumPy array", name);
+        return 0;
+    }
+    PyArrayObject *array = (PyArrayObject *)obj;
+    if (PyArray_TYPE(array) != typenum || PyArray_NDIM(array) != ndim ||
+        !PyArray_IS_C_CONTIGUOUS(array) || !PyArray_ISALIGNED(array) ||
+        (writable && !PyArray_ISWRITEABLE(array))) {
+        PyErr_Format(PyExc_ValueError,
+                     "%s has the wrong dtype, dimensions, contiguity, alignment, or writability",
+                     name);
+        return 0;
+    }
+    *array_out = array;
+    return 1;
+}
+
+static int checked_size_mul(size_t left, size_t right, size_t *result)
+{
+    if (left != 0 && right > SIZE_MAX / left) return 0;
+    *result = left * right;
+    return 1;
+}
+
+static int checked_size_add(size_t left, size_t right, size_t *result)
+{
+    if (right > SIZE_MAX - left) return 0;
+    *result = left + right;
+    return 1;
+}
+
+static EPCGradMatContext *epc_contexts = NULL;
+static int epc_profile_enabled = 0;
+static volatile unsigned long long epc_profile_calls = 0;
+static volatile unsigned long long epc_profile_parse_ns = 0;
+static volatile unsigned long long epc_profile_alloc_ns = 0;
+static volatile unsigned long long epc_profile_phase_ns = 0;
+static volatile unsigned long long epc_profile_kernel_ns = 0;
+static volatile unsigned long long epc_profile_free_ns = 0;
+
+static unsigned long long epc_clock_ns(void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC_RAW, &ts) != 0) return 0;
+    return (unsigned long long)ts.tv_sec * 1000000000ULL +
+           (unsigned long long)ts.tv_nsec;
+}
+
+static void epc_profile_add(volatile unsigned long long *counter,
+                            unsigned long long value)
+{
+    if (epc_profile_enabled) {
+#pragma omp critical(qtrans_epc_profile)
+        *counter += value;
+    }
+}
+
+static void epc_profile_call(void)
+{
+    if (epc_profile_enabled) {
+#pragma omp critical(qtrans_epc_profile)
+        epc_profile_calls += 1;
+    }
+}
+
+PyObject *epc_profile_reset(PyObject *self, PyObject *args)
+{
+    (void)self; (void)args;
+    epc_profile_calls = 0;
+    epc_profile_parse_ns = 0;
+    epc_profile_alloc_ns = 0;
+    epc_profile_phase_ns = 0;
+    epc_profile_kernel_ns = 0;
+    epc_profile_free_ns = 0;
+    epc_profile_enabled = 1;
+    Py_RETURN_NONE;
+}
+
+PyObject *epc_profile_snapshot(PyObject *self, PyObject *args)
+{
+    (void)self; (void)args;
+    return Py_BuildValue("{s:K,s:K,s:K,s:K,s:K,s:K}",
+        "calls", epc_profile_calls,
+        "parse_ns", epc_profile_parse_ns,
+        "alloc_ns", epc_profile_alloc_ns,
+        "phase_ns", epc_profile_phase_ns,
+        "kernel_ns", epc_profile_kernel_ns,
+        "free_ns", epc_profile_free_ns);
+}
+
+static EPCGradMatContext *epc_context_find(PyObject *grad_mat_obj)
+{
+    EPCGradMatContext *ctx = epc_contexts;
+    while (ctx != NULL) {
+        if (ctx->grad_mat_obj == grad_mat_obj) return ctx;
+        ctx = ctx->next;
+    }
+    return NULL;
+}
+
+static void epc_context_release_arrays(EPCGradMatContext *ctx)
+{
+    if (ctx == NULL || ctx->released) return;
+    for (Py_ssize_t i = 0; i < ctx->n_entries; ++i) {
+        Py_XDECREF(ctx->data_obj[i]);
+        Py_XDECREF(ctx->indices_obj[i]);
+        Py_XDECREF(ctx->indptr_obj[i]);
+    }
+    Py_XDECREF(ctx->grad_mat_obj);
+    ctx->grad_mat_obj = NULL;
+    free(ctx->icell_arr); free(ctx->jcell_arr); free(ctx->iatom_arr);
+    free(ctx->idir_arr); free(ctx->data_arr); free(ctx->indices_arr);
+    free(ctx->indptr_arr); free(ctx->data_obj); free(ctx->indices_obj);
+    free(ctx->indptr_obj);
+    ctx->released = 1;
+}
+
+static void epc_context_release(EPCGradMatContext *ctx)
+{
+    if (ctx == NULL) return;
+    epc_context_release_arrays(ctx);
+    free(ctx);
+}
+
+static void epc_capsule_destructor(PyObject *capsule)
+{
+    EPCGradMatContext *ctx = (EPCGradMatContext *)PyCapsule_GetPointer(
+        capsule, "qtrans.epc_grad_mat");
+    if (ctx == NULL) return;
+    EPCGradMatContext **link = &epc_contexts;
+    while (*link != NULL && *link != ctx) link = &(*link)->next;
+    if (*link == ctx) *link = ctx->next;
+    epc_context_release(ctx);
+}
+
+PyObject *prepare_sparse_grad_cache(PyObject *self, PyObject *args)
+{
+    import_array();
+    (void)self;
+    PyObject *grad_mat_obj;
+    if (!PyArg_ParseTuple(args, "O:prepare_sparse_grad_cache", &grad_mat_obj))
+        return NULL;
+    if (!PyDict_Check(grad_mat_obj)) {
+        PyErr_SetString(PyExc_TypeError, "grad_mat must be a dict");
+        return NULL;
+    }
+    Py_ssize_t n_entries = PyDict_Size(grad_mat_obj);
+    SparseGradCache *cache = (SparseGradCache *)calloc(1, sizeof(*cache));
+    if (cache == NULL) return PyErr_NoMemory();
+    cache->n_entries = n_entries;
+    if (n_entries > 0) {
+        cache->icell = (int *)malloc((size_t)n_entries * sizeof(int));
+        cache->jcell = (int *)malloc((size_t)n_entries * sizeof(int));
+        cache->iatom = (int *)malloc((size_t)n_entries * sizeof(int));
+        cache->idir = (int *)malloc((size_t)n_entries * sizeof(int));
+        cache->data = (double **)malloc((size_t)n_entries * sizeof(double *));
+        cache->indices = (int **)malloc((size_t)n_entries * sizeof(int *));
+        cache->indptr = (int **)malloc((size_t)n_entries * sizeof(int *));
+        if (cache->icell == NULL || cache->jcell == NULL ||
+            cache->iatom == NULL || cache->idir == NULL || cache->data == NULL ||
+            cache->indices == NULL || cache->indptr == NULL) {
+            sparse_grad_cache_release(cache); return PyErr_NoMemory();
+        }
+    }
+    PyObject *key_obj, *value_obj;
+    Py_ssize_t pos = 0, entry = 0;
+    while (PyDict_Next(grad_mat_obj, &pos, &key_obj, &value_obj)) {
+        if (!PyTuple_Check(key_obj) || PyTuple_GET_SIZE(key_obj) != 4 ||
+            !PyTuple_Check(value_obj) || PyTuple_GET_SIZE(value_obj) != 3) {
+            PyErr_SetString(PyExc_ValueError,
+                            "grad_mat entries must be key=(icell,jcell,iatom,idir), value=(data,indices,indptr)");
+            sparse_grad_cache_release(cache); return NULL;
+        }
+        long values[4];
+        for (int i = 0; i < 4; ++i) {
+            values[i] = PyLong_AsLong(PyTuple_GET_ITEM(key_obj, i));
+            if (PyErr_Occurred() || values[i] < 0 || values[i] > INT_MAX) {
+                if (!PyErr_Occurred())
+                    PyErr_SetString(PyExc_ValueError, "grad_mat key values must be non-negative C integers");
+                sparse_grad_cache_release(cache); return NULL;
+            }
+        }
+        if (values[3] > 2) {
+            PyErr_SetString(PyExc_ValueError, "grad_mat idir must be 0, 1, or 2");
+            sparse_grad_cache_release(cache); return NULL;
+        }
+        PyArrayObject *data_obj, *indices_obj, *indptr_obj;
+        if (!sparse_cache_require_vector(PyTuple_GET_ITEM(value_obj, 0), NPY_DOUBLE,
+                                         "grad_mat data", &data_obj) ||
+            !sparse_cache_require_vector(PyTuple_GET_ITEM(value_obj, 1), NPY_INT32,
+                                         "grad_mat indices", &indices_obj) ||
+            !sparse_cache_require_vector(PyTuple_GET_ITEM(value_obj, 2), NPY_INT32,
+                                         "grad_mat indptr", &indptr_obj)) {
+            sparse_grad_cache_release(cache); return NULL;
+        }
+        npy_intp nnz = PyArray_SIZE(data_obj);
+        npy_intp nrows = PyArray_SIZE(indptr_obj) - 1;
+        if (nnz != PyArray_SIZE(indices_obj) || nnz > INT_MAX ||
+            nrows <= 0 || nrows > INT_MAX) {
+            PyErr_SetString(PyExc_ValueError, "invalid CSR sizes in grad_mat entry");
+            sparse_grad_cache_release(cache); return NULL;
+        }
+        int *indices = INTP(indices_obj), *indptr = INTP(indptr_obj);
+        if (cache->norbs == 0) cache->norbs = (int)nrows;
+        if (cache->norbs != (int)nrows || indptr[0] != 0 ||
+            indptr[nrows] != (int)nnz) {
+            PyErr_SetString(PyExc_ValueError, "inconsistent CSR dimensions in grad_mat entry");
+            sparse_grad_cache_release(cache); return NULL;
+        }
+        for (npy_intp i = 0; i < nrows; ++i) {
+            if (indptr[i] < 0 || indptr[i] > indptr[i + 1] ||
+                indptr[i + 1] > (int)nnz) {
+                PyErr_SetString(PyExc_ValueError, "grad_mat CSR indptr must be monotonic");
+                sparse_grad_cache_release(cache); return NULL;
+            }
+        }
+        for (npy_intp i = 0; i < nnz; ++i) {
+            if (indices[i] < 0 || indices[i] >= (int)nrows) {
+                PyErr_SetString(PyExc_ValueError, "grad_mat CSR index out of range");
+                sparse_grad_cache_release(cache); return NULL;
+            }
+        }
+        cache->icell[entry] = (int)values[0]; cache->jcell[entry] = (int)values[1];
+        cache->iatom[entry] = (int)values[2]; cache->idir[entry] = (int)values[3];
+        cache->data[entry] = DOUBLEP(data_obj); cache->indices[entry] = indices;
+        cache->indptr[entry] = indptr; ++entry;
+    }
+    Py_INCREF(grad_mat_obj); cache->owner = grad_mat_obj;
+    PyObject *capsule = PyCapsule_New(cache, SPARSE_GRAD_CACHE_CAPSULE,
+                                      sparse_grad_cache_capsule_destructor);
+    if (capsule == NULL) { sparse_grad_cache_release(cache); return NULL; }
+    return capsule;
+}
+
+PyObject *prepare_grad_mat(PyObject *self, PyObject *args)
+{
+    import_array();
+    (void)self;
+    PyObject *grad_mat_obj;
+    if (!PyArg_ParseTuple(args, "O:prepare_grad_mat", &grad_mat_obj)) return NULL;
+    if (!PyDict_Check(grad_mat_obj)) {
+        PyErr_SetString(PyExc_TypeError, "grad_mat must be a dictionary");
+        return NULL;
+    }
+    unsigned long long t_alloc = epc_clock_ns();
+    EPCGradMatContext *ctx = (EPCGradMatContext *)calloc(1, sizeof(*ctx));
+    if (ctx == NULL) { PyErr_NoMemory(); return NULL; }
+    ctx->grad_mat_obj = grad_mat_obj; Py_INCREF(grad_mat_obj);
+    ctx->n_entries = PyDict_Size(grad_mat_obj);
+    Py_ssize_t n = ctx->n_entries;
+    ctx->icell_arr = (int *)malloc(n * sizeof(int));
+    ctx->jcell_arr = (int *)malloc(n * sizeof(int));
+    ctx->iatom_arr = (int *)malloc(n * sizeof(int));
+    ctx->idir_arr = (int *)malloc(n * sizeof(int));
+    ctx->data_arr = (double **)malloc(n * sizeof(double *));
+    ctx->indices_arr = (int **)malloc(n * sizeof(int *));
+    ctx->indptr_arr = (int **)malloc(n * sizeof(int *));
+    ctx->data_obj = (PyObject **)calloc(n, sizeof(PyObject *));
+    ctx->indices_obj = (PyObject **)calloc(n, sizeof(PyObject *));
+    ctx->indptr_obj = (PyObject **)calloc(n, sizeof(PyObject *));
+    if (n > 0 && (ctx->icell_arr == NULL || ctx->jcell_arr == NULL ||
+        ctx->iatom_arr == NULL || ctx->idir_arr == NULL || ctx->data_arr == NULL ||
+        ctx->indices_arr == NULL || ctx->indptr_arr == NULL || ctx->data_obj == NULL ||
+        ctx->indices_obj == NULL || ctx->indptr_obj == NULL)) {
+        epc_context_release(ctx); PyErr_NoMemory(); return NULL;
+    }
+    epc_profile_add(&epc_profile_alloc_ns, epc_clock_ns() - t_alloc);
+    PyObject *key, *value; Py_ssize_t pos = 0; int entry = 0;
+    unsigned long long t_parse = epc_clock_ns();
+    while (PyDict_Next(grad_mat_obj, &pos, &key, &value)) {
+        PyObject *d = PyTuple_GetItem(value, 0);
+        PyObject *ix = PyTuple_GetItem(value, 1);
+        PyObject *ip = PyTuple_GetItem(value, 2);
+        if (!PyTuple_Check(key) || PyTuple_Size(key) < 4 || d == NULL || ix == NULL ||
+            ip == NULL || !PyArray_Check(d) || !PyArray_Check(ix) || !PyArray_Check(ip)) {
+            epc_context_release(ctx);
+            PyErr_SetString(PyExc_TypeError, "invalid grad_mat sparse entry");
+            return NULL;
+        }
+        ctx->icell_arr[entry] = (int)PyLong_AsLong(PyTuple_GetItem(key, 0));
+        ctx->jcell_arr[entry] = (int)PyLong_AsLong(PyTuple_GetItem(key, 1));
+        ctx->iatom_arr[entry] = (int)PyLong_AsLong(PyTuple_GetItem(key, 2));
+        ctx->idir_arr[entry] = (int)PyLong_AsLong(PyTuple_GetItem(key, 3));
+        ctx->data_obj[entry] = d; Py_INCREF(d);
+        ctx->indices_obj[entry] = ix; Py_INCREF(ix);
+        ctx->indptr_obj[entry] = ip; Py_INCREF(ip);
+        ctx->data_arr[entry] = DOUBLEP((PyArrayObject *)d);
+        ctx->indices_arr[entry] = INTP((PyArrayObject *)ix);
+        ctx->indptr_arr[entry] = INTP((PyArrayObject *)ip);
+        ++entry;
+    }
+    epc_profile_add(&epc_profile_parse_ns, epc_clock_ns() - t_parse);
+    ctx->next = epc_contexts; epc_contexts = ctx;
+    return PyCapsule_New(ctx, "qtrans.epc_grad_mat", epc_capsule_destructor);
+}
+
+PyObject *free_grad_mat_context(PyObject *self, PyObject *args)
+{
+    (void)self;
+    PyObject *capsule;
+    if (!PyArg_ParseTuple(args, "O:free_grad_mat_context", &capsule)) return NULL;
+    if (!PyCapsule_IsValid(capsule, "qtrans.epc_grad_mat")) return NULL;
+    EPCGradMatContext *ctx = (EPCGradMatContext *)PyCapsule_GetPointer(
+        capsule, "qtrans.epc_grad_mat");
+    EPCGradMatContext **link = &epc_contexts;
+    while (*link != NULL && *link != ctx) link = &(*link)->next;
+    if (*link == ctx) *link = ctx->next;
+    epc_context_release_arrays(ctx);
+    Py_RETURN_NONE;
+}
 
 PyObject *epc_elements_cal_helper_sparse(PyObject *self, PyObject *args)
 {
@@ -139,13 +516,8 @@ PyObject *epc_elements_cal_helper_sparse(PyObject *self, PyObject *args)
     if (icell_arr == NULL || jcell_arr == NULL || iatom_arr == NULL || idir_arr == NULL ||
         data_arr == NULL || indices_arr == NULL || indptr_arr == NULL || phase_product == NULL)
     {
-        free(icell_arr);
-        free(jcell_arr);
-        free(iatom_arr);
-        free(idir_arr);
-        free(data_arr);
-        free(indices_arr);
-        free(indptr_arr);
+        free(icell_arr); free(jcell_arr); free(iatom_arr); free(idir_arr);
+        free(data_arr); free(indices_arr); free(indptr_arr);
         free(phase_product);
         PyErr_NoMemory();
         return NULL;
@@ -382,6 +754,329 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *ar
     free(wfn_prod);
 
     Py_RETURN_NONE;
+}
+
+/*
+ * Batch Eliashberg helper for the non-spin-polarized sparse path.
+ *
+ * The scalar helper above predates SparseGradCache and receives the Python
+ * gradient dictionary on every call.  This entry point has the same
+ * integrand, but consumes a prepared SparseGradCache capsule and evaluates a
+ * bounded batch of k points in one Python/C transition.  The array layout is
+ * deliberately explicit:
+ *
+ *   phase_k, phase_kpq : (B, ncell) complex128
+ *   wave_k             : (B, NB, norbs) complex128
+ *   wave_kpq           : (B, MB, norbs) complex128
+ *   enk_match          : (B, NB) bool
+ *   emkpq_match        : (B, MB) bool
+ *   eig_k, eig_kpq     : (B, NB/MB) float64
+ *   weight_k           : (B,) float64
+ *   epc_strengths_out  : (B, nbranches) float64 (in/out)
+ *
+ * For every k, band pair, and phonon branch this is algebraically identical
+ * to eliashberg_spectrum_cal_EPC_helper_sparse: the electronic matrix element
+ * is contracted over the cached CSR gradient entries, multiplied by the
+ * phase and phonon/mass/frequency factors, squared, and weighted by the two
+ * Gaussian Fermi-surface factors and weight_k.  A batch is capped at 1024 k
+ * points to make the intended memory bound part of the native contract.
+ */
+#define ELIASHBERG_BATCH_MAX_K 1024
+#define ELIASHBERG_BATCH_SCRATCH_LIMIT ((size_t)64 * 1024 * 1024)
+
+PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_batch(PyObject *self, PyObject *args)
+{
+    import_array();
+    (void)self;
+
+    PyObject *freq_arg, *mass_arg, *phon_arg, *phase_k_arg, *phase_kpq_arg;
+    PyObject *cache_arg, *wave_k_arg, *wave_kpq_arg, *enk_arg, *emkpq_arg;
+    PyObject *eig_k_arg, *eig_kpq_arg, *weight_arg, *out_arg;
+    PyObject *cutoff_arg, *inv_arg, *efermi_arg;
+    if (!PyArg_UnpackTuple(args,
+                           "eliashberg_spectrum_cal_EPC_helper_sparse_batch",
+                           17, 17,
+                           &freq_arg, &mass_arg, &phon_arg,
+                           &phase_k_arg, &phase_kpq_arg, &cache_arg,
+                           &wave_k_arg, &wave_kpq_arg, &enk_arg, &emkpq_arg,
+                           &eig_k_arg, &eig_kpq_arg, &weight_arg, &out_arg,
+                           &cutoff_arg, &inv_arg, &efermi_arg)) {
+        return NULL;
+    }
+
+    double cutoff = PyFloat_AsDouble(cutoff_arg);
+    double inv_degaussw = PyFloat_AsDouble(inv_arg);
+    double efermi = PyFloat_AsDouble(efermi_arg);
+    if (PyErr_Occurred()) return NULL;
+
+    if (!PyCapsule_IsValid(cache_arg, SPARSE_GRAD_CACHE_CAPSULE)) {
+        PyErr_SetString(PyExc_TypeError,
+                        "cache must be a valid qtrans SparseGradCache capsule");
+        return NULL;
+    }
+    SparseGradCache *cache = (SparseGradCache *)PyCapsule_GetPointer(
+        cache_arg, SPARSE_GRAD_CACHE_CAPSULE);
+    if (cache == NULL) return NULL;
+
+    PyArrayObject *freq_obj, *mass_obj, *phon_obj, *phase_k_obj,
+        *phase_kpq_obj, *wave_k_obj, *wave_kpq_obj, *enk_obj, *emkpq_obj,
+        *eig_k_obj, *eig_kpq_obj, *weight_obj, *out_obj;
+    if (!require_c_array(freq_arg, NPY_DOUBLE, 1, 0, "freq", &freq_obj) ||
+        !require_c_array(mass_arg, NPY_DOUBLE, 1, 0, "atomic_mass", &mass_obj) ||
+        !require_c_array(phon_arg, NPY_CDOUBLE, 3, 0, "eigen_vec_phon", &phon_obj) ||
+        !require_c_array(phase_k_arg, NPY_CDOUBLE, 2, 0, "phase_k", &phase_k_obj) ||
+        !require_c_array(phase_kpq_arg, NPY_CDOUBLE, 2, 0, "phase_kpq", &phase_kpq_obj) ||
+        !require_c_array(wave_k_arg, NPY_CDOUBLE, 3, 0, "wave_k", &wave_k_obj) ||
+        !require_c_array(wave_kpq_arg, NPY_CDOUBLE, 3, 0, "wave_kpq", &wave_kpq_obj) ||
+        !require_c_array(enk_arg, NPY_BOOL, 2, 0, "enk_match", &enk_obj) ||
+        !require_c_array(emkpq_arg, NPY_BOOL, 2, 0, "emkpq_match", &emkpq_obj) ||
+        !require_c_array(eig_k_arg, NPY_DOUBLE, 2, 0, "eig_k", &eig_k_obj) ||
+        !require_c_array(eig_kpq_arg, NPY_DOUBLE, 2, 0, "eig_kpq", &eig_kpq_obj) ||
+        !require_c_array(weight_arg, NPY_DOUBLE, 1, 0, "weight_k", &weight_obj) ||
+        !require_c_array(out_arg, NPY_DOUBLE, 2, 1, "epc_strengths_out", &out_obj)) {
+        return NULL;
+    }
+
+    npy_intp nk_dim = PyArray_DIMS(wave_k_obj)[0];
+    npy_intp nb_dim = PyArray_DIMS(wave_k_obj)[1];
+    npy_intp norbs_dim = PyArray_DIMS(wave_k_obj)[2];
+    npy_intp mb_dim = PyArray_DIMS(wave_kpq_obj)[1];
+    npy_intp nbranches_dim = PyArray_DIMS(freq_obj)[0];
+    npy_intp natoms_dim = PyArray_DIMS(mass_obj)[0];
+    npy_intp ncell_dim = PyArray_DIMS(phase_k_obj)[1];
+    if (nk_dim < 0 || nk_dim > ELIASHBERG_BATCH_MAX_K ||
+        nb_dim <= 0 || nb_dim > INT_MAX || mb_dim <= 0 || mb_dim > INT_MAX ||
+        norbs_dim <= 0 || norbs_dim > INT_MAX || nbranches_dim <= 0 ||
+        nbranches_dim > INT_MAX || natoms_dim <= 0 || natoms_dim > INT_MAX ||
+        ncell_dim <= 0 || ncell_dim > INT_MAX) {
+        PyErr_SetString(PyExc_ValueError,
+                        "batch dimensions are empty, too large, or exceed B=1024");
+        return NULL;
+    }
+    int nk = (int)nk_dim;
+    int nb = (int)nb_dim;
+    int mb = (int)mb_dim;
+    int norbs = (int)norbs_dim;
+    int nbranches = (int)nbranches_dim;
+    int natoms = (int)natoms_dim;
+    int ncell = (int)ncell_dim;
+
+#define ELI_CHECK1(a, d0, name) \
+    if (PyArray_DIMS(a)[0] != (d0)) { \
+        PyErr_Format(PyExc_ValueError, "%s has an incompatible shape", name); \
+        return NULL; \
+    }
+#define ELI_CHECK2(a, d0, d1, name) \
+    if (PyArray_DIMS(a)[0] != (d0) || PyArray_DIMS(a)[1] != (d1)) { \
+        PyErr_Format(PyExc_ValueError, "%s has an incompatible shape", name); \
+        return NULL; \
+    }
+#define ELI_CHECK3(a, d0, d1, d2, name) \
+    if (PyArray_DIMS(a)[0] != (d0) || PyArray_DIMS(a)[1] != (d1) || \
+        PyArray_DIMS(a)[2] != (d2)) { \
+        PyErr_Format(PyExc_ValueError, "%s has an incompatible shape", name); \
+        return NULL; \
+    }
+    ELI_CHECK1(mass_obj, natoms, "atomic_mass");
+    ELI_CHECK1(freq_obj, nbranches, "freq");
+    ELI_CHECK3(phon_obj, nbranches, natoms, 3, "eigen_vec_phon");
+    ELI_CHECK2(phase_k_obj, nk, ncell, "phase_k");
+    ELI_CHECK2(phase_kpq_obj, nk, ncell, "phase_kpq");
+    ELI_CHECK3(wave_kpq_obj, nk, mb, norbs, "wave_kpq");
+    ELI_CHECK2(enk_obj, nk, nb, "enk_match");
+    ELI_CHECK2(emkpq_obj, nk, mb, "emkpq_match");
+    ELI_CHECK2(eig_k_obj, nk, nb, "eig_k");
+    ELI_CHECK2(eig_kpq_obj, nk, mb, "eig_kpq");
+    ELI_CHECK1(weight_obj, nk, "weight_k");
+    ELI_CHECK2(out_obj, nk, nbranches, "epc_strengths_out");
+#undef ELI_CHECK1
+#undef ELI_CHECK2
+#undef ELI_CHECK3
+
+    if (cache->norbs != 0 && cache->norbs != norbs) {
+        PyErr_SetString(PyExc_ValueError,
+                        "cache CSR row count does not match wave-function orbital count");
+        return NULL;
+    }
+    for (Py_ssize_t entry = 0; entry < cache->n_entries; ++entry) {
+        if (cache->icell[entry] < 0 || cache->icell[entry] >= ncell ||
+            cache->jcell[entry] < 0 || cache->jcell[entry] >= ncell ||
+            cache->iatom[entry] < 0 || cache->iatom[entry] >= natoms ||
+            cache->idir[entry] < 0 || cache->idir[entry] >= 3) {
+            PyErr_SetString(PyExc_ValueError,
+                            "cache metadata is outside supplied cell/atom bounds");
+            return NULL;
+        }
+    }
+    if (nk == 0) {
+        return Py_BuildValue("{s:i,s:d,s:i}",
+                             "threads", 0, "kernel_seconds", 0.0,
+                             "batch_size", 0);
+    }
+
+    size_t phon_count, phon_bytes;
+    if (!checked_size_mul((size_t)nbranches, (size_t)natoms * 3, &phon_count) ||
+        !checked_size_mul(phon_count, sizeof(double complex), &phon_bytes) ||
+        phon_bytes > ELIASHBERG_BATCH_SCRATCH_LIMIT) {
+        PyErr_SetString(PyExc_MemoryError,
+                        "phonon factors exceed the sparse EPC scratch limit");
+        return NULL;
+    }
+    int requested_threads = omp_get_max_threads();
+    if (requested_threads > nk) requested_threads = nk;
+    if (requested_threads < 1) requested_threads = 1;
+
+    /* Cache phase products once per worker/k when that metadata fits the
+     * bounded native scratch budget.  If the gradient dictionary is unusually
+     * large, compute the phase product inline instead of turning the cache
+     * into an unbounded allocation. */
+    int phase_cached = 1;
+    size_t phase_count = 0, phase_bytes = 0;
+    if (!checked_size_mul((size_t)requested_threads,
+                          (size_t)cache->n_entries, &phase_count) ||
+        !checked_size_mul(phase_count, sizeof(double complex), &phase_bytes) ||
+        phase_bytes > ELIASHBERG_BATCH_SCRATCH_LIMIT - phon_bytes) {
+        phase_cached = 0;
+        phase_count = 0;
+        phase_bytes = 0;
+    }
+
+    size_t epc_count, epc_bytes;
+    if (!checked_size_mul((size_t)requested_threads, (size_t)nbranches, &epc_count) ||
+        !checked_size_mul(epc_count, sizeof(double complex), &epc_bytes) ||
+        epc_bytes > ELIASHBERG_BATCH_SCRATCH_LIMIT - phon_bytes) {
+        requested_threads = 1;
+        if (!checked_size_mul((size_t)nbranches, sizeof(double complex), &epc_bytes) ||
+            epc_bytes > ELIASHBERG_BATCH_SCRATCH_LIMIT - phon_bytes) {
+            PyErr_SetString(PyExc_MemoryError,
+                            "per-thread Eliashberg scratch exceeds the 64 MiB limit");
+            return NULL;
+        }
+        epc_count = (size_t)nbranches;
+    }
+
+    double complex *phon_factor = (double complex *)malloc(phon_bytes);
+    double complex *epc_thread = (double complex *)malloc(epc_count * sizeof(double complex));
+    double complex *phase_thread = phase_count > 0 ?
+        (double complex *)malloc(phase_bytes) : NULL;
+    if ((phon_bytes > 0 && phon_factor == NULL) ||
+        (epc_count > 0 && epc_thread == NULL) ||
+        (phase_count > 0 && phase_thread == NULL)) {
+        free(phon_factor); free(epc_thread); free(phase_thread);
+        return PyErr_NoMemory();
+    }
+    double *freq = DOUBLEP(freq_obj);
+    double *mass = DOUBLEP(mass_obj);
+    double complex *phon = DCOMPLEXP(phon_obj);
+    for (int ibranch = 0; ibranch < nbranches; ++ibranch) {
+        for (int iatom = 0; iatom < natoms; ++iatom) {
+            double factor = 0.0;
+            if (freq[ibranch] >= cutoff && mass[iatom] > 0.0 &&
+                fabs(freq[ibranch]) > 0.0) {
+                factor = 1.0 / sqrt(2.0 * mass[iatom] * fabs(freq[ibranch]));
+            }
+            for (int idir = 0; idir < 3; ++idir) {
+                size_t idx = ((size_t)ibranch * (size_t)natoms + (size_t)iatom) * 3u +
+                             (size_t)idir;
+                phon_factor[idx] = factor * phon[idx];
+            }
+        }
+    }
+
+    double complex *phase_k = DCOMPLEXP(phase_k_obj);
+    double complex *phase_kpq = DCOMPLEXP(phase_kpq_obj);
+    double complex *wave_k = DCOMPLEXP(wave_k_obj);
+    double complex *wave_kpq = DCOMPLEXP(wave_kpq_obj);
+    bool *enk = BOOLP(enk_obj);
+    bool *emkpq = BOOLP(emkpq_obj);
+    double *eig_k = DOUBLEP(eig_k_obj);
+    double *eig_kpq = DOUBLEP(eig_kpq_obj);
+    double *weight_k = DOUBLEP(weight_obj);
+    double *out = DOUBLEP(out_obj);
+
+    int actual_threads = 0;
+    double kernel_start = omp_get_wtime();
+    Py_BEGIN_ALLOW_THREADS;
+#pragma omp parallel num_threads(requested_threads)
+    {
+        int tid = omp_get_thread_num();
+        double complex *epc = epc_thread + (size_t)tid * (size_t)nbranches;
+        double complex *phase = phase_cached ?
+            phase_thread + (size_t)tid * (size_t)cache->n_entries : NULL;
+#pragma omp single
+        actual_threads = omp_get_num_threads();
+#pragma omp for schedule(dynamic, 1)
+        for (int ik = 0; ik < nk; ++ik) {
+            size_t phase_base = (size_t)ik * (size_t)ncell;
+            size_t eig_k_base = (size_t)ik * (size_t)nb;
+            size_t eig_kpq_base = (size_t)ik * (size_t)mb;
+            size_t wave_k_base = (size_t)ik * (size_t)nb * (size_t)norbs;
+            size_t wave_kpq_base = (size_t)ik * (size_t)mb * (size_t)norbs;
+            size_t out_base = (size_t)ik * (size_t)nbranches;
+            if (phase_cached) {
+                for (Py_ssize_t entry = 0; entry < cache->n_entries; ++entry) {
+                    phase[entry] =
+                        conj(phase_kpq[phase_base + (size_t)cache->icell[entry]]) *
+                        phase_k[phase_base + (size_t)cache->jcell[entry]];
+                }
+            }
+            for (int jband = 0; jband < nb; ++jband) {
+                if (!enk[eig_k_base + (size_t)jband]) continue;
+                double x_n = (eig_k[eig_k_base + (size_t)jband] - efermi) * inv_degaussw;
+                double delta_n = exp(-fmin(200.0, x_n * x_n)) *
+                                 UTILS_SQRT_INVPI * inv_degaussw;
+                for (int iband = 0; iband < mb; ++iband) {
+                    if (!emkpq[eig_kpq_base + (size_t)iband]) continue;
+                    double x_m = (eig_kpq[eig_kpq_base + (size_t)iband] - efermi) * inv_degaussw;
+                    double delta_m = exp(-fmin(200.0, x_m * x_m)) *
+                                     UTILS_SQRT_INVPI * inv_degaussw;
+                    double weight_factor = delta_n * delta_m * weight_k[ik];
+                    for (int ibranch = 0; ibranch < nbranches; ++ibranch)
+                        epc[ibranch] = 0.0 + 0.0 * I;
+                    for (Py_ssize_t entry = 0; entry < cache->n_entries; ++entry) {
+                        double complex electronic_element = 0.0 + 0.0 * I;
+                        int *indptr = cache->indptr[entry];
+                        int *indices = cache->indices[entry];
+                        double *data = cache->data[entry];
+                        size_t wave_m_base = wave_kpq_base + (size_t)iband * (size_t)norbs;
+                        size_t wave_n_base = wave_k_base + (size_t)jband * (size_t)norbs;
+                        for (int iorb = 0; iorb < norbs; ++iorb) {
+                            for (int idx_val = indptr[iorb]; idx_val < indptr[iorb + 1]; ++idx_val) {
+                                int jorb = indices[idx_val];
+                                electronic_element +=
+                                    conj(wave_kpq[wave_m_base + (size_t)iorb]) *
+                                    wave_k[wave_n_base + (size_t)jorb] * data[idx_val];
+                            }
+                        }
+                        double complex phase_product = phase_cached ? phase[entry] :
+                            conj(phase_kpq[phase_base + (size_t)cache->icell[entry]]) *
+                            phase_k[phase_base + (size_t)cache->jcell[entry]];
+                        double complex base = phase_product * electronic_element;
+                        for (int ibranch = 0; ibranch < nbranches; ++ibranch) {
+                            size_t phon_base = ((size_t)cache->iatom[entry] * 3u) +
+                                               (size_t)cache->idir[entry];
+                            epc[ibranch] += base *
+                                phon_factor[(size_t)ibranch * (size_t)natoms * 3u + phon_base];
+                        }
+                    }
+                    for (int ibranch = 0; ibranch < nbranches; ++ibranch) {
+                        double real_part = creal(epc[ibranch]);
+                        double imag_part = cimag(epc[ibranch]);
+                        out[out_base + (size_t)ibranch] +=
+                            (real_part * real_part + imag_part * imag_part) * weight_factor;
+                    }
+                }
+            }
+        }
+    }
+    Py_END_ALLOW_THREADS;
+    double kernel_seconds = omp_get_wtime() - kernel_start;
+    free(phon_factor); free(epc_thread); free(phase_thread);
+    return Py_BuildValue("{s:i,s:d,s:i,s:O}",
+                         "threads", actual_threads,
+                         "kernel_seconds", kernel_seconds,
+                         "batch_size", nk,
+                         "phase_cached", phase_cached ? Py_True : Py_False);
 }
 
 PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject *args)
@@ -1672,6 +2367,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
     double complex *self_energy = DCOMPLEXP(self_energy_obj);
     double *omega_list = DOUBLEP(omega_list_obj);
     double complex ieta = 0.0 + eta * I;
+    epc_profile_call();
 
     int natoms = PyArray_DIMS(atomic_mass_obj)[0];
     int nbranches = PyArray_DIMS(freq_obj)[0];
@@ -1686,49 +2382,61 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
     double complex epc, tmp1, tmp2;
     double complex e_pole1, e_pole2, se_factor;
 
-    int n_entries = (int)PyDict_Size(grad_mat_obj);
-    int *icell_arr = (int *)malloc(n_entries * sizeof(int));
-    int *jcell_arr = (int *)malloc(n_entries * sizeof(int));
-    int *iatom_arr = (int *)malloc(n_entries * sizeof(int));
-    int *idir_arr = (int *)malloc(n_entries * sizeof(int));
-    double **data_arr = (double **)malloc(n_entries * sizeof(double *));
-    int **indices_arr = (int **)malloc(n_entries * sizeof(int *));
-    int **indptr_arr = (int **)malloc(n_entries * sizeof(int *));
+    unsigned long long t_alloc = epc_clock_ns();
+    EPCGradMatContext *prepared_ctx = epc_context_find(grad_mat_obj);
+    int n_entries = prepared_ctx ? (int)prepared_ctx->n_entries : (int)PyDict_Size(grad_mat_obj);
+    int *icell_arr = prepared_ctx ? prepared_ctx->icell_arr : (int *)malloc(n_entries * sizeof(int));
+    int *jcell_arr = prepared_ctx ? prepared_ctx->jcell_arr : (int *)malloc(n_entries * sizeof(int));
+    int *iatom_arr = prepared_ctx ? prepared_ctx->iatom_arr : (int *)malloc(n_entries * sizeof(int));
+    int *idir_arr = prepared_ctx ? prepared_ctx->idir_arr : (int *)malloc(n_entries * sizeof(int));
+    double **data_arr = prepared_ctx ? prepared_ctx->data_arr : (double **)malloc(n_entries * sizeof(double *));
+    int **indices_arr = prepared_ctx ? prepared_ctx->indices_arr : (int **)malloc(n_entries * sizeof(int *));
+    int **indptr_arr = prepared_ctx ? prepared_ctx->indptr_arr : (int **)malloc(n_entries * sizeof(int *));
     double complex *phase_product = (double complex *)malloc(n_entries * sizeof(double complex));
 
     if (icell_arr == NULL || jcell_arr == NULL || iatom_arr == NULL || idir_arr == NULL ||
         data_arr == NULL || indices_arr == NULL || indptr_arr == NULL || phase_product == NULL)
     {
-        free(icell_arr);
-        free(jcell_arr);
-        free(iatom_arr);
-        free(idir_arr);
-        free(data_arr);
-        free(indices_arr);
-        free(indptr_arr);
+        if (!prepared_ctx) {
+            free(icell_arr); free(jcell_arr); free(iatom_arr); free(idir_arr);
+            free(data_arr); free(indices_arr); free(indptr_arr);
+        }
         free(phase_product);
         PyErr_NoMemory();
         return NULL;
     }
+    epc_profile_add(&epc_profile_alloc_ns, epc_clock_ns() - t_alloc);
 
-    PyObject *cell_info_obj, *mat_sp_tuple;
-    Py_ssize_t pos = 0;
     int entry_idx = 0;
-    while (PyDict_Next(grad_mat_obj, &pos, &cell_info_obj, &mat_sp_tuple))
-    {
-        int icell_tmp = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 0));
-        int jcell_tmp = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 1));
-        icell_arr[entry_idx] = icell_tmp;
-        jcell_arr[entry_idx] = jcell_tmp;
-        iatom_arr[entry_idx] = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 2));
-        idir_arr[entry_idx] = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 3));
-        data_arr[entry_idx] = DOUBLEP((PyArrayObject *)PyTuple_GetItem(mat_sp_tuple, 0));
-        indices_arr[entry_idx] = INTP((PyArrayObject *)PyTuple_GetItem(mat_sp_tuple, 1));
-        indptr_arr[entry_idx] = INTP((PyArrayObject *)PyTuple_GetItem(mat_sp_tuple, 2));
-        phase_product[entry_idx] = conj(phase_kpq[icell_tmp]) * phase_k[jcell_tmp];
-        entry_idx++;
+    if (prepared_ctx) {
+        unsigned long long t_phase = epc_clock_ns();
+        for (entry_idx = 0; entry_idx < n_entries; ++entry_idx)
+            phase_product[entry_idx] = conj(phase_kpq[icell_arr[entry_idx]]) * phase_k[jcell_arr[entry_idx]];
+        epc_profile_add(&epc_profile_phase_ns, epc_clock_ns() - t_phase);
+    } else {
+        PyObject *cell_info_obj, *mat_sp_tuple;
+        Py_ssize_t pos = 0;
+        unsigned long long t_parse = epc_clock_ns();
+        while (PyDict_Next(grad_mat_obj, &pos, &cell_info_obj, &mat_sp_tuple))
+        {
+            unsigned long long t_phase = epc_clock_ns();
+            int icell_tmp = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 0));
+            int jcell_tmp = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 1));
+            icell_arr[entry_idx] = icell_tmp;
+            jcell_arr[entry_idx] = jcell_tmp;
+            iatom_arr[entry_idx] = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 2));
+            idir_arr[entry_idx] = (int)PyLong_AsLong(PyTuple_GetItem(cell_info_obj, 3));
+            data_arr[entry_idx] = DOUBLEP((PyArrayObject *)PyTuple_GetItem(mat_sp_tuple, 0));
+            indices_arr[entry_idx] = INTP((PyArrayObject *)PyTuple_GetItem(mat_sp_tuple, 1));
+            indptr_arr[entry_idx] = INTP((PyArrayObject *)PyTuple_GetItem(mat_sp_tuple, 2));
+            phase_product[entry_idx] = conj(phase_kpq[icell_tmp]) * phase_k[jcell_tmp];
+            epc_profile_add(&epc_profile_phase_ns, epc_clock_ns() - t_phase);
+            entry_idx++;
+        }
+        epc_profile_add(&epc_profile_parse_ns, epc_clock_ns() - t_parse);
     }
 
+    unsigned long long t_kernel = epc_clock_ns();
     Py_BEGIN_ALLOW_THREADS;
     // first loop for n of |n,k>, with jband
     for (jband = 0; jband < NB; jband++)
@@ -1781,13 +2489,468 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
         } // iband
     } // jband
     Py_END_ALLOW_THREADS;
-    free(icell_arr);
-    free(jcell_arr);
-    free(iatom_arr);
-    free(idir_arr);
-    free(data_arr);
-    free(indices_arr);
-    free(indptr_arr);
+    epc_profile_add(&epc_profile_kernel_ns, epc_clock_ns() - t_kernel);
+    unsigned long long t_free = epc_clock_ns();
+    if (!prepared_ctx) {
+        free(icell_arr);
+        free(jcell_arr);
+        free(iatom_arr);
+        free(idir_arr);
+        free(data_arr);
+        free(indices_arr);
+        free(indptr_arr);
+    }
     free(phase_product);
+    epc_profile_add(&epc_profile_free_ns, epc_clock_ns() - t_free);
     Py_RETURN_NONE;
+}
+#define SPARSE_EPC_SCRATCH_LIMIT ((size_t)64 * 1024 * 1024)
+
+PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObject *args)
+{
+    import_array();
+    PyObject *freq_arg;
+    PyObject *atomic_mass_arg;
+    PyObject *eigen_vec_phon_arg;
+    PyObject *phase_k_arg;
+    PyObject *phase_kpq_arg;
+    PyObject *cache_arg;
+    PyObject *wave_k_arg;
+    PyObject *wave_kpq_arg;
+    PyObject *enk_inside_arg;
+    PyObject *match_table_arg;
+    PyObject *eig_kpq_arg;
+    PyObject *bose_qvs_arg;
+    PyObject *fermi_kpqs_arg;
+    PyObject *self_energy_arg;
+    PyObject *omega_list_arg;
+    PyObject *weight_q_arg;
+    PyObject *eta_arg;
+
+    if (!PyArg_UnpackTuple(args, "electron_self_energy_cal_EPC_helper_sparse_batch",
+                           17, 17,
+                           &freq_arg, &atomic_mass_arg, &eigen_vec_phon_arg,
+                           &phase_k_arg, &phase_kpq_arg, &cache_arg,
+                           &wave_k_arg, &wave_kpq_arg, &enk_inside_arg,
+                           &match_table_arg, &eig_kpq_arg, &bose_qvs_arg,
+                           &fermi_kpqs_arg, &self_energy_arg, &omega_list_arg,
+                           &weight_q_arg, &eta_arg)) {
+        return NULL;
+    }
+
+    double weight_q = PyFloat_AsDouble(weight_q_arg);
+    if (PyErr_Occurred()) {
+        return NULL;
+    }
+    double eta = PyFloat_AsDouble(eta_arg);
+    if (PyErr_Occurred()) {
+        return NULL;
+    }
+
+    SparseGradCache *cache = (SparseGradCache *)PyCapsule_GetPointer(
+        cache_arg, SPARSE_GRAD_CACHE_CAPSULE);
+    if (cache == NULL) {
+        return NULL;
+    }
+
+    PyArrayObject *freq_obj;
+    PyArrayObject *atomic_mass_obj;
+    PyArrayObject *eigen_vec_phon_obj;
+    PyArrayObject *phase_k_obj;
+    PyArrayObject *phase_kpq_obj;
+    PyArrayObject *wave_k_obj;
+    PyArrayObject *wave_kpq_obj;
+    PyArrayObject *enk_inside_obj;
+    PyArrayObject *match_table_obj;
+    PyArrayObject *eig_kpq_obj;
+    PyArrayObject *bose_qvs_obj;
+    PyArrayObject *fermi_kpqs_obj;
+    PyArrayObject *self_energy_obj;
+    PyArrayObject *omega_list_obj;
+
+    if (!require_c_array(freq_arg, NPY_DOUBLE, 1, 0, "freq", &freq_obj) ||
+        !require_c_array(atomic_mass_arg, NPY_DOUBLE, 1, 0, "atomic_mass", &atomic_mass_obj) ||
+        !require_c_array(eigen_vec_phon_arg, NPY_CDOUBLE, 3, 0, "eigen_vec_phon", &eigen_vec_phon_obj) ||
+        !require_c_array(phase_k_arg, NPY_CDOUBLE, 2, 0, "phase_k", &phase_k_obj) ||
+        !require_c_array(phase_kpq_arg, NPY_CDOUBLE, 2, 0, "phase_kpq", &phase_kpq_obj) ||
+        !require_c_array(wave_k_arg, NPY_CDOUBLE, 3, 0, "wave_k", &wave_k_obj) ||
+        !require_c_array(wave_kpq_arg, NPY_CDOUBLE, 3, 0, "wave_kpq", &wave_kpq_obj) ||
+        !require_c_array(enk_inside_arg, NPY_BOOL, 2, 0, "enk_inside", &enk_inside_obj) ||
+        !require_c_array(match_table_arg, NPY_BOOL, 3, 0, "match_table", &match_table_obj) ||
+        !require_c_array(eig_kpq_arg, NPY_DOUBLE, 2, 0, "eig_kpq", &eig_kpq_obj) ||
+        !require_c_array(bose_qvs_arg, NPY_DOUBLE, 1, 0, "bose_qvs", &bose_qvs_obj) ||
+        !require_c_array(fermi_kpqs_arg, NPY_DOUBLE, 2, 0, "fermi_kpqs", &fermi_kpqs_obj) ||
+        !require_c_array(self_energy_arg, NPY_CDOUBLE, 3, 1, "self_energy_out", &self_energy_obj) ||
+        !require_c_array(omega_list_arg, NPY_DOUBLE, 1, 0, "omega_list", &omega_list_obj)) {
+        return NULL;
+    }
+
+    npy_intp nk_dim = PyArray_DIMS(wave_k_obj)[0];
+    npy_intp nb_dim = PyArray_DIMS(wave_k_obj)[1];
+    npy_intp norbs_dim = PyArray_DIMS(wave_k_obj)[2];
+    npy_intp nbranches_dim = PyArray_DIMS(freq_obj)[0];
+    npy_intp natoms_dim = PyArray_DIMS(atomic_mass_obj)[0];
+    npy_intp ncell_dim = PyArray_DIMS(phase_k_obj)[1];
+    npy_intp nomegas_dim = PyArray_DIMS(omega_list_obj)[0];
+    if (nk_dim < 0 || nk_dim > INT_MAX || nb_dim <= 0 || nb_dim > INT_MAX ||
+        norbs_dim <= 0 || norbs_dim > INT_MAX || nbranches_dim <= 0 ||
+        nbranches_dim > INT_MAX || natoms_dim <= 0 || natoms_dim > INT_MAX ||
+        ncell_dim <= 0 || ncell_dim > INT_MAX || nomegas_dim <= 0 ||
+        nomegas_dim > INT_MAX) {
+        PyErr_SetString(PyExc_ValueError, "batch array dimensions are empty or too large");
+        return NULL;
+    }
+
+    int nk = (int)nk_dim;
+    int nbands = (int)nb_dim;
+    int norbs = (int)norbs_dim;
+    int nbranches = (int)nbranches_dim;
+    int natoms = (int)natoms_dim;
+    int ncell = (int)ncell_dim;
+    int nomegas = (int)nomegas_dim;
+
+#define CHECK_SHAPE_1(array, d0, name) \
+    if (PyArray_DIMS(array)[0] != (d0)) { \
+        PyErr_Format(PyExc_ValueError, "%s has an incompatible shape", name); \
+        return NULL; \
+    }
+#define CHECK_SHAPE_2(array, d0, d1, name) \
+    if (PyArray_DIMS(array)[0] != (d0) || PyArray_DIMS(array)[1] != (d1)) { \
+        PyErr_Format(PyExc_ValueError, "%s has an incompatible shape", name); \
+        return NULL; \
+    }
+#define CHECK_SHAPE_3(array, d0, d1, d2, name) \
+    if (PyArray_DIMS(array)[0] != (d0) || PyArray_DIMS(array)[1] != (d1) || \
+        PyArray_DIMS(array)[2] != (d2)) { \
+        PyErr_Format(PyExc_ValueError, "%s has an incompatible shape", name); \
+        return NULL; \
+    }
+
+    CHECK_SHAPE_1(bose_qvs_obj, nbranches, "bose_qvs");
+    CHECK_SHAPE_3(eigen_vec_phon_obj, nbranches, natoms, 3, "eigen_vec_phon");
+    CHECK_SHAPE_2(phase_k_obj, nk, ncell, "phase_k");
+    CHECK_SHAPE_2(phase_kpq_obj, nk, ncell, "phase_kpq");
+    CHECK_SHAPE_3(wave_kpq_obj, nk, nbands, norbs, "wave_kpq");
+    CHECK_SHAPE_2(enk_inside_obj, nk, nbands, "enk_inside");
+    CHECK_SHAPE_3(match_table_obj, nk, nbands, nbranches, "match_table");
+    CHECK_SHAPE_2(eig_kpq_obj, nk, nbands, "eig_kpq");
+    CHECK_SHAPE_2(fermi_kpqs_obj, nk, nbands, "fermi_kpqs");
+    CHECK_SHAPE_3(self_energy_obj, nk, nbands, nomegas, "self_energy_out");
+#undef CHECK_SHAPE_1
+#undef CHECK_SHAPE_2
+#undef CHECK_SHAPE_3
+
+    if (cache->norbs != 0 && cache->norbs != norbs) {
+        PyErr_SetString(PyExc_ValueError,
+                        "cache CSR row count does not match wave-function orbital count");
+        return NULL;
+    }
+    for (Py_ssize_t entry = 0; entry < cache->n_entries; entry++) {
+        if (cache->icell[entry] >= ncell || cache->jcell[entry] >= ncell ||
+            cache->iatom[entry] >= natoms || cache->idir[entry] >= 3) {
+            PyErr_SetString(PyExc_ValueError,
+                            "cache metadata is outside the supplied cell/atom/direction bounds");
+            return NULL;
+        }
+    }
+
+    if (nk == 0) {
+        return Py_BuildValue("{s:i,s:K,s:K,s:d,s:i,s:i,s:O}",
+                             "threads", 0,
+                             "scratch_per_thread", (unsigned long long)0,
+                             "scratch_total", (unsigned long long)0,
+                             "kernel_seconds", 0.0,
+                             "omega_tile", 0,
+                             "band_block", 0,
+                             "phase_cached", Py_False);
+    }
+
+    size_t phon_count;
+    size_t phon_bytes;
+    if (!checked_size_mul((size_t)nbranches, (size_t)natoms * 3, &phon_count) ||
+        !checked_size_mul(phon_count, sizeof(double complex), &phon_bytes) ||
+        phon_bytes > SPARSE_EPC_SCRATCH_LIMIT) {
+        PyErr_SetString(PyExc_MemoryError,
+                        "shared phonon factors exceed the 64 MiB sparse EPC scratch limit");
+        return NULL;
+    }
+
+    int omega_tile = nomegas < 64 ? nomegas : 64;
+    int band_block = nbands;
+    int phase_cached = 1;
+    size_t phase_bytes = 0;
+    size_t g_branch_bytes = 0;
+    size_t g2_bytes = 0;
+    size_t kernel_bytes = 0;
+    size_t scratch_per_thread = 0;
+    size_t memory_threads = 0;
+
+    while (1) {
+        size_t temp;
+        if (!checked_size_mul((size_t)cache->n_entries, sizeof(double complex), &phase_bytes) ||
+            !checked_size_mul((size_t)nbranches, sizeof(double complex), &g_branch_bytes) ||
+            !checked_size_mul((size_t)band_block * (size_t)nbranches, sizeof(double), &g2_bytes) ||
+            !checked_size_mul((size_t)nbranches * (size_t)omega_tile,
+                              sizeof(double complex), &kernel_bytes)) {
+            PyErr_SetString(PyExc_MemoryError, "sparse EPC scratch size overflow");
+            return NULL;
+        }
+        scratch_per_thread = phase_cached ? phase_bytes : 0;
+        if (!checked_size_add(scratch_per_thread, g_branch_bytes, &temp) ||
+            !checked_size_add(temp, g2_bytes, &temp) ||
+            !checked_size_add(temp, kernel_bytes, &scratch_per_thread)) {
+            PyErr_SetString(PyExc_MemoryError, "sparse EPC scratch size overflow");
+            return NULL;
+        }
+        memory_threads = scratch_per_thread == 0 ? (size_t)nk :
+            (SPARSE_EPC_SCRATCH_LIMIT - phon_bytes) / scratch_per_thread;
+        if (memory_threads > 0) {
+            break;
+        }
+        if (phase_cached) {
+            phase_cached = 0;
+        } else if (omega_tile > 1) {
+            omega_tile = (omega_tile + 1) / 2;
+        } else if (band_block > 1) {
+            band_block = (band_block + 1) / 2;
+        } else {
+            PyErr_SetString(PyExc_MemoryError,
+                            "one sparse EPC worker exceeds the 64 MiB scratch limit");
+            return NULL;
+        }
+    }
+
+    int requested_threads = omp_get_max_threads();
+    if (requested_threads > nk) {
+        requested_threads = nk;
+    }
+    if ((size_t)requested_threads > memory_threads) {
+        requested_threads = (int)memory_threads;
+    }
+    if (requested_threads < 1) {
+        requested_threads = 1;
+    }
+
+    size_t phase_total_count = phase_cached ?
+        (size_t)requested_threads * (size_t)cache->n_entries : 0;
+    size_t g_branch_total_count = (size_t)requested_threads * (size_t)nbranches;
+    size_t g2_total_count = (size_t)requested_threads * (size_t)band_block * (size_t)nbranches;
+    size_t kernel_total_count = (size_t)requested_threads * (size_t)nbranches * (size_t)omega_tile;
+    double complex *phon_factor = phon_count > 0 ?
+        (double complex *)malloc(phon_count * sizeof(double complex)) : NULL;
+    double complex *phase_product = phase_total_count > 0 ?
+        (double complex *)malloc(phase_total_count * sizeof(double complex)) : NULL;
+    double complex *g_branch = g_branch_total_count > 0 ?
+        (double complex *)malloc(g_branch_total_count * sizeof(double complex)) : NULL;
+    double *g2_table = g2_total_count > 0 ?
+        (double *)malloc(g2_total_count * sizeof(double)) : NULL;
+    double complex *kernel_tile = kernel_total_count > 0 ?
+        (double complex *)malloc(kernel_total_count * sizeof(double complex)) : NULL;
+    if ((phon_count > 0 && phon_factor == NULL) ||
+        (phase_total_count > 0 && phase_product == NULL) ||
+        (g_branch_total_count > 0 && g_branch == NULL) ||
+        (g2_total_count > 0 && g2_table == NULL) ||
+        (kernel_total_count > 0 && kernel_tile == NULL)) {
+        free(phon_factor);
+        free(phase_product);
+        free(g_branch);
+        free(g2_table);
+        free(kernel_tile);
+        return PyErr_NoMemory();
+    }
+
+    double *freq = DOUBLEP(freq_obj);
+    double *atomic_mass = DOUBLEP(atomic_mass_obj);
+    double complex *eigen_vec_phon = DCOMPLEXP(eigen_vec_phon_obj);
+    double complex *phase_k = DCOMPLEXP(phase_k_obj);
+    double complex *phase_kpq = DCOMPLEXP(phase_kpq_obj);
+    double complex *wave_k = DCOMPLEXP(wave_k_obj);
+    double complex *wave_kpq = DCOMPLEXP(wave_kpq_obj);
+    bool *enk_inside = BOOLP(enk_inside_obj);
+    bool *match_table = BOOLP(match_table_obj);
+    double *eig_kpq = DOUBLEP(eig_kpq_obj);
+    double *bose_qvs = DOUBLEP(bose_qvs_obj);
+    double *fermi_kpqs = DOUBLEP(fermi_kpqs_obj);
+    double complex *self_energy = DCOMPLEXP(self_energy_obj);
+    double *omega_list = DOUBLEP(omega_list_obj);
+
+    for (int ibranch = 0; ibranch < nbranches; ibranch++) {
+        double factor = 1.0 / sqrt(2.0 * atomic_mass[0] * fabs(freq[ibranch]));
+        for (int iatom = 0; iatom < natoms; iatom++) {
+            if (iatom != 0) {
+                factor = 1.0 / sqrt(2.0 * atomic_mass[iatom] * fabs(freq[ibranch]));
+            }
+            for (int idir = 0; idir < 3; idir++) {
+                size_t index = ((size_t)ibranch * (size_t)natoms + (size_t)iatom) * 3 + (size_t)idir;
+                phon_factor[index] = factor * eigen_vec_phon[index];
+            }
+        }
+    }
+
+    int actual_threads = 0;
+    double kernel_start = omp_get_wtime();
+    Py_BEGIN_ALLOW_THREADS;
+#pragma omp parallel num_threads(requested_threads)
+    {
+        int thread_id = omp_get_thread_num();
+        double complex *phase_thread = phase_cached ?
+            phase_product + (size_t)thread_id * (size_t)cache->n_entries : NULL;
+        double complex *g_branch_thread =
+            g_branch + (size_t)thread_id * (size_t)nbranches;
+        double *g2_thread =
+            g2_table + (size_t)thread_id * (size_t)band_block * (size_t)nbranches;
+        double complex *kernel_thread =
+            kernel_tile + (size_t)thread_id * (size_t)nbranches * (size_t)omega_tile;
+
+#pragma omp single
+        actual_threads = omp_get_num_threads();
+
+#pragma omp for schedule(dynamic, 1)
+        for (int ik = 0; ik < nk; ik++) {
+            if (phase_cached) {
+                for (Py_ssize_t entry = 0; entry < cache->n_entries; entry++) {
+                    phase_thread[entry] =
+                        conj(phase_kpq[(size_t)ik * (size_t)ncell + (size_t)cache->icell[entry]]) *
+                        phase_k[(size_t)ik * (size_t)ncell + (size_t)cache->jcell[entry]];
+                }
+            }
+
+            for (int mband = 0; mband < nbands; mband++) {
+                bool has_match = false;
+                size_t match_base = ((size_t)ik * (size_t)nbands + (size_t)mband) * (size_t)nbranches;
+                for (int ibranch = 0; ibranch < nbranches; ibranch++) {
+                    if (match_table[match_base + (size_t)ibranch]) {
+                        has_match = true;
+                        break;
+                    }
+                }
+                if (!has_match) {
+                    continue;
+                }
+
+                for (int nstart = 0; nstart < nbands; nstart += band_block) {
+                    int ncount = nbands - nstart;
+                    if (ncount > band_block) {
+                        ncount = band_block;
+                    }
+                    memset(g2_thread, 0,
+                           (size_t)ncount * (size_t)nbranches * sizeof(double));
+
+                    for (int nlocal = 0; nlocal < ncount; nlocal++) {
+                        int nband = nstart + nlocal;
+                        if (!enk_inside[(size_t)ik * (size_t)nbands + (size_t)nband]) {
+                            continue;
+                        }
+                        memset(g_branch_thread, 0,
+                               (size_t)nbranches * sizeof(double complex));
+
+                        for (Py_ssize_t entry = 0; entry < cache->n_entries; entry++) {
+                            double complex electronic_element = 0.0 + 0.0 * I;
+                            int *indptr = cache->indptr[entry];
+                            int *indices = cache->indices[entry];
+                            double *data = cache->data[entry];
+                            for (int iorb = 0; iorb < norbs; iorb++) {
+                                for (int idx_val = indptr[iorb]; idx_val < indptr[iorb + 1]; idx_val++) {
+                                    int jorb = indices[idx_val];
+                                    size_t wave_m_index =
+                                        ((size_t)ik * (size_t)nbands + (size_t)mband) * (size_t)norbs + (size_t)iorb;
+                                    size_t wave_n_index =
+                                        ((size_t)ik * (size_t)nbands + (size_t)nband) * (size_t)norbs + (size_t)jorb;
+                                    electronic_element += conj(wave_kpq[wave_m_index]) *
+                                        wave_k[wave_n_index] * data[idx_val];
+                                }
+                            }
+                            double complex phase = phase_cached ? phase_thread[entry] :
+                                conj(phase_kpq[(size_t)ik * (size_t)ncell + (size_t)cache->icell[entry]]) *
+                                phase_k[(size_t)ik * (size_t)ncell + (size_t)cache->jcell[entry]];
+                            double complex base = phase * electronic_element;
+                            size_t phon_base =
+                                ((size_t)cache->iatom[entry] * 3 + (size_t)cache->idir[entry]);
+                            for (int ibranch = 0; ibranch < nbranches; ibranch++) {
+                                if (match_table[match_base + (size_t)ibranch]) {
+                                    g_branch_thread[ibranch] += base *
+                                        phon_factor[(size_t)ibranch * (size_t)natoms * 3 + phon_base];
+                                }
+                            }
+                        }
+
+                        for (int ibranch = 0; ibranch < nbranches; ibranch++) {
+                            double real_part = creal(g_branch_thread[ibranch]);
+                            double imag_part = cimag(g_branch_thread[ibranch]);
+                            g2_thread[(size_t)nlocal * (size_t)nbranches + (size_t)ibranch] =
+                                real_part * real_part + imag_part * imag_part;
+                        }
+                    }
+
+                    for (int ostart = 0; ostart < nomegas; ostart += omega_tile) {
+                        int ocount = nomegas - ostart;
+                        if (ocount > omega_tile) {
+                            ocount = omega_tile;
+                        }
+                        memset(kernel_thread, 0,
+                               (size_t)nbranches * (size_t)omega_tile * sizeof(double complex));
+                        for (int ibranch = 0; ibranch < nbranches; ibranch++) {
+                            if (!match_table[match_base + (size_t)ibranch]) {
+                                continue;
+                            }
+                            double occ_factor1 =
+                                fermi_kpqs[(size_t)ik * (size_t)nbands + (size_t)mband] + bose_qvs[ibranch];
+                            double occ_factor2 = 1.0 -
+                                fermi_kpqs[(size_t)ik * (size_t)nbands + (size_t)mband] + bose_qvs[ibranch];
+                            double complex e_pole1 =
+                                eig_kpq[(size_t)ik * (size_t)nbands + (size_t)mband] - freq[ibranch] - eta * I;
+                            double complex e_pole2 =
+                                eig_kpq[(size_t)ik * (size_t)nbands + (size_t)mband] + freq[ibranch] - eta * I;
+                            double se0_factor = -creal(
+                                occ_factor1 / e_pole1 + occ_factor2 / e_pole2);
+                            for (int iomega = 0; iomega < ocount; iomega++) {
+                                double complex se_factor =
+                                    occ_factor1 / (omega_list[ostart + iomega] - e_pole1) +
+                                    occ_factor2 / (omega_list[ostart + iomega] - e_pole2);
+                                kernel_thread[(size_t)ibranch * (size_t)omega_tile + (size_t)iomega] =
+                                    (se_factor - se0_factor) * weight_q;
+                            }
+                        }
+
+                        for (int nlocal = 0; nlocal < ncount; nlocal++) {
+                            int nband = nstart + nlocal;
+                            if (!enk_inside[(size_t)ik * (size_t)nbands + (size_t)nband]) {
+                                continue;
+                            }
+                            for (int iomega = 0; iomega < ocount; iomega++) {
+                                double complex contribution = 0.0 + 0.0 * I;
+                                for (int ibranch = 0; ibranch < nbranches; ibranch++) {
+                                    contribution +=
+                                        g2_thread[(size_t)nlocal * (size_t)nbranches + (size_t)ibranch] *
+                                        kernel_thread[(size_t)ibranch * (size_t)omega_tile + (size_t)iomega];
+                                }
+                                size_t out_index =
+                                    ((size_t)ik * (size_t)nbands + (size_t)nband) * (size_t)nomegas +
+                                    (size_t)(ostart + iomega);
+                                self_energy[out_index] += contribution;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Py_END_ALLOW_THREADS;
+    double kernel_seconds = omp_get_wtime() - kernel_start;
+
+    size_t scratch_total = phon_bytes + (size_t)requested_threads * scratch_per_thread;
+    free(phon_factor);
+    free(phase_product);
+    free(g_branch);
+    free(g2_table);
+    free(kernel_tile);
+
+    return Py_BuildValue("{s:i,s:K,s:K,s:d,s:i,s:i,s:O}",
+                         "threads", actual_threads,
+                         "scratch_per_thread", (unsigned long long)scratch_per_thread,
+                         "scratch_total", (unsigned long long)scratch_total,
+                         "kernel_seconds", kernel_seconds,
+                         "omega_tile", omega_tile,
+                         "band_block", band_block,
+                         "phase_cached", phase_cached ? Py_True : Py_False);
 }
