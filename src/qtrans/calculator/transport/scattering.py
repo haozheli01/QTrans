@@ -232,6 +232,13 @@ class _ScatteringMixin:
             (nbands, nks_local, nbranches).
         """
 
+        if (self.cal_mode == 'conductivity' and self.spinor_mode == 'none'
+                and not self.soc_switch and self.read_sparse_grad_mat):
+            from qtrans.calculator.transport.mobility_sparse import scattering_rate_sparse_none_batched
+            return scattering_rate_sparse_none_batched(
+                self, k_grid, q_grid, band_indice, band_edge_energy,
+                mob_level=mob_level, is_metal=is_metal, is_rmp=is_rmp)
+
         nbranches = self._get_nbranches()
         nbands = len(band_indice)
         nks = len(k_grid)
