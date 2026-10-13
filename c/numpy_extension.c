@@ -17,6 +17,7 @@ PyObject *epc_elements_cal_helper_sparse(PyObject *self, PyObject *args);
 
 PyObject *scattering_rate_cal_EPC_helper_sparse_soc(PyObject *self, PyObject *args);
 PyObject *scattering_rate_cal_EPC_helper_sparse(PyObject *self, PyObject *args);
+PyObject *scattering_rate_cal_EPC_helper_sparse_batch(PyObject *self, PyObject *args);
 
 PyObject *breakdown_rate_cal_EPC_helper_sparse(PyObject *self, PyObject *args);
 
@@ -39,6 +40,7 @@ static PyMethodDef functions[] = {
     {"epc_elements_cal_helper_sparse", (PyCFunction)epc_elements_cal_helper_sparse, METH_VARARGS, 0},
     {"scattering_rate_cal_EPC_helper_sparse_soc", (PyCFunction)scattering_rate_cal_EPC_helper_sparse_soc, METH_VARARGS, 0},
     {"scattering_rate_cal_EPC_helper_sparse", (PyCFunction)scattering_rate_cal_EPC_helper_sparse, METH_VARARGS, 0},
+    {"scattering_rate_cal_EPC_helper_sparse_batch", (PyCFunction)scattering_rate_cal_EPC_helper_sparse_batch, METH_VARARGS, 0},
     {"breakdown_rate_cal_EPC_helper_sparse", (PyCFunction)breakdown_rate_cal_EPC_helper_sparse, METH_VARARGS, 0},
     {"transport_eliashberg_function_cal_EPC_iso_helper_sparse", (PyCFunction)transport_eliashberg_function_cal_EPC_iso_helper_sparse, METH_VARARGS, 0},
     {"dynamics_setup_helper_sparse", (PyCFunction)dynamics_setup_helper_sparse, METH_VARARGS, 0},

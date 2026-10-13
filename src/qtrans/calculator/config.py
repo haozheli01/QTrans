@@ -83,6 +83,7 @@ class _ConfigMixin:
             )
 
         self._set('read_sparse_grad_mat',   validate_bool,         'advanced', 5021)
+        self._set('k_batch_mem',             validate_positive_int, 'advanced', 5033)
         self._set('soc_switch',             validate_bool,         'advanced', 5022)
         self._set('magnetic_tolerance',     validate_num,          'advanced', 5024)
         self._set('moment_similar_tolerence', validate_num,        'advanced', 5025)
@@ -98,6 +99,9 @@ class _ConfigMixin:
             )
         if self.rank == 0 and self.q_split_mode == 'block':
             log("q_split_mode='block' is an alias for 'contiguous'.\n", rank=self.rank)
+
+        log(f"K-point batch memory budget: {self.k_batch_mem} MiB.\n",
+            rank=self.rank)
 
         if self.system_2D:
             log('Dealing with a 2D system.\n', rank=self.rank)
