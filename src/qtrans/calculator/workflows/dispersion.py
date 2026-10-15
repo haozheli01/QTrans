@@ -3,6 +3,7 @@
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
 from qtrans.calculator.spectra.spectrum import spectrum_function_cal
+from qtrans.calculator.spectra.modes import preflight_mode_output, write_mode_output
 from qtrans.core.constants import QTcts
 from qtrans.numerics.gaussian import w0gauss
 from qtrans.parallel.mpi import gather_to_rank_root
@@ -54,6 +55,9 @@ class _DispersionMixin:
         if self.band_grid_mode:
             return self._band_cal_on_grid()
         if self.disp_renormalize:
+            mode_result = {} if getattr(self, 'SE_mode_resolved', False) else None
+            if mode_result is not None:
+                preflight_mode_output(self)
             self.cal_mode = 'self-energy'
             # q_grid_ibz, self.weight_q = self._get_ir_reciprocal_mesh(self.q_size, auxiliary_info=False, return_frac=True)
             q_grid_fbz = self._get_monkhorst_pack(self.q_size, return_frac=True)
@@ -151,7 +155,12 @@ class _DispersionMixin:
                 ele_data_tmp = self.comm.bcast(ele_data_tmp, root=0)
                 self.efermi, self.carrier_density = ele_data_tmp[0], ele_data_tmp[1]
             self._print_mesh_mpi_check(nqs_fbz, nqs_fbz, nqs_fbz, nks, reduced_type='q')
-            enks, omega_list, self_energies, spectrum_func = spectrum_function_cal(self, self.high_symmetry_k_vecs, q_grid_fbz, is_metal=is_metal)
+            enks, omega_list, self_energies, spectrum_func = spectrum_function_cal(
+                self, self.high_symmetry_k_vecs, q_grid_fbz, is_metal=is_metal,
+                mode_result=mode_result)
+            if mode_result is not None:
+                write_mode_output(self, self.high_symmetry_k_vecs, q_grid_fbz,
+                                  enks, omega_list, self_energies, mode_result)
             if self.rank == 0:
                 if self.spinor_mode == 'collinear':
                     enks = np.transpose(enks, (0, 2, 1))

@@ -104,6 +104,82 @@ def split_by_rank_indices(data: Sequence, axis: int, indices: np.ndarray) -> np.
         raise ValueError("indices are outside the selected data axis.")
     return np.take(data, indices, axis=axis)
 
+
+_ARRAY_CHUNK_BYTES = 256 * 1024 ** 2
+
+
+def _array_chunk_input(data, chunk_bytes):
+    array = np.asarray(data)
+    if array.ndim < 1 or array.dtype.kind not in 'biufc' or not array.dtype.isnative:
+        raise ValueError('Chunked MPI arrays must be native numeric arrays with a row axis.')
+    if not isinstance(chunk_bytes, (int, np.integer)) or chunk_bytes < array.dtype.itemsize:
+        raise ValueError('chunk_bytes must fit at least one array element.')
+    return np.ascontiguousarray(array)
+
+
+def _array_rank_metadata(local, comm):
+    metadata = (local.shape, local.dtype.str)
+    all_metadata = [metadata] if comm is None else comm.allgather(metadata)
+    if any(shape[1:] != local.shape[1:] or dtype != local.dtype.str
+           for shape, dtype in all_metadata):
+        raise ValueError('Chunked MPI arrays must share trailing shape and dtype.')
+    return all_metadata
+
+
+def iter_bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=_ARRAY_CHUNK_BYTES):
+    """Yield (owner, local row offset, rows) on every rank in rank order.
+
+    Each typed broadcast stays within chunk_bytes. A row larger than that
+    budget is broadcast in several pieces, then yielded as one complete row.
+    Empty owners yield no chunks. Consumers must exhaust the iterator on all
+    ranks in the same order; they may perform matching collectives per yield.
+    """
+    local = _array_chunk_input(data_local, chunk_bytes)
+    metadata = _array_rank_metadata(local, comm)
+    rank = 0 if comm is None else comm.Get_rank()
+    row_items = int(np.prod(local.shape[1:], dtype=np.int64))
+    row_bytes = row_items * local.dtype.itemsize
+    rows_per_chunk = max(1, int(chunk_bytes) // max(1, row_bytes))
+    for owner, (shape, _) in enumerate(metadata):
+        for offset in range(0, shape[0], rows_per_chunk):
+            count = min(rows_per_chunk, shape[0] - offset)
+            chunk = (local[offset:offset + count] if rank == owner else
+                     np.empty((count,) + shape[1:], dtype=local.dtype))
+            if comm is not None:
+                buffer = chunk.reshape(-1).view(np.uint8)
+                for start in range(0, buffer.size, int(chunk_bytes)):
+                    comm.Bcast([buffer[start:start + int(chunk_bytes)], MPI.BYTE], root=owner)
+            yield owner, offset, chunk
+
+
+def bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=_ARRAY_CHUNK_BYTES):
+    """Allgather rows with bounded typed broadcasts, preserving rank order."""
+    local = _array_chunk_input(data_local, chunk_bytes)
+    metadata = _array_rank_metadata(local, comm)
+    counts = [shape[0] for shape, _ in metadata]
+    starts = np.insert(np.cumsum(counts[:-1], dtype=np.int64), 0, 0)
+    result = np.empty((sum(counts),) + local.shape[1:], dtype=local.dtype)
+    for owner, offset, chunk in iter_bcast_array_by_rank_chunks(local, comm, chunk_bytes):
+        start = int(starts[owner]) + offset
+        result[start:start + len(chunk)] = chunk
+    return result
+
+
+def allreduce_array_in_place_chunks(data, comm, chunk_bytes=_ARRAY_CHUNK_BYTES, op=MPI.SUM):
+    """Reduce a writable contiguous numeric array in place in bounded pieces."""
+    array = _array_chunk_input(data, chunk_bytes)
+    if not isinstance(data, np.ndarray) or not data.flags.c_contiguous or not data.flags.writeable:
+        raise ValueError('In-place chunked reduction requires a writable C-contiguous ndarray.')
+    if comm is not None:
+        metadata = comm.allgather((array.shape, array.dtype.str))
+        if any(item != metadata[0] for item in metadata):
+            raise ValueError('In-place chunked reduction requires identical shapes and dtypes.')
+        flat = array.reshape(-1)
+        count = int(chunk_bytes) // array.dtype.itemsize
+        for start in range(0, flat.size, count):
+            comm.Allreduce(MPI.IN_PLACE, flat[start:start + count], op=op)
+    return data
+
 def gather_to_rank_root(data_local:Any, comm:Union[Intracomm, None], root:int=0) -> Union[List[Any], None]:
     data_type = type(data_local)
     if comm is None:
