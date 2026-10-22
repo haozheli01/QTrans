@@ -5,12 +5,10 @@ from mpi4py import MPI
 from pymatgen.core.periodic_table import Element
 from pymatgen.core.structure import Structure
 from qtrans.core.constants import QTcts
-from qtrans.core.batch import get_k_batch_size
 from qtrans.numerics.gaussian import w0gauss
-from qtrans.parallel.mpi import split_into_rank, get_q_rank_indices
+from qtrans.parallel.mpi import split_into_rank
 from typing import Union
 import math
-import os
 import numpy as np
 import spglib
 
@@ -224,15 +222,7 @@ class _TransportCommonMixin:
         """Compute phonon spectrum and eigenvectors for local q points."""
         apply_correction_for_qs = None
         if q_grid_local.size > 0:
-            use_q_batch = (
-                self.cal_mode == 'conductivity' and not is_metal
-                and self.spinor_mode == 'none' and not self.soc_switch
-                and self.magnetic_type == 'none' and self.read_sparse_grad_mat
-                and self.LRC_taylor_order == 0)
-            if use_q_batch:
-                freq_grid, boson_vecs = self._phonon_cal_q_batch(q_grid_local)
-            else:
-                freq_grid, boson_vecs = self._phonon_cal(q_grid_local)
+            freq_grid, boson_vecs = self._phonon_cal(q_grid_local)
             nqs_local = len(freq_grid)
             boson_vecs = boson_vecs.reshape(nqs_local, nbranches, self.natoms, 3)
             q_cut_sq = self.q_cut * self.q_cut
@@ -251,24 +241,6 @@ class _TransportCommonMixin:
 
     def _compute_electron_properties(self, k_grid_local, band_indice, band_edge_energy, nbands):
         """Compute eigenvalues, eigenvectors, velocities, and fermi speed for local k points."""
-        if (self.cal_mode == 'conductivity' and self.spinor_mode == 'none'
-                and not self.soc_switch and self.read_sparse_grad_mat):
-            nlocal = len(k_grid_local)
-            eigen = np.empty((nbands, nlocal))
-            eigen_vecs = np.empty((nlocal, nbands, self.norbs), dtype=np.complex128)
-            vnks = np.empty((nlocal, nbands, 3))
-            block = get_k_batch_size(self)
-            for start in range(0, nlocal, block):
-                stop = min(start + block, nlocal)
-                eig_raw, wave_raw = self._elec_cal_torch(k_grid_local[start:stop])
-                eig_sel = np.ascontiguousarray(eig_raw[band_indice, :])
-                wave_sel = np.ascontiguousarray(wave_raw[:, band_indice, :])
-                eigen[:, start:stop] = eig_sel
-                eigen_vecs[start:stop] = wave_sel
-                vnks[start:stop] = self._vel_nk_cal_from_HS(
-                    eig_sel, wave_sel, k_grid_local[start:stop])
-                del eig_raw, wave_raw, eig_sel, wave_sel
-            return eigen, eigen_vecs, vnks, None
         vnks = None
         fermi_speed = None
         if k_grid_local.size > 0:
@@ -353,49 +325,18 @@ class _TransportCommonMixin:
 
         if reduced_type == 'k':
             # q points are parallelized and q grid is split
-            trace_startup = (os.environ.get(
-                'QTRANS_TRACE_MOBILITY_STARTUP') == '1')
-            sparse_mobility = (self.cal_mode == 'conductivity' and
-                               self.spinor_mode == 'none' and not self.soc_switch
-                               and self.read_sparse_grad_mat)
-            if sparse_mobility and getattr(self, '_mobility_q_prepartitioned', False):
-                # The conductivity workflow has already scattered q and
-                # weights from rank 0.  Do not recreate a global q index array
-                # or run the splitter a second time.
-                q_indices = np.asarray(self._mobility_q_global_indices,
-                                       dtype=int)
-                q_grid_local = np.ascontiguousarray(q_grid)
-                weights_q_local = np.ascontiguousarray(self.weight_q)
-            elif sparse_mobility:
-                # BEGIN QTRANS_STARTUP_TRACE (remove with tests/test_mobility_startup_trace.py)
-                trace_q0 = MPI.Wtime() if trace_startup else None
-                q_indices = get_q_rank_indices(
-                    q_grid, self.rank, self.rank_size,
-                    split_mode=getattr(self, 'q_split_mode', 'contiguous'),
-                    q_size=self.q_size)
-                if trace_startup:
-                    self._mobility_trace_qsplit_s = MPI.Wtime() - trace_q0
-                self._mobility_q_global_indices = q_indices
-                q_grid_local = np.asarray(q_grid)[q_indices]
-                weights_q_local = np.asarray(self.weight_q)[q_indices]
+            q_grid_local, split_indices = split_into_rank(q_grid, 0, self.rank, self.rank_size, return_indices=True)
+            weights_q = np.asarray(self.weight_q)
+            if len(weights_q.shape) != 1:
+                weights_q_local = None
             else:
-                q_grid_local, split_indices = split_into_rank(q_grid, 0, self.rank, self.rank_size, return_indices=True)
-                weights_q = np.asarray(self.weight_q)
-                if len(weights_q.shape) != 1:
-                    weights_q_local = None
-                else:
-                    weights_q_local = split_into_rank(weights_q, 0, self.rank, self.rank_size, split_indices=split_indices)
-                    self.weight_q = None
+                weights_q_local = split_into_rank(weights_q, 0, self.rank, self.rank_size, split_indices=split_indices)
+                self.weight_q = None
             del q_grid
             nbranches = self._get_nbranches()
 
-            if trace_startup:
-                trace_phonon0 = MPI.Wtime()
             # compute boson spectrum
             q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs = self._compute_phonon_spectrum(q_grid_local, nbranches, is_metal)
-            if trace_startup:
-                self._mobility_trace_phonon_s = MPI.Wtime() - trace_phonon0
-            # END QTRANS_STARTUP_TRACE
 
             # k grid is split
             split_sections = np.zeros(self.rank_size, dtype=int)

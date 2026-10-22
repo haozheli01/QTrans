@@ -12,11 +12,47 @@ from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse_soc
 from qtrans.numerics.gaussian import w0gauss
 from qtrans.parallel.mpi import gather_to_rank_root
 from qtrans.parallel.mpi import get_q_rank_indices
-from qtrans.parallel.mpi import bcast_array_by_rank_chunks as _bcast_array_by_rank_chunks
 from qtrans.parallel.mpi import print_peak_memeory
-from qtrans.core.batch import get_k_batch_size
 import numpy as np
 import os
+
+
+def _bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=512 * 1024 ** 2):
+    """Allgather a leading-axis array with typed, bounded broadcasts.
+
+    ``mpi4py.Comm.allgather`` pickles each NumPy array and can overflow its
+    signed byte-count for large wave-function tables.  Broadcasting one rank's
+    contiguous chunks at a time keeps every MPI message below ``chunk_bytes``
+    while preserving rank (and therefore global k-point) order.
+    """
+    data_local = np.ascontiguousarray(data_local)
+    if comm is None:
+        return data_local.copy()
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    shape_tail = tuple(data_local.shape[1:])
+    dtype = data_local.dtype
+    metadata = comm.allgather((int(data_local.shape[0]), shape_tail, dtype.str))
+    if any(tuple(item[1]) != shape_tail or item[2] != dtype.str for item in metadata):
+        raise RuntimeError("Inconsistent wave-function array shape or dtype across ranks.")
+    counts = [item[0] for item in metadata]
+    row_bytes = max(1, int(np.prod(shape_tail, dtype=np.int64)) * dtype.itemsize)
+    rows_per_chunk = max(1, int(chunk_bytes) // row_bytes)
+    result = np.empty((sum(counts),) + shape_tail, dtype=dtype)
+    offset_global = 0
+    for owner, count in enumerate(counts):
+        owner_offset = 0
+        while owner_offset < count:
+            nrows = min(rows_per_chunk, count - owner_offset)
+            if rank == owner:
+                chunk = np.ascontiguousarray(data_local[owner_offset:owner_offset + nrows])
+            else:
+                chunk = np.empty((nrows,) + shape_tail, dtype=dtype)
+            comm.Bcast(chunk, root=owner)
+            result[offset_global + owner_offset:offset_global + owner_offset + nrows] = chunk
+            owner_offset += nrows
+        offset_global += count
+    return result
 
 
 def _sparse_epc_q_none_batched(calculator, q, freq, phon_vec_q,
@@ -38,7 +74,7 @@ def _sparse_epc_q_none_batched(calculator, q, freq, phon_vec_q,
     wave_bytes_per_k = max(1, norbs * norbs * np.dtype(np.complex128).itemsize)
     # Keep the requested 1024 upper bound, but avoid allocating multi-GiB
     # temporary eigenvector matrices with the current full-matrix solver.
-    effective_batch = min(batch_size, get_k_batch_size(calculator, max_batch=batch_size))
+    effective_batch = min(batch_size, max(1, (256 * 1024 ** 2) // wave_bytes_per_k))
     epc_q = np.zeros(nbranches, dtype=float)
     atomic_phase = np.exp(QTcts.JTWOPI * (calculator.graph_data.pos @ q))
     phvec_wap = np.ascontiguousarray(atomic_phase[None, :, None] * phon_vec_q)

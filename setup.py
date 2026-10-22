@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from setuptools import Extension, setup
-import sysconfig
+
 
 def native_extension():
     sources = [
@@ -9,12 +9,9 @@ def native_extension():
         os.path.join("c", "utils_matrix.c"),
     ]
 
-    include_dirs = [np.get_include(), sysconfig.get_path("include")]
-    # Match the optimized QTrans20260721 native build.  ``-march=native`` is
-    # evaluated by the compiler on the build host; callers can remove it when
-    # building a portable wheel for heterogeneous nodes.
-    compile_args = ["-std=gnu99", "-O3", "-march=native", "-funroll-loops", "-fopenmp"]
-    link_args = ["-fopenmp", "-lgomp", "-lpthread"]
+    include_dirs = [np.get_include()]
+    compile_args = ["-O3", "-fopenmp"]
+    link_args = ["-fopenmp", "-lpthread"]
 
     return Extension(
         "qtrans._native",
@@ -26,3 +23,4 @@ def native_extension():
 
 
 setup(ext_modules=[native_extension()])
+
