@@ -1,4 +1,5 @@
 """Electrical and thermal conductivity calculation workflow."""
+from mpi4py import MPI
 """Conductivity and mobility calculation-mode entry point."""
 
 from qtrans.core.constants import QTcts
@@ -6,6 +7,11 @@ from qtrans.core.logging import log
 from qtrans.numerics.random import random_cauchy
 from qtrans.numerics.random import random_uniform
 from qtrans.parallel.mpi import print_peak_memeory
+from qtrans.parallel.mpi import gather_array_to_root_chunks
+from qtrans.parallel.mpi import bcast_array_from_root_chunks
+from qtrans.parallel.mpi import get_q_rank_index_parts
+from qtrans.calculator.transport.mobility_sparse import validate_commensurate_lookup
+from qtrans.core.batch import get_k_batch_size
 import numpy as np
 import os
 
@@ -25,16 +31,33 @@ class _ConductivityMixin:
         """
 
         # define basic dimensions of k/q-grid
-        k_grid_ibz, self.weight_k, k_grid_fbz, _ = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=True)
+        k_grid_ibz, self.weight_k, k_grid_fbz, grid2ir_idx = self._get_ir_reciprocal_mesh(self.k_size, auxiliary_info=True)
         self.ir_indices, rot_indices, all_rots_cart, ibz_to_fbz, ibz_to_fbz_index = self._build_kpoint_mappings(self.k_size, return_index = True)
+        sparse_none = (self.cal_mode == 'conductivity' and self.spinor_mode == 'none'
+                       and not self.soc_switch and self.read_sparse_grad_mat
+                       and not self.epc_rate_path)
+        self._mobility_kpq_energy_ibz = None
+        self._mobility_grid2ir_idx = None
 
-        if self.MC_sampling == 'cauchy':
+        # BEGIN QTRANS_LOCAL_Q_PARTITION (remove with the q-owner optimization)
+        local_q_partition = (sparse_none and self.comm is not None and
+                             self.MC_sampling == 'none')
+        if local_q_partition and self.rank != 0:
+            q_grid_fbz = None
+            self.weight_q = None
+        elif self.MC_sampling == 'cauchy':
             q_grid_fbz, self.weight_q = random_cauchy(self.nsamples, cauchy_scale=self.cauchy_scale, random_seed=self.sampling_seed)
         elif self.MC_sampling == 'uniform':
             q_grid_fbz, self.weight_q = random_uniform(self.nsamples, random_seed=self.sampling_seed)
         else:
             q_grid_fbz = self._get_monkhorst_pack(self.q_size, return_frac=True)
             self.weight_q = np.ones(len(q_grid_fbz)) / len(q_grid_fbz)
+        if local_q_partition:
+            n_q_fbz = self.comm.bcast(
+                len(q_grid_fbz) if self.rank == 0 else None, root=0)
+        else:
+            n_q_fbz = len(q_grid_fbz)
+        # END QTRANS_LOCAL_Q_PARTITION
         nks_fbz = len(k_grid_fbz)
         nks_ibz = len(k_grid_ibz)
         nbands = len(self.bands_indices)
@@ -47,7 +70,17 @@ class _ConductivityMixin:
         split_sections = np.cumsum(split_sections, axis=0)
         k_grid_split = np.split(k_grid_ibz, indices_or_sections=split_sections, axis=0)
         k_grid_local = k_grid_split[self.rank]
-        if k_grid_local.size > 0:
+        if sparse_none:
+            # The Fermi-level and metal test still need all bands.  Discard
+            # full eigenvectors after each bounded solve, retaining energies.
+            enks_local = np.empty((self.norbs, len(k_grid_local)))
+            block = get_k_batch_size(self)
+            for start in range(0, len(k_grid_local), block):
+                stop = min(start + block, len(k_grid_local))
+                eig_block, wave_block = self._elec_cal_torch(k_grid_local[start:stop])
+                enks_local[:, start:stop] = eig_block
+                del eig_block, wave_block
+        elif k_grid_local.size > 0:
             # enks_local: # shape if collinear (2*norbs, nks_local), else (norbs, nks_local)
             enks_local, _ = self._elec_cal_torch(k_grid_local)
         else:
@@ -59,8 +92,11 @@ class _ConductivityMixin:
             enks_all = [None] * self.rank_size
         else:
             enks_all = None
-        self.comm.Barrier()
-        enks_all = self.comm.gather(enks_local, root=0)
+        if sparse_none:
+            enks_all = gather_array_to_root_chunks(enks_local, self.comm, root=0)
+        else:
+            self.comm.Barrier()
+            enks_all = self.comm.gather(enks_local, root=0)
         if self.rank == 0:
             # enks: # shape if collinear (2*norbs, nks), else (norbs, nks)
             enks = np.concatenate(enks_all, axis=-1)
@@ -100,6 +136,7 @@ class _ConductivityMixin:
             else:
                 unique_kpts = None
             unique_kpts = self.comm.bcast(unique_kpts, root=0)
+
         else:
             if self.is_hole:
                 band_edge_index = self.VBM_band_index
@@ -180,6 +217,23 @@ class _ConductivityMixin:
                 unique_kpts = None
             unique_kpts = self.comm.bcast(unique_kpts, root=0)
 
+        if sparse_none:
+            if self.rank == 0:
+                reason = validate_commensurate_lookup(
+                    self, k_grid_ibz, k_grid_fbz, grid2ir_idx, q_grid_fbz)
+            else:
+                reason = None
+            reason = self.comm.bcast(reason, root=0)
+            if reason is None:
+                table_root = np.ascontiguousarray(enks.T) if self.rank == 0 else None
+                self._mobility_kpq_energy_ibz = bcast_array_from_root_chunks(
+                    table_root, self.comm, root=0)
+                self._mobility_grid2ir_idx = np.asarray(grid2ir_idx, dtype=int)
+                if self.rank == 0:
+                    log('Sparse mobility k+q selected-band IBZ lookup enabled.\n', rank=self.rank)
+            elif self.rank == 0:
+                log(f'Sparse mobility k+q lookup disabled: {reason}; using direct bounded solves.\n', rank=self.rank)
+
         # distribute kpoints really contributing to each pool
         nks_ibz_usefull = unique_kpts.shape[0] # total number of usefull kpoints
         k_grid_ibz_usefull = k_grid_ibz[unique_kpts] # Card. of usefull kpoints. shape: (nks_ibz_usefull, 3)
@@ -191,7 +245,34 @@ class _ConductivityMixin:
         _sl_end = int(split_sections[self.rank])
         k_grid_local = k_grid_ibz_usefull[_sl_start:_sl_end]
         k_index_local = unique_kpts[_sl_start:_sl_end]
-        self._print_mesh_mpi_check(nks_fbz, nks_ibz, nks_ibz_usefull, len(q_grid_fbz))
+        if local_q_partition:
+            trace_q_partition0 = MPI.Wtime() if os.environ.get(
+                'QTRANS_TRACE_MOBILITY_STARTUP') == '1' else None
+            if self.rank == 0:
+                q_parts = get_q_rank_index_parts(
+                    q_grid_fbz, self.rank_size,
+                    split_mode=getattr(self, 'q_split_mode', 'contiguous'),
+                    q_size=self.q_size)
+                q_coord_parts = [q_grid_fbz[idx] for idx in q_parts]
+                q_weight_parts = [self.weight_q[idx] for idx in q_parts]
+            else:
+                q_parts = q_coord_parts = q_weight_parts = None
+            q_grid_fbz = self.comm.scatter(q_coord_parts, root=0)
+            self.weight_q = self.comm.scatter(q_weight_parts, root=0)
+            self._mobility_q_global_indices = self.comm.scatter(q_parts, root=0)
+            del q_coord_parts, q_weight_parts, q_parts
+            self._mobility_q_prepartitioned = True
+            if trace_q_partition0 is not None:
+                self._mobility_trace_qsplit_s = (
+                    MPI.Wtime() - trace_q_partition0)
+        self._print_mesh_mpi_check(nks_fbz, nks_ibz, nks_ibz_usefull, n_q_fbz)
+        # BEGIN QTRANS_STARTUP_TRACE (remove with tests/test_mobility_startup_trace.py)
+        # This is a synchronized reference immediately after the mesh/rank
+        # report.  MPI.Wtime values are only compared as local elapsed times.
+        if os.environ.get('QTRANS_TRACE_MOBILITY_STARTUP') == '1':
+            self.comm.Barrier()
+            self._mobility_trace_t0 = MPI.Wtime()
+        # END QTRANS_STARTUP_TRACE
         # Pre-compute unit conversion factors used repeatedly in ERTA/IBTE
         _sigma_unit = 1.0 / (self.volume_uc * nks_fbz) / (QTcts.HARTREEtoOHM * QTcts.BOHRtoM)
         _mob_unit_base = QTcts.EV * self.inv_cell / nks_fbz / (QTcts.HBAR_EV * QTcts.BOHRtoCM)

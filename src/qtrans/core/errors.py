@@ -51,6 +51,7 @@ class InputParameterError(Exception):
     5029: ...
     5031: The 'smooth_gauge' in <advanced> block must be a boolean.
     5032: ...
+    5033: The 'k_batch_mem' in <advanced> block must be a positive integer in MiB.
     5041: The 'supercell_matrix' in <phonon> block must be a 3*3 float matrix.
     5042: The file specified by 'unitcell_filename' in the <phonon> block does not exist or is not readable.
     5043: The file specified by 'force_infos_filename' in the <phonon> block does not exist or is not readable.

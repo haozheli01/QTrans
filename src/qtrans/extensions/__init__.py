@@ -16,6 +16,7 @@ from .native import (
     eliashberg_spectrum_cal_EPC_helper_sparse_soc,
     epc_elements_cal_helper_sparse,
     scattering_rate_cal_EPC_helper_sparse,
+    scattering_rate_cal_EPC_helper_sparse_batch,
     scattering_rate_cal_EPC_helper_sparse_soc,
     transport_eliashberg_function_cal_EPC_iso_helper_sparse,
 )
@@ -36,6 +37,7 @@ __all__ = [
     "eliashberg_spectrum_cal_EPC_helper_sparse_soc",
     "epc_elements_cal_helper_sparse",
     "scattering_rate_cal_EPC_helper_sparse",
+    "scattering_rate_cal_EPC_helper_sparse_batch",
     "scattering_rate_cal_EPC_helper_sparse_soc",
     "transport_eliashberg_function_cal_EPC_iso_helper_sparse",
 ]

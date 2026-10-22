@@ -56,6 +56,10 @@ def scattering_rate_cal_EPC_helper_sparse(*args):
     return _call("scattering_rate_cal_EPC_helper_sparse", *args)
 
 
+def scattering_rate_cal_EPC_helper_sparse_batch(*args):
+    return _call("scattering_rate_cal_EPC_helper_sparse_batch", *args)
+
+
 def breakdown_rate_cal_EPC_helper_sparse(*args):
     return _call("breakdown_rate_cal_EPC_helper_sparse", *args)
 

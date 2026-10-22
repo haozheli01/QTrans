@@ -576,6 +576,9 @@ basis_def_40_abacus = (lambda s1=[0],
 })()
 
 basis_def_44_abacus = (lambda s1=[0],s2=[1],s3=[2],s4=[3],s5=[4],s6=[5],p1=[6,7,8],p2=[9,10,11],p3=[12,13,14],d1=[15,16,17,18,19],d2=[20,21,22,23,24],d3=[25,26,27,28,29],f1=[30,31,32,33,34,35,36],f2=[37,38,39,40,41,42,43]: {
+    # Si_gga_10au_100Ry_3s3p2d.orb has 3 s + 3 p + 2 d shells = 22
+    # orbitals.  Keep the 44-slot padded layout used by nao_max=44.
+    Element['Si'].Z : np.array(s1+s2+s3+p1+p2+p3+d1+d2, dtype=int),
     Element['O'].Z : np.array(s1+s2+s3+p1+p2+p3+d1+d2, dtype=int),
     Element['P'].Z : np.array(s1+s2+s3+p1+p2+p3+d1+d2, dtype=int),
     Element['S'].Z : np.array(s1+s2+s3+p1+p2+p3+d1+d2, dtype=int),
