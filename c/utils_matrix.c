@@ -2676,7 +2676,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
     int MB = PyArray_DIMS(eig_kpq_obj)[0];
     int nomegas = PyArray_DIMS(omega_list_obj)[0];
 
-    int iorb, jorb, icell, jcell, ibranch, iatom, idir, iband, jband, idx_val;
+    int iorb, jorb, icell, jcell, ibranch, iatom, idir, iband, jband, idx_val, iomega;
     double factor, g2_tmp;
     double occ_factor1, occ_factor2, se0_factor;
     double complex epc, tmp1, tmp2;
@@ -2781,7 +2781,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
                 e_pole1 = eig_kpq[iband] - freq[ibranch] - ieta;
                 e_pole2 = eig_kpq[iband] + freq[ibranch] - ieta;
                 se0_factor = -1.0 * creal(occ_factor1 / e_pole1 + occ_factor2 / e_pole2);
-                for (int iomega = 0; iomega < nomegas; iomega++) {
+                for (iomega = 0; iomega < nomegas; iomega++) {
                     se_factor = occ_factor1 / (omega_list[iomega] - e_pole1) + occ_factor2 / (omega_list[iomega] - e_pole2);
                     self_energy[INDEX3D(nbranches, nomegas, jband, ibranch, iomega)] = self_energy[INDEX3D(nbranches, nomegas, jband, ibranch, iomega)] + g2_tmp * (se_factor - se0_factor) * weight_q;
                 }
@@ -2826,16 +2826,15 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
     PyObject *omega_list_arg;
     PyObject *weight_q_arg;
     PyObject *eta_arg;
-    PyObject *mode_out_arg = Py_None;
 
     if (!PyArg_UnpackTuple(args, "electron_self_energy_cal_EPC_helper_sparse_batch",
-                           17, 18,
+                           17, 17,
                            &freq_arg, &atomic_mass_arg, &eigen_vec_phon_arg,
                            &phase_k_arg, &phase_kpq_arg, &cache_arg,
                            &wave_k_arg, &wave_kpq_arg, &enk_inside_arg,
                            &match_table_arg, &eig_kpq_arg, &bose_qvs_arg,
                            &fermi_kpqs_arg, &self_energy_arg, &omega_list_arg,
-                           &weight_q_arg, &eta_arg, &mode_out_arg)) {
+                           &weight_q_arg, &eta_arg)) {
         return NULL;
     }
 
@@ -2940,39 +2939,6 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
 #undef CHECK_SHAPE_1
 #undef CHECK_SHAPE_2
 #undef CHECK_SHAPE_3
-
-    double complex *mode_out = NULL;
-    if (mode_out_arg != Py_None) {
-        PyArrayObject *mode_out_obj;
-        if (!require_c_array(mode_out_arg, NPY_CDOUBLE, 4, 1,
-                             "mode_out", &mode_out_obj)) {
-            return NULL;
-        }
-        if (!PyArray_ISNOTSWAPPED(mode_out_obj)) {
-            PyErr_SetString(PyExc_ValueError,
-                            "mode_out must use native byte order");
-            return NULL;
-        }
-        if (PyArray_DIMS(mode_out_obj)[0] != nk_dim ||
-            PyArray_DIMS(mode_out_obj)[1] != nb_dim ||
-            PyArray_DIMS(mode_out_obj)[2] != nbranches_dim ||
-            PyArray_DIMS(mode_out_obj)[3] != nomegas_dim) {
-            PyErr_SetString(PyExc_ValueError,
-                            "mode_out has an incompatible shape");
-            return NULL;
-        }
-        size_t mode_count;
-        size_t mode_bytes;
-        if (!checked_size_mul((size_t)nk_dim, (size_t)nb_dim, &mode_count) ||
-            !checked_size_mul(mode_count, (size_t)nbranches_dim, &mode_count) ||
-            !checked_size_mul(mode_count, (size_t)nomegas_dim, &mode_count) ||
-            !checked_size_mul(mode_count, sizeof(double complex), &mode_bytes) ||
-            mode_bytes > (size_t)NPY_MAX_INTP) {
-            PyErr_SetString(PyExc_OverflowError, "mode_out size overflow");
-            return NULL;
-        }
-        mode_out = DCOMPLEXP(mode_out_obj);
-    }
 
     if (cache->norbs != 0 && cache->norbs != norbs) {
         PyErr_SetString(PyExc_ValueError,
@@ -3254,18 +3220,9 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
                             for (int iomega = 0; iomega < ocount; iomega++) {
                                 double complex contribution = 0.0 + 0.0 * I;
                                 for (int ibranch = 0; ibranch < nbranches; ibranch++) {
-                                    double complex term =
+                                    contribution +=
                                         g2_thread[(size_t)nlocal * (size_t)nbranches + (size_t)ibranch] *
                                         kernel_thread[(size_t)ibranch * (size_t)omega_tile + (size_t)iomega];
-                                    contribution += term;
-                                    if (mode_out != NULL) {
-                                        /* Each worker exclusively owns its ik slice. */
-                                        size_t mode_index =
-                                            (((size_t)ik * (size_t)nbands + (size_t)nband) *
-                                             (size_t)nbranches + (size_t)ibranch) * (size_t)nomegas +
-                                            (size_t)(ostart + iomega);
-                                        mode_out[mode_index] += term;
-                                    }
                                 }
                                 size_t out_index =
                                     ((size_t)ik * (size_t)nbands + (size_t)nband) * (size_t)nomegas +

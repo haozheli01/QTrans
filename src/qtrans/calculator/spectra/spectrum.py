@@ -1,7 +1,6 @@
 """Electronic and phonon spectral-function calculations."""
 
 from mpi4py import MPI
-from qtrans.calculator.spectra.modes import collective_mode_errors
 from qtrans.core.constants import QTcts
 from qtrans.core.logging import time_logger
 from qtrans.extensions import electron_self_energy_cal_EPC_helper_sparse
@@ -19,16 +18,9 @@ from qtrans.parallel.mpi import split_into_rank
 import numpy as np
 
 
-def spectrum_function_cal(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False, *, mode_result=None):
-    if getattr(QTc_obj, 'SE_mode_resolved', False):
-        if (QTc_obj.SE_type != 'electron' or QTc_obj.spinor_mode != 'none' or
-                not QTc_obj.read_sparse_grad_mat or
-                QTc_obj.apply_correction or QTc_obj.quadrupole_correction):
-            raise ValueError('SE_mode_resolved requires nonmagnetic sparse electron self-energy without LRC.')
-        if mode_result is None:
-            raise ValueError('SE_mode_resolved requires a mode_result dictionary.')
+def spectrum_function_cal(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False):
     if QTc_obj.SE_type == 'electron':
-        enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron(QTc_obj, k_grid, q_grid, is_metal, mode_result=mode_result)
+        enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron(QTc_obj, k_grid, q_grid, is_metal)
         return enks, omega_list, self_energies, spectrum_func
     elif QTc_obj.SE_type == 'phonon':
         freq_all, phon_vecs_all, omega_list, self_energies, spectrum_func = _spectrum_function_phonon(QTc_obj, k_grid, q_grid, is_metal)
@@ -129,7 +121,7 @@ def _spectrum_function_phonon_dense(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarra
         spectrum_func = np.concatenate(spectrum_func, axis=0)
     return freq_all, phon_vecs_all, omega_list, self_energies, spectrum_func
 
-def _spectrum_function_electron(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False, *, mode_result=None):
+def _spectrum_function_electron(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False):
     if QTc_obj.spinor_mode == 'collinear':
         if QTc_obj.read_sparse_grad_mat:
             enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_collinear_sparse(QTc_obj, k_grid, q_grid, is_metal=is_metal)
@@ -137,41 +129,42 @@ def _spectrum_function_electron(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, i
             enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_collinear_dense(QTc_obj, k_grid, q_grid, is_metal=is_metal)
     else:
         if QTc_obj.read_sparse_grad_mat:
-            enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_sparse(QTc_obj, k_grid, q_grid, is_metal=is_metal, mode_result=mode_result)
+            enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_sparse(QTc_obj, k_grid, q_grid, is_metal=is_metal)
         else:
             enks, omega_list, self_energies, spectrum_func = _spectrum_function_electron_epc_dense(QTc_obj, k_grid, q_grid, is_metal=is_metal)
     return enks, omega_list, self_energies, spectrum_func
 
 def _prepare_electron_epc_self_energy_q_parallel(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False):
-    with collective_mode_errors(QTc_obj, "local spectrum preparation"):
-        k_grid = QTc_obj._frac2car(k_grid)
-        nbands = len(QTc_obj.bands_indices)
-        efocus_threshold = [-QTc_obj.over_band_edge, QTc_obj.over_band_edge]
+    k_grid = QTc_obj._frac2car(k_grid)
+    nbands = len(QTc_obj.bands_indices)
+    efocus_threshold = [-QTc_obj.over_band_edge, QTc_obj.over_band_edge]
 
-        # Hash-cyclic is opt-in for the nonmagnetic self-energy path.
-        split_mode = getattr(QTc_obj, 'q_split_mode', 'contiguous')
-        use_hash_cyclic = (split_mode == 'hash-cyclic' and
-                           QTc_obj.spinor_mode == 'none')
-        q_indices = get_q_rank_indices(
-            q_grid, QTc_obj.rank, QTc_obj.rank_size,
-            split_mode=split_mode if use_hash_cyclic else 'contiguous',
-            q_size=getattr(QTc_obj, 'q_size', None))
-        q_grid_local_frac = np.ascontiguousarray(split_by_rank_indices(q_grid, 0, q_indices))
-        weights_q = np.asarray(QTc_obj.weight_q)
-        if weights_q.ndim == 0:
-            weights_q_local = np.full(len(q_grid_local_frac), weights_q.item())
-        elif weights_q.ndim == 1:
-            weights_q_local = np.ascontiguousarray(split_by_rank_indices(weights_q, 0, q_indices))
-        else:
-            raise RuntimeError("Error(9999): q-parallel self-energy requires one-dimensional q weights.")
+    # Hash-cyclic is an opt-in optimization for the non-SOC/non-collinear
+    # self-energy path.  Keep the historical contiguous split for all other
+    # paths and for the default configuration.
+    split_mode = getattr(QTc_obj, 'q_split_mode', 'contiguous')
+    use_hash_cyclic = (split_mode == 'hash-cyclic' and
+                       QTc_obj.spinor_mode == 'none')
+    q_indices = get_q_rank_indices(
+        q_grid, QTc_obj.rank, QTc_obj.rank_size,
+        split_mode=split_mode if use_hash_cyclic else 'contiguous',
+        q_size=getattr(QTc_obj, 'q_size', None))
+    q_grid_local_frac = np.ascontiguousarray(split_by_rank_indices(q_grid, 0, q_indices))
+    weights_q = np.asarray(QTc_obj.weight_q)
+    if weights_q.ndim == 0:
+        weights_q_local = np.full(len(q_grid_local_frac), weights_q.item())
+    elif weights_q.ndim == 1:
+        weights_q_local = np.ascontiguousarray(split_by_rank_indices(weights_q, 0, q_indices))
+    else:
+        raise RuntimeError("Error(9999): q-parallel self-energy requires one-dimensional q weights.")
 
-        nbranches = QTc_obj._get_nbranches()
-        q_grid_local, freq_grid, phon_vecs, apply_correction_for_qs = QTc_obj._compute_phonon_spectrum(
-            q_grid_local_frac, nbranches, is_metal)
+    nbranches = QTc_obj._get_nbranches()
+    q_grid_local, freq_grid, phon_vecs, apply_correction_for_qs = QTc_obj._compute_phonon_spectrum(
+        q_grid_local_frac, nbranches, is_metal)
 
-        k_grid_local = split_into_rank(k_grid, 0, QTc_obj.rank, QTc_obj.rank_size)
-        eigen_local, eigen_vecs_local, _, _ = QTc_obj._compute_electron_properties(
-            k_grid_local, QTc_obj.bands_indices, QTc_obj.efermi, nbands)
+    k_grid_local = split_into_rank(k_grid, 0, QTc_obj.rank, QTc_obj.rank_size)
+    eigen_local, eigen_vecs_local, _, _ = QTc_obj._compute_electron_properties(
+        k_grid_local, QTc_obj.bands_indices, QTc_obj.efermi, nbands)
 
     if QTc_obj.comm is None:
         eigen_chunks = [eigen_local]
@@ -180,18 +173,21 @@ def _prepare_electron_epc_self_energy_q_parallel(QTc_obj, k_grid:np.ndarray, q_g
         eigen_chunks = QTc_obj.comm.allgather(eigen_local)
         eigen_vecs_chunks = QTc_obj.comm.allgather(eigen_vecs_local)
 
+    if QTc_obj.spinor_mode == 'collinear':
+        eigen = np.concatenate(eigen_chunks, axis=-1)
+        eigen_vecs = np.concatenate(eigen_vecs_chunks, axis=1)
+    else:
+        eigen = np.concatenate(eigen_chunks, axis=-1)
+        eigen_vecs = np.concatenate(eigen_vecs_chunks, axis=0)
+
     # Keep one process-local prepared CSR context for the non-SOC sparse
     # self-energy helper.  The baseline helper still accepts grad_mat and
     # automatically reverts to dictionary parsing if preparation is absent.
-    with collective_mode_errors(QTc_obj, "cache preparation"):
-        eigen = np.concatenate(eigen_chunks, axis=-1)
-        eigen_vecs = np.concatenate(eigen_vecs_chunks,
-                                   axis=1 if QTc_obj.spinor_mode == 'collinear' else 0)
-        if (getattr(QTc_obj, 'read_sparse_grad_mat', False) and
-                QTc_obj.spinor_mode == 'none' and
-                hasattr(QTc_obj, 'grad_mat')):
-            QTc_obj._grad_mat_context = prepare_grad_mat(QTc_obj.grad_mat)
-            QTc_obj._sparse_grad_cache = prepare_sparse_grad_cache(QTc_obj.grad_mat)
+    if (getattr(QTc_obj, 'read_sparse_grad_mat', False) and
+            QTc_obj.spinor_mode == 'none' and
+            hasattr(QTc_obj, 'grad_mat')):
+        QTc_obj._grad_mat_context = prepare_grad_mat(QTc_obj.grad_mat)
+        QTc_obj._sparse_grad_cache = prepare_sparse_grad_cache(QTc_obj.grad_mat)
 
     return efocus_threshold, k_grid, eigen, eigen_vecs, q_grid_local, weights_q_local, freq_grid, phon_vecs, apply_correction_for_qs
 
@@ -299,7 +295,129 @@ def _spectrum_function_electron_epc_dense(QTc_obj, k_grid:np.ndarray, q_grid:np.
         spectrum_func = None
     return eigen_all, omega_list, self_energies, spectrum_func
 
-def _release_self_energy_cache(QTc_obj):
+def _spectrum_function_electron_epc_sparse(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False):
+    efocus_threshold, k_grid, eigen, eigen_vecs, q_grid_local, weights_q_local, freq_grid, phon_vecs, apply_correction_for_qs = \
+        _prepare_electron_epc_self_energy_q_parallel(QTc_obj, k_grid, q_grid, is_metal=is_metal)
+    omega_list = np.arange(QTc_obj.SE_erange[0], QTc_obj.SE_erange[1]+QTc_obj.SE_erange[2]/10.0, QTc_obj.SE_erange[2])
+    eigen = eigen - QTc_obj.efermi
+    nomegas = len(omega_list)
+    nbands = len(QTc_obj.bands_indices)
+    nbranches = int(3) * QTc_obj.natoms
+    nks = len(k_grid)
+    self_energies_local = np.zeros((nks, nbands, nomegas), dtype=complex)
+    phase_k_all = np.exp(QTcts.JTWOPI * (QTc_obj.nbr_shift_of_cell_sc @ k_grid.T))
+    atomic_mass = np.ascontiguousarray(QTc_obj.atomic_mass)
+    if QTc_obj.rank == 0:
+        logger = time_logger(max(len(q_grid_local), 1), 'spectrum_function_electron_epc_sparse')
+
+    for iq, q in enumerate(q_grid_local):
+        freq, eigen_vec_phon, apply_correction_for_this_q = freq_grid[iq], phon_vecs[iq], apply_correction_for_qs[iq]
+        bose_qvs = bose_weight(freq, QTc_obj.temperature)
+        atomic_phase = np.exp(QTcts.JTWOPI*np.sum(QTc_obj.graph_data.pos*q[None,:], axis=-1)) # shape (natoms, )
+        phvec_wap = atomic_phase[None,:,None] * eigen_vec_phon # shape (nbranches, natoms, 3)
+        kpqs = np.ascontiguousarray(k_grid + q)
+        eig_kpqs_raw, wave_kpqs_raw = QTc_obj._elec_cal_torch(kpqs)
+        # The batch C API uses [ik, band, ...] layout.  Keep this conversion
+        # explicit so the scalar long-range fallback below remains unchanged.
+        eig_kpqs = np.ascontiguousarray(eig_kpqs_raw[QTc_obj.bands_indices].T)
+        eig_kpqs_shifted = np.ascontiguousarray(eig_kpqs - QTc_obj.efermi)
+        wave_kpqs = np.ascontiguousarray(wave_kpqs_raw[:, QTc_obj.bands_indices, :])
+        enk_inside_all = np.ascontiguousarray(
+            (eigen.T >= efocus_threshold[0]) & (eigen.T <= efocus_threshold[1]))
+        match_table_all = _get_batch_epc_match_table(
+            omega_list, eig_kpqs_shifted, freq,
+            QTc_obj.phonon_frequency_cutoff, QTc_obj.e_thr)
+        fermi_kpqs = np.ascontiguousarray(
+            fermi_weight(eig_kpqs_shifted, QTc_obj.temperature))
+        phase_q = np.exp(QTcts.JTWOPI * (QTc_obj.nbr_shift_of_cell_sc @ q))
+        phase_kpq_all = np.ascontiguousarray((phase_k_all * phase_q[:, None]).T)
+        phvec_wap = np.ascontiguousarray(phvec_wap)
+
+        if QTc_obj.spinor_mode != 'none':
+            # SOC/non-collinear sparse calculations retain the pre-existing
+            # scalar helper semantics.  The batch cache is deliberately
+            # restricted to the non-SOC/non-collinear path.
+            for ik, k in enumerate(k_grid):
+                enk_inside_table = enk_inside_all[ik]
+                match_table_k = match_table_all[ik]
+                if not enk_inside_table.any() or not match_table_k.any():
+                    continue
+                eig_k = eigen[:, ik]
+                wave_k = eigen_vecs[ik]
+                eig_kpq = eig_kpqs[ik]
+                wave_kpq = wave_kpqs[ik]
+                match_table = np.repeat(match_table_k[None, :, :], nbands, axis=0)
+                epc_corr = np.zeros((nbands, nbands, nbranches), dtype=complex)
+                if apply_correction_for_this_q:
+                    epc_corr = QTc_obj._get_LR_correction_kq(
+                        q, freq, phvec_wap, match_table, enk_inside_table,
+                        k, wave_k, wave_kpq, return_tmp1=False)
+                self_energy_single = np.zeros(
+                    (nbands, nbranches, nomegas), dtype=complex, order='C')
+                electron_self_energy_cal_EPC_helper_sparse(
+                    np.ascontiguousarray(freq), atomic_mass, phvec_wap,
+                    np.ascontiguousarray(phase_k_all[:, ik]),
+                    np.ascontiguousarray(phase_kpq_all[ik]), QTc_obj.grad_mat,
+                    np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
+                    np.ascontiguousarray(enk_inside_table),
+                    np.ascontiguousarray(match_table), np.ascontiguousarray(eig_kpq),
+                    np.ascontiguousarray(bose_qvs), np.ascontiguousarray(fermi_kpqs[ik]),
+                    np.ascontiguousarray(epc_corr), self_energy_single,
+                    np.ascontiguousarray(omega_list), weights_q_local[iq], QTc_obj.smeark)
+                self_energies_local[ik] += np.sum(self_energy_single, axis=1)
+        elif apply_correction_for_this_q:
+            # Long-range correction still needs the scalar path because each
+            # k point receives a distinct correction matrix.
+            for ik, k in enumerate(k_grid):
+                enk_inside_table = enk_inside_all[ik]
+                match_table_k = match_table_all[ik]
+                if not enk_inside_table.any() or not match_table_k.any():
+                    continue
+                eig_k = eigen[:, ik]
+                wave_k = eigen_vecs[ik]
+                eig_kpq = eig_kpqs[ik]
+                wave_kpq = wave_kpqs[ik]
+                match_table = np.repeat(match_table_k[None, :, :], nbands, axis=0)
+                epc_corr = QTc_obj._get_LR_correction_kq(
+                    q, freq, phvec_wap, match_table, enk_inside_table,
+                    k, wave_k, wave_kpq, return_tmp1=False)
+                self_energy_single = np.zeros(
+                    (nbands, nbranches, nomegas), dtype=complex, order='C')
+                electron_self_energy_cal_EPC_helper_sparse(
+                    np.ascontiguousarray(freq), atomic_mass, phvec_wap,
+                    np.ascontiguousarray(phase_k_all[:, ik]),
+                    np.ascontiguousarray(phase_kpq_all[ik]), QTc_obj.grad_mat,
+                    np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
+                    np.ascontiguousarray(enk_inside_table),
+                    np.ascontiguousarray(match_table), np.ascontiguousarray(eig_kpq),
+                    np.ascontiguousarray(bose_qvs), np.ascontiguousarray(fermi_kpqs[ik]),
+                    np.ascontiguousarray(epc_corr), self_energy_single,
+                    np.ascontiguousarray(omega_list), weights_q_local[iq], QTc_obj.smeark)
+                self_energies_local[ik] += np.sum(self_energy_single, axis=1)
+        elif (getattr(QTc_obj, '_sparse_grad_cache', None) is not None and
+              enk_inside_all.any() and match_table_all.any()):
+            electron_self_energy_cal_EPC_helper_sparse_batch(
+                np.ascontiguousarray(freq), atomic_mass, phvec_wap,
+                np.ascontiguousarray(phase_k_all.T), phase_kpq_all,
+                QTc_obj._sparse_grad_cache, np.ascontiguousarray(eigen_vecs),
+                wave_kpqs, enk_inside_all, match_table_all, eig_kpqs_shifted,
+                np.ascontiguousarray(bose_qvs), fermi_kpqs,
+                self_energies_local, np.ascontiguousarray(omega_list),
+                weights_q_local[iq], QTc_obj.smeark)
+        if QTc_obj.rank == 0:
+            logger.step(iq+1)
+
+    if QTc_obj.comm is not None:
+        QTc_obj.comm.Allreduce(MPI.IN_PLACE, self_energies_local, op=MPI.SUM)
+
+    eigen_all = np.transpose(eigen)
+    self_energies = QTc_obj._self_energy_symmetrize(eigen_all, self_energies_local)
+    if QTc_obj.rank == 0:
+        se_imag = self_energies.imag
+        se_real = self_energies.real
+        spectrum_func = np.sum(np.abs(se_imag) / (np.power(omega_list[None,None,:] - eigen_all[:,:,None] - se_real, 2) + np.power(se_imag, 2)), axis=1) / QTcts.PI
+    else:
+        spectrum_func = None
     context = getattr(QTc_obj, '_grad_mat_context', None)
     if context is not None:
         free_grad_mat_context(context)
@@ -308,164 +426,6 @@ def _release_self_energy_cache(QTc_obj):
     # process-local.  Dropping the capsule here invokes its destructor.
     if hasattr(QTc_obj, '_sparse_grad_cache'):
         QTc_obj._sparse_grad_cache = None
-
-
-def _spectrum_function_electron_epc_sparse(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False, *, mode_result=None):
-    try:
-        efocus_threshold, k_grid, eigen, eigen_vecs, q_grid_local, weights_q_local, freq_grid, phon_vecs, apply_correction_for_qs = \
-            _prepare_electron_epc_self_energy_q_parallel(QTc_obj, k_grid, q_grid, is_metal=is_metal)
-        with collective_mode_errors(QTc_obj, "local q accumulation"):
-            omega_list = np.arange(QTc_obj.SE_erange[0], QTc_obj.SE_erange[1]+QTc_obj.SE_erange[2]/10.0, QTc_obj.SE_erange[2])
-            eigen = eigen - QTc_obj.efermi
-            nomegas = len(omega_list)
-            nbands = len(QTc_obj.bands_indices)
-            nbranches = int(3) * QTc_obj.natoms
-            nks = len(k_grid)
-            self_energies_local = np.zeros((nks, nbands, nomegas), dtype=complex)
-            resolve_modes = getattr(QTc_obj, 'SE_mode_resolved', False)
-            enk_inside_all = np.ascontiguousarray(
-                (eigen.T >= efocus_threshold[0]) & (eigen.T <= efocus_threshold[1]))
-            if resolve_modes:
-                if mode_result is None:
-                    raise ValueError('SE_mode_resolved requires a mode_result dictionary.')
-                if getattr(QTc_obj, '_sparse_grad_cache', None) is None:
-                    raise RuntimeError('SE_mode_resolved requires the prepared sparse gradient cache.')
-                sigma_mode = np.zeros((nks, nbands, nbranches, nomegas), dtype=np.complex128)
-                kernel_seconds = 0.0
-                kernel_threads = 0
-            phase_k_all = np.exp(QTcts.JTWOPI * (QTc_obj.nbr_shift_of_cell_sc @ k_grid.T))
-            atomic_mass = np.ascontiguousarray(QTc_obj.atomic_mass)
-            if QTc_obj.rank == 0:
-                logger = time_logger(max(len(q_grid_local), 1), 'spectrum_function_electron_epc_sparse')
-
-            for iq, q in enumerate(q_grid_local):
-                freq, eigen_vec_phon, apply_correction_for_this_q = freq_grid[iq], phon_vecs[iq], apply_correction_for_qs[iq]
-                bose_qvs = bose_weight(freq, QTc_obj.temperature)
-                atomic_phase = np.exp(QTcts.JTWOPI*np.sum(QTc_obj.graph_data.pos*q[None,:], axis=-1)) # shape (natoms, )
-                phvec_wap = atomic_phase[None,:,None] * eigen_vec_phon # shape (nbranches, natoms, 3)
-                kpqs = np.ascontiguousarray(k_grid + q)
-                eig_kpqs_raw, wave_kpqs_raw = QTc_obj._elec_cal_torch(kpqs)
-                # Both native paths use final-state energies relative to EF.
-                # The batch C API uses [ik, band, ...] layout.
-                eig_kpqs = np.ascontiguousarray(eig_kpqs_raw[QTc_obj.bands_indices].T)
-                eig_kpqs_shifted = np.ascontiguousarray(eig_kpqs - QTc_obj.efermi)
-                wave_kpqs = np.ascontiguousarray(wave_kpqs_raw[:, QTc_obj.bands_indices, :])
-                match_table_all = _get_batch_epc_match_table(
-                    omega_list, eig_kpqs_shifted, freq,
-                    QTc_obj.phonon_frequency_cutoff, QTc_obj.e_thr)
-                fermi_kpqs = np.ascontiguousarray(
-                    fermi_weight(eig_kpqs_shifted, QTc_obj.temperature))
-                phase_q = np.exp(QTcts.JTWOPI * (QTc_obj.nbr_shift_of_cell_sc @ q))
-                phase_kpq_all = np.ascontiguousarray((phase_k_all * phase_q[:, None]).T)
-                phvec_wap = np.ascontiguousarray(phvec_wap)
-
-                if QTc_obj.spinor_mode != 'none':
-                    # The batch cache is restricted to the nonmagnetic path.
-                    # Spinor calculations continue to use the scalar helper.
-                    for ik, k in enumerate(k_grid):
-                        enk_inside_table = enk_inside_all[ik]
-                        match_table_k = match_table_all[ik]
-                        if not enk_inside_table.any() or not match_table_k.any():
-                            continue
-                        eig_k = eigen[:, ik]
-                        wave_k = eigen_vecs[ik]
-                        eig_kpq = eig_kpqs_shifted[ik]
-                        wave_kpq = wave_kpqs[ik]
-                        match_table = np.repeat(match_table_k[None, :, :], nbands, axis=0)
-                        epc_corr = np.zeros((nbands, nbands, nbranches), dtype=complex)
-                        if apply_correction_for_this_q:
-                            epc_corr = QTc_obj._get_LR_correction_kq(
-                                q, freq, phvec_wap, match_table, enk_inside_table,
-                                k, wave_k, wave_kpq, return_tmp1=False)
-                        self_energy_single = np.zeros(
-                            (nbands, nbranches, nomegas), dtype=complex, order='C')
-                        electron_self_energy_cal_EPC_helper_sparse(
-                            np.ascontiguousarray(freq), atomic_mass, phvec_wap,
-                            np.ascontiguousarray(phase_k_all[:, ik]),
-                            np.ascontiguousarray(phase_kpq_all[ik]), QTc_obj.grad_mat,
-                            np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
-                            np.ascontiguousarray(enk_inside_table),
-                            np.ascontiguousarray(match_table), np.ascontiguousarray(eig_kpq),
-                            np.ascontiguousarray(bose_qvs), np.ascontiguousarray(fermi_kpqs[ik]),
-                            np.ascontiguousarray(epc_corr), self_energy_single,
-                            np.ascontiguousarray(omega_list), weights_q_local[iq], QTc_obj.smeark)
-                        self_energies_local[ik] += np.sum(self_energy_single, axis=1)
-                elif apply_correction_for_this_q:
-                    # Long-range correction still needs the scalar path because each
-                    # k point receives a distinct correction matrix.
-                    for ik, k in enumerate(k_grid):
-                        enk_inside_table = enk_inside_all[ik]
-                        match_table_k = match_table_all[ik]
-                        if not enk_inside_table.any() or not match_table_k.any():
-                            continue
-                        eig_k = eigen[:, ik]
-                        wave_k = eigen_vecs[ik]
-                        eig_kpq = eig_kpqs_shifted[ik]
-                        wave_kpq = wave_kpqs[ik]
-                        match_table = np.repeat(match_table_k[None, :, :], nbands, axis=0)
-                        epc_corr = QTc_obj._get_LR_correction_kq(
-                            q, freq, phvec_wap, match_table, enk_inside_table,
-                            k, wave_k, wave_kpq, return_tmp1=False)
-                        self_energy_single = np.zeros(
-                            (nbands, nbranches, nomegas), dtype=complex, order='C')
-                        electron_self_energy_cal_EPC_helper_sparse(
-                            np.ascontiguousarray(freq), atomic_mass, phvec_wap,
-                            np.ascontiguousarray(phase_k_all[:, ik]),
-                            np.ascontiguousarray(phase_kpq_all[ik]), QTc_obj.grad_mat,
-                            np.ascontiguousarray(wave_k), np.ascontiguousarray(wave_kpq),
-                            np.ascontiguousarray(enk_inside_table),
-                            np.ascontiguousarray(match_table), np.ascontiguousarray(eig_kpq),
-                            np.ascontiguousarray(bose_qvs), np.ascontiguousarray(fermi_kpqs[ik]),
-                            np.ascontiguousarray(epc_corr), self_energy_single,
-                            np.ascontiguousarray(omega_list), weights_q_local[iq], QTc_obj.smeark)
-                        self_energies_local[ik] += np.sum(self_energy_single, axis=1)
-                elif (getattr(QTc_obj, '_sparse_grad_cache', None) is not None and
-                      enk_inside_all.any() and match_table_all.any()):
-                    batch_args = (
-                        np.ascontiguousarray(freq), atomic_mass, phvec_wap,
-                        np.ascontiguousarray(phase_k_all.T), phase_kpq_all,
-                        QTc_obj._sparse_grad_cache, np.ascontiguousarray(eigen_vecs),
-                        wave_kpqs, enk_inside_all, match_table_all, eig_kpqs_shifted,
-                        np.ascontiguousarray(bose_qvs), fermi_kpqs,
-                        self_energies_local, np.ascontiguousarray(omega_list),
-                        weights_q_local[iq], QTc_obj.smeark)
-                    if resolve_modes:
-                        profile = electron_self_energy_cal_EPC_helper_sparse_batch(*batch_args, sigma_mode)
-                        kernel_seconds += profile['kernel_seconds']
-                        kernel_threads = max(kernel_threads, profile['threads'])
-                    else:
-                        electron_self_energy_cal_EPC_helper_sparse_batch(*batch_args)
-                if QTc_obj.rank == 0:
-                    logger.step(iq+1)
-
-    finally:
-        _release_self_energy_cache(QTc_obj)
-
-    if QTc_obj.comm is not None:
-        QTc_obj.comm.Allreduce(MPI.IN_PLACE, self_energies_local, op=MPI.SUM)
-
-    if resolve_modes and QTc_obj.comm is not None:
-        QTc_obj.comm.Allreduce(MPI.IN_PLACE, sigma_mode, op=MPI.SUM)
-    with collective_mode_errors(QTc_obj, "postprocessing"):
-        eigen_all = np.transpose(eigen)
-        self_energies = QTc_obj._self_energy_symmetrize(eigen_all, self_energies_local)
-        if resolve_modes:
-            for inu in range(nbranches):
-                sigma_mode[:, :, inu, :] = QTc_obj._self_energy_symmetrize(
-                    eigen_all, sigma_mode[:, :, inu, :])
-            profile = {'threads': kernel_threads, 'kernel_seconds': kernel_seconds}
-            mode_result.update(sigma_mode=sigma_mode, initial_state_mask=enk_inside_all,
-                               profile=profile)
-        if QTc_obj.rank == 0:
-            se_imag = self_energies.imag
-            se_real = self_energies.real
-            spectrum_func = np.sum(np.abs(se_imag) / (np.power(omega_list[None,None,:] - eigen_all[:,:,None] - se_real, 2) + np.power(se_imag, 2)), axis=1) / QTcts.PI
-        else:
-            spectrum_func = None
-    if resolve_modes:
-        profile = mode_result.pop('profile')
-        profiles = [profile] if QTc_obj.comm is None else QTc_obj.comm.allgather(profile)
-        mode_result['profiles'] = profiles
     return eigen_all, omega_list, self_energies, spectrum_func
 
 def _spectrum_function_electron_epc_collinear_dense(QTc_obj, k_grid:np.ndarray, q_grid:np.ndarray, is_metal:bool=False):

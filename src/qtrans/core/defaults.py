@@ -7,7 +7,6 @@ from typing import Dict
 calculator_default_parameters:Dict[str, Dict[str, Any]] = {
     'advanced': {
         'read_sparse_grad_mat': False,
-        'k_batch_mem': 256,  # MiB; estimated temporary matrix budget
         # Keep the historical contiguous q distribution unless explicitly
         # requested.  ``block`` is accepted as an alias by the validator.
         'q_split_mode': 'contiguous',
@@ -151,7 +150,6 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
     },
     'self-energy': {
         'SE_type': 'electron', # electron, phonon
-        'SE_mode_resolved': False,
         'SE_erange': [-1.0, 1.0, 0.01],  # [emin, emax, estep] in eV
         'over_band_edge': 0.2, # eV
         'ncarrier': 10000000000000000.0,  # 10^16 cm^-3
