@@ -56,6 +56,10 @@ def scattering_rate_cal_EPC_helper_sparse(*args):
     return _call("scattering_rate_cal_EPC_helper_sparse", *args)
 
 
+def scattering_rate_cal_EPC_helper_sparse_batch(*args):
+    return _call("scattering_rate_cal_EPC_helper_sparse_batch", *args)
+
+
 def breakdown_rate_cal_EPC_helper_sparse(*args):
     return _call("breakdown_rate_cal_EPC_helper_sparse", *args)
 
@@ -77,12 +81,6 @@ def prepare_sparse_grad_cache(*args):
 
 
 def electron_self_energy_cal_EPC_helper_sparse_batch(*args):
-    """Accumulate total self-energy; optional argument 18 receives branch terms.
-
-    The optional buffer is writable C-contiguous complex128 with axes
-    (k, initial band, phonon branch, energy), in Hartree. Both outputs are
-    accumulated in place and must be initialized by the caller.
-    """
     return _call("electron_self_energy_cal_EPC_helper_sparse_batch", *args)
 
 

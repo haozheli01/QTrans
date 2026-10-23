@@ -1354,38 +1354,25 @@ self-energy block
 
 .. _cal_SE_mode_resolved:
 .. param-card:: SE_mode_resolved
-   :options: True | False
+   :options: True, False
    :default: False
    :block: self-energy
 
-    Save the complex electron self-energy for every phonon
-    branch, summed over q, in
-    ``<outdir>/self_energy/electron_self_energy_modes.npz``.
+    Added 2026-10-23. Save the complex electron self-energy contribution from
+    every phonon branch in ``<outdir>/self_energy/electron_self_energy_modes.npz``.
+    This option is independent of ``transport.mode_resolved``.
+
     Requires ``cal_mode: band``, ``disp_renormalize: True``,
     ``band_grid_mode: False``, ``SE_type: electron``, sparse gradients,
-    nonmagnetic/no SOC, and both long-range correction options disabled.
-    Unsupported combinations raise an input error. Existing mode output is
-    never overwritten; use a new output directory for another calculation.
+    ``magnetic_type: none``, ``soc_switch: False``, and both phonon long-range
+    correction flags set to ``False``. Unsupported combinations are rejected
+    from the original input, before workflow-specific overrides.
 
-    ``sigma_mode_eV`` is complex128 with axes
-    ``(k, initial_band, phonon_branch, energy)``. Branches are sorted by
-    frequency at each q; their identities are not tracked across q.
-    Each contribution already uses the retarded convention
-    :math:`\Sigma(E)-\operatorname{Re}\Sigma(0)` and the same electronic
-    degeneracy average as the independent total ``sigma_total_eV``.
-    Summing the branch axis recovers that total within floating-point error.
-    Individual spectra cannot be added to obtain the total spectrum.
-
-    The archive also contains ``energies_eV`` and ``bare_energies_eV`` relative
-    to the Fermi level, fractional ``kpoints_frac``, ``bands_1based``,
-    ``branches_1based``, the boolean ``initial_state_mask`` before electronic
-    degeneracy averaging, and a Unicode ``metadata_json`` scalar. A false mask
-    can acquire a nonzero value through degeneracy averaging at the window
-    boundary. Load with ``numpy.load(path, allow_pickle=False)``.
-
-    The additional complex array requires
-    :math:`16 N_k N_b (3N_{\mathrm{at}}) N_E` bytes per MPI rank,
-    plus communication and output temporaries. All branches are retained.
+    All ``3 * natoms`` branches are saved after the q sum and electronic
+    degeneracy average. Existing total self-energy and spectrum formats are
+    preserved. The NPZ is created exclusively; use a new output directory for
+    each run. See :ref:`electron-self-energy-modes` for axes, units, memory
+    requirements, and validation instructions.
 
 :ref:`Back to top <cal_title_keywords>`
 

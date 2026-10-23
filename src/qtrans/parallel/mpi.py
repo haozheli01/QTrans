@@ -8,6 +8,7 @@ from typing import List
 from typing import Sequence
 from typing import Union
 import numpy as np
+import pickle
 try:
     import resource
 except ImportError:
@@ -62,14 +63,15 @@ def get_rank_indices(data_len: int, rank_id: int, rank_size: int,
         return np.array_split(indices, rank_size)[rank_id]
     if mode == "hash-cyclic":
         permutation = np.argsort(_splitmix64(indices), kind="stable")
-        return indices[permutation][rank_id::rank_size]
+        # Copy the local slice so it does not retain the full permutation.
+        return permutation[rank_id::rank_size].copy()
     raise ValueError(f"Unsupported q_split_mode={split_mode!r}.")
 
 
 def get_q_rank_indices(q_grid: np.ndarray, rank_id: int, rank_size: int,
                        split_mode: str = "hash-cyclic",
                        q_size: Union[np.ndarray, Sequence[int], None] = None) -> np.ndarray:
-    """Map q points to ranks, matching QTrans20260721 hash-cyclic semantics."""
+    """Map q points to ranks by stable hash sorting followed by round-robin."""
     q_grid = np.asarray(q_grid)
     if q_grid.ndim != 2 or q_grid.shape[1] != 3:
         raise ValueError("q_grid must have shape (nq, 3).")
@@ -92,9 +94,43 @@ def get_q_rank_indices(q_grid: np.ndarray, rank_id: int, rank_size: int,
         q_coords = np.mod(q_coords, q_size[None, :]).astype(np.uint64)
         qs = q_size.astype(np.uint64)
         hash_input = q_coords[:, 0] + qs[0] * (q_coords[:, 1] + qs[1] * q_coords[:, 2])
-    indices = np.arange(len(q_grid), dtype=int)
     permutation = np.argsort(_splitmix64(hash_input), kind="stable")
-    return indices[permutation][rank_id::rank_size]
+    return permutation[rank_id::rank_size].copy()
+
+
+def get_q_rank_index_parts(q_grid: np.ndarray, rank_size: int,
+                           split_mode: str = 'contiguous',
+                           q_size: Union[np.ndarray, Sequence[int], None] = None):
+    """Build all q owner parts once, for a root-only q-grid partition.
+
+    The caller should invoke this on the root rank and scatter the returned
+    coordinate/index parts.  In hash-cyclic mode the hashes are stably sorted
+    once, then the permutation is distributed round-robin across ranks.
+    """
+    q_grid = np.asarray(q_grid)
+    if q_grid.ndim != 2 or q_grid.shape[1] != 3:
+        raise ValueError('q_grid must have shape (nq, 3).')
+    if rank_size < 1:
+        raise ValueError('rank_size must be positive.')
+    mode = str(split_mode).strip().lower().replace('_', '-')
+    if mode in ('block', 'contiguous'):
+        indices = np.arange(len(q_grid), dtype=int)
+        return list(np.array_split(indices, rank_size))
+    if mode != 'hash-cyclic':
+        raise ValueError(f'Unsupported q_split_mode={split_mode!r}.')
+    if q_size is None:
+        hash_input = np.arange(len(q_grid), dtype=np.uint64)
+    else:
+        q_size = np.asarray(q_size, dtype=np.int64)
+        if q_size.shape != (3,) or np.any(q_size < 1):
+            raise ValueError('q_size must contain three positive integers.')
+        q_coords = np.rint(np.mod(q_grid, 1.0) * q_size[None, :]).astype(np.int64)
+        q_coords = np.mod(q_coords, q_size[None, :]).astype(np.uint64)
+        qs = q_size.astype(np.uint64)
+        hash_input = q_coords[:, 0] + qs[0] * (
+            q_coords[:, 1] + qs[1] * q_coords[:, 2])
+    permutation = np.argsort(_splitmix64(hash_input), kind='stable')
+    return [permutation[rank::rank_size] for rank in range(rank_size)]
 
 
 def split_by_rank_indices(data: Sequence, axis: int, indices: np.ndarray) -> np.ndarray:
@@ -105,79 +141,135 @@ def split_by_rank_indices(data: Sequence, axis: int, indices: np.ndarray) -> np.
     return np.take(data, indices, axis=axis)
 
 
-_ARRAY_CHUNK_BYTES = 256 * 1024 ** 2
+def iter_bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=512 * 1024 ** 2):
+    """Yield ``(owner, row_offset, chunk)`` in rank order using typed Bcast.
 
-
-def _array_chunk_input(data, chunk_bytes):
-    array = np.asarray(data)
-    if array.ndim < 1 or array.dtype.kind not in 'biufc' or not array.dtype.isnative:
-        raise ValueError('Chunked MPI arrays must be native numeric arrays with a row axis.')
-    if not isinstance(chunk_bytes, (int, np.integer)) or chunk_bytes < array.dtype.itemsize:
-        raise ValueError('chunk_bytes must fit at least one array element.')
-    return np.ascontiguousarray(array)
-
-
-def _array_rank_metadata(local, comm):
-    metadata = (local.shape, local.dtype.str)
-    all_metadata = [metadata] if comm is None else comm.allgather(metadata)
-    if any(shape[1:] != local.shape[1:] or dtype != local.dtype.str
-           for shape, dtype in all_metadata):
-        raise ValueError('Chunked MPI arrays must share trailing shape and dtype.')
-    return all_metadata
-
-
-def iter_bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=_ARRAY_CHUNK_BYTES):
-    """Yield (owner, local row offset, rows) on every rank in rank order.
-
-    Each typed broadcast stays within chunk_bytes. A row larger than that
-    budget is broadcast in several pieces, then yielded as one complete row.
-    Empty owners yield no chunks. Consumers must exhaust the iterator on all
-    ranks in the same order; they may perform matching collectives per yield.
+    A consumer can process each owner's wavefunctions without retaining the
+    arrays belonging to every rank. Every MPI payload is strictly bounded.
     """
-    local = _array_chunk_input(data_local, chunk_bytes)
-    metadata = _array_rank_metadata(local, comm)
-    rank = 0 if comm is None else comm.Get_rank()
-    row_items = int(np.prod(local.shape[1:], dtype=np.int64))
-    row_bytes = row_items * local.dtype.itemsize
-    rows_per_chunk = max(1, int(chunk_bytes) // max(1, row_bytes))
-    for owner, (shape, _) in enumerate(metadata):
-        for offset in range(0, shape[0], rows_per_chunk):
-            count = min(rows_per_chunk, shape[0] - offset)
-            chunk = (local[offset:offset + count] if rank == owner else
-                     np.empty((count,) + shape[1:], dtype=local.dtype))
-            if comm is not None:
-                buffer = chunk.reshape(-1).view(np.uint8)
-                for start in range(0, buffer.size, int(chunk_bytes)):
-                    comm.Bcast([buffer[start:start + int(chunk_bytes)], MPI.BYTE], root=owner)
+    data_local = np.ascontiguousarray(data_local)
+    if comm is None:
+        yield 0, 0, data_local.copy()
+        return
+    rank = comm.Get_rank()
+    shape_tail = tuple(data_local.shape[1:])
+    dtype = data_local.dtype
+    metadata = comm.allgather((int(data_local.shape[0]), shape_tail, dtype.str))
+    if any(tuple(item[1]) != shape_tail or item[2] != dtype.str for item in metadata):
+        raise RuntimeError("Inconsistent array shape or dtype across ranks.")
+    row_bytes = max(1, int(np.prod(shape_tail, dtype=np.int64)) * dtype.itemsize)
+    if chunk_bytes < dtype.itemsize:
+        raise ValueError("MPI chunk limit is smaller than one array element.")
+    rows_per_chunk = max(1, int(chunk_bytes) // row_bytes)
+    for owner, (count, _, _) in enumerate(metadata):
+        for offset in range(0, count, rows_per_chunk):
+            nrows = min(rows_per_chunk, count - offset)
+            if rank == owner:
+                chunk = np.ascontiguousarray(data_local[offset:offset + nrows])
+            else:
+                chunk = np.empty((nrows,) + shape_tail, dtype=dtype)
+            if chunk.nbytes <= chunk_bytes:
+                comm.Bcast(chunk, root=owner)
+            else:
+                flat = chunk.reshape(-1)
+                nelem = max(1, int(chunk_bytes) // dtype.itemsize)
+                for start in range(0, flat.size, nelem):
+                    comm.Bcast(flat[start:start + nelem], root=owner)
             yield owner, offset, chunk
 
 
-def bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=_ARRAY_CHUNK_BYTES):
-    """Allgather rows with bounded typed broadcasts, preserving rank order."""
-    local = _array_chunk_input(data_local, chunk_bytes)
-    metadata = _array_rank_metadata(local, comm)
-    counts = [shape[0] for shape, _ in metadata]
+def bcast_array_by_rank_chunks(data_local, comm, chunk_bytes=512 * 1024 ** 2):
+    """Collect typed rank broadcasts in rank order (legacy superconductor API)."""
+    data_local = np.ascontiguousarray(data_local)
+    if comm is None:
+        return data_local.copy()
+    counts = comm.allgather(int(data_local.shape[0]))
     starts = np.insert(np.cumsum(counts[:-1], dtype=np.int64), 0, 0)
-    result = np.empty((sum(counts),) + local.shape[1:], dtype=local.dtype)
-    for owner, offset, chunk in iter_bcast_array_by_rank_chunks(local, comm, chunk_bytes):
-        start = int(starts[owner]) + offset
-        result[start:start + len(chunk)] = chunk
+    result = np.empty((sum(counts),) + data_local.shape[1:], dtype=data_local.dtype)
+    for owner, offset, chunk in iter_bcast_array_by_rank_chunks(
+            data_local, comm, chunk_bytes):
+        result[starts[owner] + offset:starts[owner] + offset + len(chunk)] = chunk
     return result
 
 
-def allreduce_array_in_place_chunks(data, comm, chunk_bytes=_ARRAY_CHUNK_BYTES, op=MPI.SUM):
-    """Reduce a writable contiguous numeric array in place in bounded pieces."""
-    array = _array_chunk_input(data, chunk_bytes)
-    if not isinstance(data, np.ndarray) or not data.flags.c_contiguous or not data.flags.writeable:
-        raise ValueError('In-place chunked reduction requires a writable C-contiguous ndarray.')
-    if comm is not None:
-        metadata = comm.allgather((array.shape, array.dtype.str))
-        if any(item != metadata[0] for item in metadata):
-            raise ValueError('In-place chunked reduction requires identical shapes and dtypes.')
-        flat = array.reshape(-1)
-        count = int(chunk_bytes) // array.dtype.itemsize
-        for start in range(0, flat.size, count):
-            comm.Allreduce(MPI.IN_PLACE, flat[start:start + count], op=op)
+def allreduce_array_in_place_chunks(data, comm, chunk_bytes=512 * 1024 ** 2):
+    """Sum a contiguous ndarray, chunking only when its payload is too large."""
+    if comm is None:
+        return
+    if not data.flags.c_contiguous:
+        raise ValueError("Chunked Allreduce requires a C-contiguous array.")
+    flat = data.reshape(-1)
+    nelem = max(1, int(chunk_bytes) // data.dtype.itemsize)
+    for start in range(0, flat.size, nelem):
+        comm.Allreduce(MPI.IN_PLACE, flat[start:start + nelem], op=MPI.SUM)
+
+
+def gather_array_to_root_chunks(data_local, comm, root=0,
+                                chunk_bytes=512 * 1024 ** 2):
+    """Gather trailing-k-axis arrays with one typed Gatherv when small.
+
+    If the combined receive payload exceeds the bound, transfer each sender
+    in bounded typed chunks to avoid a 32-bit MPI count or pickle limit.
+    """
+    data_local = np.ascontiguousarray(data_local)
+    if comm is None:
+        return [data_local.copy()]
+    rank = comm.Get_rank()
+    metadata = comm.allgather((data_local.shape, data_local.dtype.str))
+    if any(item[0][:-1] != data_local.shape[:-1] or
+           item[1] != data_local.dtype.str for item in metadata):
+        raise RuntimeError("Inconsistent gather array shape or dtype.")
+    counts = [int(np.prod(shape, dtype=np.int64)) for shape, _ in metadata]
+    if (sum(counts) * data_local.dtype.itemsize <= chunk_bytes and
+            sum(counts) < np.iinfo(np.int32).max):
+        displacements = np.insert(np.cumsum(counts[:-1], dtype=np.int64), 0, 0)
+        received = (np.empty(sum(counts), dtype=data_local.dtype)
+                    if rank == root else None)
+        comm.Gatherv(data_local.reshape(-1),
+                     [received, counts, displacements,
+                      get_mpi_data_type(data_local)] if rank == root else None,
+                     root=root)
+        if rank == root:
+            return [received[displacements[i]:displacements[i] + count]
+                    .reshape(metadata[i][0]) for i, count in enumerate(counts)]
+        return None
+    nelem = max(1, int(chunk_bytes) // data_local.dtype.itemsize)
+    if rank == root:
+        result = [None] * comm.Get_size()
+        result[root] = data_local
+        for owner, (shape, _) in enumerate(metadata):
+            if owner == root:
+                continue
+            received = np.empty(shape, dtype=data_local.dtype)
+            flat = received.reshape(-1)
+            for start in range(0, flat.size, nelem):
+                comm.Recv(flat[start:start + nelem], source=owner, tag=941)
+            result[owner] = received
+        return result
+    flat = data_local.reshape(-1)
+    for start in range(0, flat.size, nelem):
+        comm.Send(flat[start:start + nelem], dest=root, tag=941)
+    return None
+
+
+def bcast_array_from_root_chunks(data_root, comm, root=0,
+                                 chunk_bytes=512 * 1024 ** 2):
+    """Broadcast one contiguous ndarray with bounded typed payloads."""
+    if comm is None:
+        return np.ascontiguousarray(data_root).copy()
+    rank = comm.Get_rank()
+    if rank == root:
+        data = np.ascontiguousarray(data_root)
+        metadata = (data.shape, data.dtype.str)
+    else:
+        metadata = None
+    shape, dtype_str = comm.bcast(metadata, root=root)
+    if rank != root:
+        data = np.empty(shape, dtype=np.dtype(dtype_str))
+    flat = data.reshape(-1)
+    nelem = max(1, int(chunk_bytes) // data.dtype.itemsize)
+    for start in range(0, flat.size, nelem):
+        comm.Bcast(flat[start:start + nelem], root=root)
     return data
 
 def gather_to_rank_root(data_local:Any, comm:Union[Intracomm, None], root:int=0) -> Union[List[Any], None]:
@@ -191,6 +283,42 @@ def gather_to_rank_root(data_local:Any, comm:Union[Intracomm, None], root:int=0)
         else:
             data_all = gather_to_rank_root_obj(data_local, comm, root)
     return data_all
+
+_OBJECT_CHUNK_BYTES = 512 * 1024 ** 2
+
+
+def _send_pickled_object_chunks(data: Any, comm: Intracomm, dest: int,
+                                control_tag: int = 9100,
+                                payload_tag: int = 9101) -> None:
+    """Send one Python object without a 2-GiB mpi4py pickle message.
+
+    ``comm.send`` pickles the complete object into one MPI message.  Graph
+    packing can produce a single rank-local dictionary larger than the
+    32-bit-count limit, so serialize once and transfer the resulting bytes in
+    bounded typed ``MPI.BYTE`` messages.  The receiver gets the byte count in
+    a small control message and reconstructs the original object exactly.
+    """
+    payload = pickle.dumps(data, protocol=5)
+    payload_view = np.frombuffer(payload, dtype=np.uint8)
+    comm.send(int(payload_view.size), dest=dest, tag=control_tag)
+    for start in range(0, payload_view.size, _OBJECT_CHUNK_BYTES):
+        comm.Send(payload_view[start:start + _OBJECT_CHUNK_BYTES],
+                  dest=dest, tag=payload_tag)
+
+
+def _recv_pickled_object_chunks(comm: Intracomm, source: int,
+                                control_tag: int = 9100,
+                                payload_tag: int = 9101) -> Any:
+    """Receive an object sent by ``_send_pickled_object_chunks``."""
+    payload_size = int(comm.recv(source=source, tag=control_tag))
+    if payload_size < 0:
+        raise RuntimeError(f"Invalid pickled object size from rank {source}: {payload_size}")
+    payload_view = np.empty(payload_size, dtype=np.uint8)
+    for start in range(0, payload_size, _OBJECT_CHUNK_BYTES):
+        comm.Recv(payload_view[start:start + _OBJECT_CHUNK_BYTES],
+                  source=source, tag=payload_tag)
+    return pickle.loads(payload_view)
+
 
 def gather_to_rank_root_obj(data_local:Any, comm:Union[Intracomm, None], root:int=0) -> Union[List[Any], None]:
     """
@@ -222,17 +350,17 @@ def gather_to_rank_root_obj(data_local:Any, comm:Union[Intracomm, None], root:in
     if rank_size == 1:
         return [data_local]
 
-    # Use point-to-point send/recv instead of comm.gather to avoid
-    # the 2 GB pickle buffer overflow in mpi4py for large objects.
+    # Use bounded point-to-point typed transfers instead of comm.gather or
+    # comm.send, both of which can create one >2-GiB pickle MPI message.
     if rank == root:
         data_all = [None] * rank_size
         data_all[root] = data_local
         for src in range(rank_size):
             if src == root:
                 continue
-            data_all[src] = comm.recv(source=src, tag=src)
+            data_all[src] = _recv_pickled_object_chunks(comm, source=src)
     else:
-        comm.send(data_local, dest=root, tag=rank)
+        _send_pickled_object_chunks(data_local, comm, dest=root)
         data_all = None
     return data_all
 

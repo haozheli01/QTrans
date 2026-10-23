@@ -2,7 +2,8 @@
 
 from phonopy.structure.atoms import atom_data
 from qtrans.calculator.registry import CALCULATION_MODES
-from qtrans.calculator.spectra.modes import validate_mode_configuration
+from qtrans.calculator.spectra.self_energy_modes import validate_mode_configuration
+from qtrans.config import copy_configuration
 from qtrans.core.constants import QTcts
 from qtrans.core.defaults import calculator_default_parameters
 from qtrans.core.errors import InputParameterError
@@ -762,10 +763,9 @@ class _ConfigMixin:
             config (dict): The config dict.
         """
 
-        # Check before ignored blocks, unit conversion, and band -> self-energy.
-        mode_input_hash = validate_mode_configuration(config)
-        if mode_input_hash is not None:
-            self._se_mode_input_sha256 = mode_input_hash
+        # Validate before blocks are popped, ignored, or SE_type is overridden.
+        if validate_mode_configuration(config):
+            self._self_energy_modes_input = copy_configuration(config)
 
         if 'advanced' in config:
             self._parse_input_optional(config=config, block_name='advanced')
