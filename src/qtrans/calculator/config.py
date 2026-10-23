@@ -2,6 +2,8 @@
 
 from phonopy.structure.atoms import atom_data
 from qtrans.calculator.registry import CALCULATION_MODES
+from qtrans.calculator.spectra.self_energy_modes import validate_mode_configuration
+from qtrans.config import copy_configuration
 from qtrans.core.constants import QTcts
 from qtrans.core.defaults import calculator_default_parameters
 from qtrans.core.errors import InputParameterError
@@ -706,6 +708,7 @@ class _ConfigMixin:
         """
         Initialize self-energy block.
         """
+        self._set('SE_mode_resolved', validate_bool,      'self-energy', 5305)
         self._set('SE_erange',      validate_numpy_array, 'self-energy', 5302, (3,), float)
         self._set('over_band_edge', validate_num,         'self-energy', 5303)
         self._set('ncarrier',       validate_num,         'self-energy', 5304)
@@ -759,6 +762,10 @@ class _ConfigMixin:
         Args:
             config (dict): The config dict.
         """
+
+        # Validate before blocks are popped, ignored, or SE_type is overridden.
+        if validate_mode_configuration(config):
+            self._self_energy_modes_input = copy_configuration(config)
 
         if 'advanced' in config:
             self._parse_input_optional(config=config, block_name='advanced')

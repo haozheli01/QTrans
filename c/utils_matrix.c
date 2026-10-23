@@ -1,10 +1,11 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
-#include </usr/include/complex.h>
+#include <complex.h>
 #include <stdio.h>
 #include <omp.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <time.h>
 
 #define INTP(a) ((int *)PyArray_DATA(a))
@@ -2676,7 +2677,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
     int MB = PyArray_DIMS(eig_kpq_obj)[0];
     int nomegas = PyArray_DIMS(omega_list_obj)[0];
 
-    int iorb, jorb, icell, jcell, ibranch, iatom, idir, iband, jband, idx_val, iomega;
+    int iorb, jorb, icell, jcell, ibranch, iatom, idir, iband, jband, idx_val;
     double factor, g2_tmp;
     double occ_factor1, occ_factor2, se0_factor;
     double complex epc, tmp1, tmp2;
@@ -2781,7 +2782,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse(PyObject *self, PyObject *a
                 e_pole1 = eig_kpq[iband] - freq[ibranch] - ieta;
                 e_pole2 = eig_kpq[iband] + freq[ibranch] - ieta;
                 se0_factor = -1.0 * creal(occ_factor1 / e_pole1 + occ_factor2 / e_pole2);
-                for (iomega = 0; iomega < nomegas; iomega++) {
+                for (int iomega = 0; iomega < nomegas; iomega++) {
                     se_factor = occ_factor1 / (omega_list[iomega] - e_pole1) + occ_factor2 / (omega_list[iomega] - e_pole2);
                     self_energy[INDEX3D(nbranches, nomegas, jband, ibranch, iomega)] = self_energy[INDEX3D(nbranches, nomegas, jband, ibranch, iomega)] + g2_tmp * (se_factor - se0_factor) * weight_q;
                 }
@@ -2826,15 +2827,16 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
     PyObject *omega_list_arg;
     PyObject *weight_q_arg;
     PyObject *eta_arg;
+    PyObject *sigma_mode_arg = Py_None;
 
     if (!PyArg_UnpackTuple(args, "electron_self_energy_cal_EPC_helper_sparse_batch",
-                           17, 17,
+                           17, 18,
                            &freq_arg, &atomic_mass_arg, &eigen_vec_phon_arg,
                            &phase_k_arg, &phase_kpq_arg, &cache_arg,
                            &wave_k_arg, &wave_kpq_arg, &enk_inside_arg,
                            &match_table_arg, &eig_kpq_arg, &bose_qvs_arg,
                            &fermi_kpqs_arg, &self_energy_arg, &omega_list_arg,
-                           &weight_q_arg, &eta_arg)) {
+                           &weight_q_arg, &eta_arg, &sigma_mode_arg)) {
         return NULL;
     }
 
@@ -2867,6 +2869,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
     PyArrayObject *fermi_kpqs_obj;
     PyArrayObject *self_energy_obj;
     PyArrayObject *omega_list_obj;
+    PyArrayObject *sigma_mode_obj = NULL;
 
     if (!require_c_array(freq_arg, NPY_DOUBLE, 1, 0, "freq", &freq_obj) ||
         !require_c_array(atomic_mass_arg, NPY_DOUBLE, 1, 0, "atomic_mass", &atomic_mass_obj) ||
@@ -2908,6 +2911,42 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
     int natoms = (int)natoms_dim;
     int ncell = (int)ncell_dim;
     int nomegas = (int)nomegas_dim;
+
+    if (sigma_mode_arg != Py_None) {
+        if (!require_c_array(sigma_mode_arg, NPY_CDOUBLE, 4, 1,
+                             "sigma_mode_out", &sigma_mode_obj)) {
+            return NULL;
+        }
+        if (!PyArray_ISNOTSWAPPED(sigma_mode_obj)) {
+            PyErr_SetString(PyExc_ValueError, "sigma_mode_out must use native byte order");
+            return NULL;
+        }
+        if (PyArray_DIMS(sigma_mode_obj)[0] != nk_dim ||
+            PyArray_DIMS(sigma_mode_obj)[1] != nb_dim ||
+            PyArray_DIMS(sigma_mode_obj)[2] != nbranches_dim ||
+            PyArray_DIMS(sigma_mode_obj)[3] != nomegas_dim) {
+            PyErr_SetString(PyExc_ValueError, "sigma_mode_out has an incompatible shape");
+            return NULL;
+        }
+        size_t mode_bytes;
+        if (!checked_size_mul((size_t)nk, (size_t)nbands, &mode_bytes) ||
+            !checked_size_mul(mode_bytes, (size_t)nbranches, &mode_bytes) ||
+            !checked_size_mul(mode_bytes, (size_t)nomegas, &mode_bytes) ||
+            !checked_size_mul(mode_bytes, sizeof(double complex), &mode_bytes)) {
+            PyErr_SetString(PyExc_OverflowError, "sigma_mode_out size overflow");
+            return NULL;
+        }
+        // Both outputs must own disjoint storage; otherwise the extra writes
+        // could corrupt the independent total accumulator.
+        uintptr_t mode_start = (uintptr_t)PyArray_DATA(sigma_mode_obj);
+        uintptr_t total_start = (uintptr_t)PyArray_DATA(self_energy_obj);
+        size_t total_bytes = (size_t)PyArray_NBYTES(self_energy_obj);
+        if ((mode_start <= total_start && total_start - mode_start < mode_bytes) ||
+            (total_start < mode_start && mode_start - total_start < total_bytes)) {
+            PyErr_SetString(PyExc_ValueError, "sigma_mode_out overlaps self_energy_out");
+            return NULL;
+        }
+    }
 
 #define CHECK_SHAPE_1(array, d0, name) \
     if (PyArray_DIMS(array)[0] != (d0)) { \
@@ -3074,6 +3113,7 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
     double complex *self_energy = DCOMPLEXP(self_energy_obj);
     double *omega_list = DOUBLEP(omega_list_obj);
 
+    double complex *sigma_mode = sigma_mode_obj ? DCOMPLEXP(sigma_mode_obj) : NULL;
     for (int ibranch = 0; ibranch < nbranches; ibranch++) {
         double factor = 1.0 / sqrt(2.0 * atomic_mass[0] * fabs(freq[ibranch]));
         for (int iatom = 0; iatom < natoms; iatom++) {
@@ -3220,9 +3260,18 @@ PyObject *electron_self_energy_cal_EPC_helper_sparse_batch(PyObject *self, PyObj
                             for (int iomega = 0; iomega < ocount; iomega++) {
                                 double complex contribution = 0.0 + 0.0 * I;
                                 for (int ibranch = 0; ibranch < nbranches; ibranch++) {
-                                    contribution +=
+                                    double complex term =
                                         g2_thread[(size_t)nlocal * (size_t)nbranches + (size_t)ibranch] *
                                         kernel_thread[(size_t)ibranch * (size_t)omega_tile + (size_t)iomega];
+                                    contribution += term;
+                                    if (sigma_mode != NULL) {
+                                        // The outer OpenMP loop owns this entire k slice.
+                                        size_t mode_index =
+                                            (((size_t)ik * (size_t)nbands + (size_t)nband) *
+                                             (size_t)nbranches + (size_t)ibranch) * (size_t)nomegas +
+                                            (size_t)(ostart + iomega);
+                                        sigma_mode[mode_index] += term;
+                                    }
                                 }
                                 size_t out_index =
                                     ((size_t)ik * (size_t)nbands + (size_t)nband) * (size_t)nomegas +

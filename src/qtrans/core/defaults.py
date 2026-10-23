@@ -152,6 +152,7 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
     },
     'self-energy': {
         'SE_type': 'electron', # electron, phonon
+        'SE_mode_resolved': False,
         'SE_erange': [-1.0, 1.0, 0.01],  # [emin, emax, estep] in eV
         'over_band_edge': 0.2, # eV
         'ncarrier': 10000000000000000.0,  # 10^16 cm^-3

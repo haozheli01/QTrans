@@ -174,6 +174,7 @@ Blocks
         **Block <self-energy>**
 
             :ref:`SE_type <cal_SE_type>`,
+            :ref:`SE_mode_resolved <cal_SE_mode_resolved>`,
             :ref:`SE_erange <cal_SE_erange>`,
             :ref:`over_band_edge <cal_over_band_edge_self_energy>`,
             :ref:`ncarrier <cal_ncarrier_self_energy>`
@@ -1348,6 +1349,30 @@ self-energy block
    :block: self-energy
 
     Specifies the quasiparticle type of which the self-energy will be calculated.
+
+:ref:`Back to top <cal_title_keywords>`
+
+.. _cal_SE_mode_resolved:
+.. param-card:: SE_mode_resolved
+   :options: True, False
+   :default: False
+   :block: self-energy
+
+    Added 2026-10-23. Save the complex electron self-energy contribution from
+    every phonon branch in ``<outdir>/self_energy/electron_self_energy_modes.npz``.
+    This option is independent of ``transport.mode_resolved``.
+
+    Requires ``cal_mode: band``, ``disp_renormalize: True``,
+    ``band_grid_mode: False``, ``SE_type: electron``, sparse gradients,
+    ``magnetic_type: none``, ``soc_switch: False``, and both phonon long-range
+    correction flags set to ``False``. Unsupported combinations are rejected
+    from the original input, before workflow-specific overrides.
+
+    All ``3 * natoms`` branches are saved after the q sum and electronic
+    degeneracy average. Existing total self-energy and spectrum formats are
+    preserved. The NPZ is created exclusively; use a new output directory for
+    each run. See :ref:`electron-self-energy-modes` for axes, units, memory
+    requirements, and validation instructions.
 
 :ref:`Back to top <cal_title_keywords>`
 
