@@ -62,20 +62,16 @@ def get_rank_indices(data_len: int, rank_id: int, rank_size: int,
     if mode in ("block", "contiguous"):
         return np.array_split(indices, rank_size)[rank_id]
     if mode == "hash-cyclic":
-        # Assign ownership directly from the deterministic hash.  The old
-        # implementation sorted all hashes and then strided the permutation;
-        # that made every rank allocate O(N) permutation/index arrays.  The
-        # owner map preserves deterministic coverage while using one boolean
-        # mask and local indices.
-        owners = _splitmix64(indices.astype(np.uint64)) % np.uint64(rank_size)
-        return indices[owners == np.uint64(rank_id)]
+        permutation = np.argsort(_splitmix64(indices), kind="stable")
+        # Copy the local slice so it does not retain the full permutation.
+        return permutation[rank_id::rank_size].copy()
     raise ValueError(f"Unsupported q_split_mode={split_mode!r}.")
 
 
 def get_q_rank_indices(q_grid: np.ndarray, rank_id: int, rank_size: int,
                        split_mode: str = "hash-cyclic",
                        q_size: Union[np.ndarray, Sequence[int], None] = None) -> np.ndarray:
-    """Map q points to ranks, matching QTrans20260721 hash-cyclic semantics."""
+    """Map q points to ranks by stable hash sorting followed by round-robin."""
     q_grid = np.asarray(q_grid)
     if q_grid.ndim != 2 or q_grid.shape[1] != 3:
         raise ValueError("q_grid must have shape (nq, 3).")
@@ -98,9 +94,8 @@ def get_q_rank_indices(q_grid: np.ndarray, rank_id: int, rank_size: int,
         q_coords = np.mod(q_coords, q_size[None, :]).astype(np.uint64)
         qs = q_size.astype(np.uint64)
         hash_input = q_coords[:, 0] + qs[0] * (q_coords[:, 1] + qs[1] * q_coords[:, 2])
-    indices = np.arange(len(q_grid), dtype=int)
-    owners = _splitmix64(hash_input) % np.uint64(rank_size)
-    return indices[owners == np.uint64(rank_id)]
+    permutation = np.argsort(_splitmix64(hash_input), kind="stable")
+    return permutation[rank_id::rank_size].copy()
 
 
 def get_q_rank_index_parts(q_grid: np.ndarray, rank_size: int,
@@ -109,8 +104,8 @@ def get_q_rank_index_parts(q_grid: np.ndarray, rank_size: int,
     """Build all q owner parts once, for a root-only q-grid partition.
 
     The caller should invoke this on the root rank and scatter the returned
-    coordinate/index parts.  In hash-cyclic mode the hash and owner mask are
-    computed once instead of once per rank.
+    coordinate/index parts.  In hash-cyclic mode the hashes are stably sorted
+    once, then the permutation is distributed round-robin across ranks.
     """
     q_grid = np.asarray(q_grid)
     if q_grid.ndim != 2 or q_grid.shape[1] != 3:
@@ -118,8 +113,8 @@ def get_q_rank_index_parts(q_grid: np.ndarray, rank_size: int,
     if rank_size < 1:
         raise ValueError('rank_size must be positive.')
     mode = str(split_mode).strip().lower().replace('_', '-')
-    indices = np.arange(len(q_grid), dtype=int)
     if mode in ('block', 'contiguous'):
+        indices = np.arange(len(q_grid), dtype=int)
         return list(np.array_split(indices, rank_size))
     if mode != 'hash-cyclic':
         raise ValueError(f'Unsupported q_split_mode={split_mode!r}.')
@@ -134,8 +129,8 @@ def get_q_rank_index_parts(q_grid: np.ndarray, rank_size: int,
         qs = q_size.astype(np.uint64)
         hash_input = q_coords[:, 0] + qs[0] * (
             q_coords[:, 1] + qs[1] * q_coords[:, 2])
-    owners = _splitmix64(hash_input) % np.uint64(rank_size)
-    return [indices[owners == np.uint64(rank)] for rank in range(rank_size)]
+    permutation = np.argsort(_splitmix64(hash_input), kind='stable')
+    return [permutation[rank::rank_size] for rank in range(rank_size)]
 
 
 def split_by_rank_indices(data: Sequence, axis: int, indices: np.ndarray) -> np.ndarray:

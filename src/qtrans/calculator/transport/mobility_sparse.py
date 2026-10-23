@@ -177,8 +177,8 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
     """Calculate sparse mobility rates with bounded q/k tiles.
 
     The q phase table is built at most ``_Q_PHASE_BLOCK_SIZE`` q points at a
-    time.  ``hash-cyclic`` ownership has already been resolved by
-    ``get_q_rank_indices`` without a global argsort.
+    time.  ``hash-cyclic`` ownership has already been resolved by stable hash
+    sorting and round-robin partitioning before entering this function.
     """
     nbands = len(band_indice)
     nks = len(k_grid)
