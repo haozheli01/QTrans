@@ -9,9 +9,7 @@ calculator_default_parameters:Dict[str, Dict[str, Any]] = {
         'read_sparse_grad_mat': False,
         # MiB budget for sparse mobility k-point wavefunction batches.
         'k_batch_mem': 256,
-        # Keep the historical contiguous q distribution unless explicitly
-        # requested.  ``block`` is accepted as an alias by the validator.
-        'q_split_mode': 'contiguous',
+        'q_split_mode': 'hash-cyclic',
         'soc_switch': False,
         'magnetic_type': 'none',
         'magnetic_tolerance': 0.01,
