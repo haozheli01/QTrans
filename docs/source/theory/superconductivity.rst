@@ -37,6 +37,11 @@ Finally, we can use Allen-Dynes formula to compute the :math:`T_\text{c}` as:
 
 where :math:`\mu^{*}` is the semi-empirical Coulomb pseudopotential. 
 
+QTrans returns :math:`T_\text{c}=0` when
+:math:`\lambda-\mu^{*}(1+0.62\lambda)\leq 0`. This is the convention used
+outside the attractive regime of this estimate; the exponential is evaluated
+only when the denominator is positive.
+
 
 Anisotropic Superconductivity
 ----------------------------------

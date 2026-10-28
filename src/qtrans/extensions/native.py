@@ -32,16 +32,30 @@ def _call(name, *args):
     return function(*args)
 
 
-def eliashberg_spectrum_cal_EPC_helper_sparse(*args):
-    return _call("eliashberg_spectrum_cal_EPC_helper_sparse", *args)
+def _call_eliashberg(name, args, gauss_type):
+    # Keep the original argument count for Gaussian-only native installations.
+    if gauss_type == 0:
+        return _call(name, *args)
+    try:
+        return _call(name, *args, gauss_type)
+    except TypeError as error:
+        raise RuntimeError(
+            "The installed QTrans native extension cannot accept gauss_type. "
+            "Rebuild the native extension for non-Gaussian superconductivity "
+            "smearing. Original error: {}".format(error)
+        ) from error
 
 
-def eliashberg_spectrum_cal_EPC_helper_sparse_batch(*args):
-    return _call("eliashberg_spectrum_cal_EPC_helper_sparse_batch", *args)
+def eliashberg_spectrum_cal_EPC_helper_sparse(*args, gauss_type=0):
+    return _call_eliashberg("eliashberg_spectrum_cal_EPC_helper_sparse", args, gauss_type)
 
 
-def eliashberg_spectrum_cal_EPC_helper_sparse_soc(*args):
-    return _call("eliashberg_spectrum_cal_EPC_helper_sparse_soc", *args)
+def eliashberg_spectrum_cal_EPC_helper_sparse_batch(*args, gauss_type=0):
+    return _call_eliashberg("eliashberg_spectrum_cal_EPC_helper_sparse_batch", args, gauss_type)
+
+
+def eliashberg_spectrum_cal_EPC_helper_sparse_soc(*args, gauss_type=0):
+    return _call_eliashberg("eliashberg_spectrum_cal_EPC_helper_sparse_soc", args, gauss_type)
 
 
 def epc_elements_cal_helper_sparse(*args):

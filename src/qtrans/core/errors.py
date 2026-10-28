@@ -125,8 +125,8 @@ class InputParameterError(Exception):
     5223: The 'omega_step' in <resistivity> block must be a positive number.
     5224: ...
     5241: The 'mus' in <superconductivity> block must be a list of 3 numbers.
-    5242: The 'omega_range' in <superconductivity> block must be a list of 2 numbers.
-    5243: The 'omega_step' in <superconductivity> block must be a positive number.
+    5242: The superconductivity frequency bounds must be finite, satisfy 0 <= min < max, and produce a nonempty grid.
+    5243: The 'omega_step' in <superconductivity> block must be finite and positive.
     5244: The 'sc_method' in <superconductivity> block is not supported.
     5245: The Eliashberg approximation is not supported.
     5246: The 'epc_restart' flag must be a boolean.
