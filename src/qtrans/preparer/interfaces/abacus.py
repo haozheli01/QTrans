@@ -3,7 +3,8 @@
 from copy import deepcopy
 from pymatgen.core.periodic_table import Element
 from qtrans.core.constants import QTcts
-from qtrans.io.abacus import read_abacus_input
+from qtrans.io.abacus import (read_abacus_input, read_abacus_image_shifts,
+                              correct_abacus_graph_images, align_abacus_spin_graph)
 from qtrans.numerics.arrays import average_close_values
 from scipy.sparse import csr_matrix
 from torch_geometric.data import Data
@@ -31,7 +32,7 @@ class _AbacusMixin:
                 energy = -999.99 # this parameter is useless here!
                 max_scf_iterations = int(pattern_md_abacus.findall(log_content)[-1])
         except Exception as e:
-            print(f"Error reading SCF log file: {e}. Please check the convergence! Skipping...")
+            raise RuntimeError(f"{folder}: failed reading SCF log {scf_log_path}: {e}") from e
 
         # Read crystal structure parameters
         try:
@@ -54,7 +55,8 @@ class _AbacusMixin:
                 spin_vec[is_magnetic, :] = magmoms[is_magnetic, :] / spin_length[is_magnetic][:, None]
                 spin_length = average_close_values(spin_length, self.moment_similar_tolerence)
         except Exception as e:
-            print(f"Error reading STRU file: {e}. Skipping...")
+            raise RuntimeError(f"{folder}: failed reading STRU {stru_file_path}: {e}") from e
+        images = read_abacus_image_shifts(scf_log_path, stru_file_path, species, lattice, positions)
         # Read hopping and overlap parameters
         try:
             # Load sparse Hamiltonian and overlap matrices
@@ -74,11 +76,15 @@ class _AbacusMixin:
                                                             graph={}, isH=True, skip=False)
                 graph_s = self.get_abacus_hamiltonian_graph(SR, atomic_numbers, lattice, positions, basis_def,
                                                             graph=graph_h_spin0, skip=True)
+                graph_h_spin1['Hoff'] = align_abacus_spin_graph(
+                    graph_h_spin0, graph_h_spin1, HR_spin1)
             else:
                 graph_h_spin0 = self.get_abacus_hamiltonian_graph(HR_spin0, atomic_numbers, lattice, positions, basis_def,
                                                             graph={}, isH=True, skip=False)
                 graph_s = self.get_abacus_hamiltonian_graph(SR, atomic_numbers, lattice, positions, basis_def,
                                                             graph=graph_h_spin0, skip=True)
+            # H/S and spin channels have now been matched in the original gauge.
+            correct_abacus_graph_images(graph_h_spin0, images, lattice)
             # Extract graph properties
             pos = graph_h_spin0['pos']
             edge_index = graph_h_spin0['edge_index']
@@ -146,7 +152,7 @@ class _AbacusMixin:
                 # Fill in overlap matrix for off-site terms
                 S[num + len(atomic_numbers)][mask.flatten()] = Soff[num].real
         except Exception as e:
-            print(f"Error reading Hamiltonian or overlap matrices: {e}. Skipping...")
+            raise RuntimeError(f"{folder}: failed reading Hamiltonian/overlap: {e}") from e
         # save in Data
         graph_tmp = Data(z=torch.LongTensor(atomic_numbers),
                         cell = torch.Tensor(lattice[None,:,:]),
@@ -179,33 +185,6 @@ class _AbacusMixin:
 
     def get_abacus_hamiltonian_graph(self, file_path, atomic_numbers, lattice, positions, basis_def,
                                     graph: dict = None, skip = False, isH = False, isSOC = False, tojson = False) -> dict:
-        def find_matching_column_index(matrix, target_column_values):
-            """
-            Find the index of a column in a 2D numpy array that exactly matches a given target column of values.
-            
-            This function compares each column of the matrix with the target column values and returns the index of
-            the first column that matches. If no match is found, it returns None.
-
-            Parameters:
-                matrix (np.ndarray): A 2D numpy array (5xN), where N is the number of rows and 5 is the number of columns.
-                target_column_values (list or np.ndarray): A 1D array or list containing the target column values to match.
-                
-            Returns:
-                int or None: The index of the matching column if found, otherwise None.
-            """
-            # Ensure the target column is a numpy array for consistency and correct shape
-            target_column_values = np.asarray(target_column_values)
-            
-            # Validate that the target column has the same number of rows as the matrix
-            if target_column_values.shape[0] != matrix.shape[0]:
-                raise ValueError("The number of elements in the target column must match the number of rows in the matrix.")
-            
-            # Compare each column of the matrix with the target column using broadcasting
-            column_matches = np.all(matrix == target_column_values[:, None], axis=0)
-            
-            # If a match is found, return the index of the first matching column; otherwise, return None
-            return np.argmax(column_matches) if column_matches.any() else None
-        
         def find_inverse_edge_index(edge_index, cell_shifts):
             """
             Find the indices of inverse edges in a given set of edges with associated cell shifts.
@@ -364,44 +343,53 @@ class _AbacusMixin:
 
         with open(file_path, 'r') as fp:
             line = fp.readline()
-            if 'STEP' in line:
+            step = None
+            if line.startswith('STEP'):
+                match = re.fullmatch(r'STEP:\s*(\d+)\s*', line)
+                if not match or int(match[1]) != 0:
+                    raise ValueError(f"{file_path}: unsupported/ambiguous CSR STEP {line.strip()!r}; expected fixed SCF STEP 0")
+                step = int(match[1])
                 num_tot_orbits = int(fp.readline().split()[-1])
             else:
                 num_tot_orbits = int(line.split()[-1])
             ncell_shift = int(fp.readline().split()[-1])
+            if skip and graph.get('_abacus_csr_step') != step:
+                raise ValueError(f"{file_path}: H/S CSR STEP mismatch ({graph.get('_abacus_csr_step')} vs {step})")
 
             # basis number of each atom
             orbitals_per_atom = [len(basis_def[src]) for src in atomic_numbers]
             orbitals_per_atom = np.array(orbitals_per_atom, dtype=int) * repeat
             if orbitals_per_atom.sum() != num_tot_orbits:
-                print("STRU parse error! Mismatch in total number of orbitals.")
-                raise RuntimeError("Total number of orbitals mismatch")
+                raise RuntimeError(f"{file_path}: STRU/CSR total number of orbitals mismatch ({orbitals_per_atom.sum()} vs {num_tot_orbits})")
             # the index of atomic orbital in the whole matrix
             orbital_indices = np.zeros_like(orbitals_per_atom, dtype=int)
             orbital_indices[1:] = np.cumsum(orbitals_per_atom[:-1])
 
-            edge_info_array = None
+            edge_lookup = None
             if skip:
-                # shape: (5, N) -> src, dst, cx, cy, cz
-                edge_info_array = np.concatenate([np.array(graph_['edge_index']), np.array(cell_shift).T], axis=0)
-            
+                edge_lookup = {(int(i), int(j), *map(int, r)): n for n, ((i, j), r) in
+                               enumerate(zip(np.asarray(graph_['edge_index']).T, cell_shift))}
+            seen_shifts = set()
             while True:
                 line = fp.readline()
                 if not line: break
                 # skip the empty line
                 tmp = line.split()
                 if not tmp: continue
+                if len(tmp) != 4 or len(seen_shifts) >= ncell_shift:
+                    raise ValueError(f"{file_path}: extra CSR frame/block or malformed R header {line.strip()!r}")
                 # cell shift
                 cx, cy, cz = int(tmp[0]), int(tmp[1]), int(tmp[2])
                 nh = int(tmp[3]) # number of nonzero elements
+                shift_key = (cx, cy, cz)
+                if shift_key in seen_shifts or nh < 0:
+                    raise ValueError(f"{file_path}: duplicate R or negative nnz at {shift_key}")
+                seen_shifts.add(shift_key)
                 # All the matrix elements are zero, skip!
-                if nh == 0: continue
-
-                # if nh == 0:
-                #     hamilt = csr_matrix(
-                #         (num_tot_orbits, num_tot_orbits),
-                #         dtype=dtype
-                #     )
+                if nh == 0:
+                    if shift_key != (0, 0, 0):
+                        continue
+                    hamilt = csr_matrix((num_tot_orbits, num_tot_orbits), dtype=dtype)
                 else:
                     val_str = fp.readline()
                     col = list(map(int, fp.readline().split()))
@@ -413,6 +401,12 @@ class _AbacusMixin:
                         val_raw = re.findall(r'[\-\+\d\.eE]+', val_str)
                         val_raw = np.asarray(val_raw, dtype=np.float32)
                         val = val_raw[0::2] + 1j * val_raw[1::2]
+
+                    if (len(val) != nh or len(col) != nh or len(row) != num_tot_orbits + 1
+                            or row[0] != 0 or row[-1] != nh or np.any(np.diff(row) < 0)
+                            or any(c < 0 or c >= num_tot_orbits for c in col)
+                            or not np.all(np.isfinite(val))):
+                        raise ValueError(f"{file_path}: malformed CSR arrays at R={shift_key}")
 
                     hamilt = csr_matrix(
                         (val, col, row),
@@ -452,7 +446,9 @@ class _AbacusMixin:
                                 cell_shift.append(np.array([cx, cy, cz], dtype=int))
                                 nbr_shift.append(np.array([cx, cy, cz]) @ lattice)
                             else:
-                                ioff = find_matching_column_index(edge_info_array, [ia, ja, cx, cy, cz])
+                                ioff = edge_lookup.get((ia, ja, cx, cy, cz))
+                                if ioff is None:
+                                    raise ValueError(f"{file_path}: nonzero overlap edge absent in H: atoms {ia + 1}->{ja + 1}, R={shift_key}")
                                 
                                 if ioff is not None:
                                     if not isSOC:
@@ -462,6 +458,8 @@ class _AbacusMixin:
                                         Hoff[1][ioff] = ham[0::2, 1::2].toarray().flatten()  # ud
                                         Hoff[2][ioff] = ham[1::2, 0::2].toarray().flatten()  # du
                                         Hoff[3][ioff] = ham[1::2, 1::2].toarray().flatten()  # dd
+            if len(seen_shifts) != ncell_shift or any(len(channel) != num_atoms_unit_cell for channel in Hon):
+                raise ValueError(f"{file_path}: incomplete single-frame CSR (R blocks {len(seen_shifts)}/{ncell_shift}, missing onsite atoms)")
         if not skip:
             # Construct the edges and graph
             edge_index = [edge_idx_src, edge_idx_dst]
@@ -477,8 +475,8 @@ class _AbacusMixin:
             else:
                 graph_['edge_index'] = np.array(edge_index)
                 graph_['inv_edge_idx'] = inv_edge_idx
-                graph_['cell_shift'] = np.array(cell_shift)
-                graph_['nbr_shift'] = np.array(nbr_shift)
+                graph_['cell_shift'] = np.array(cell_shift, dtype=np.int64).reshape(-1, 3)
+                graph_['nbr_shift'] = np.array(nbr_shift, dtype=np.float64).reshape(-1, 3)
                 graph_['pos'] = positions
 
         if not tojson:
@@ -492,4 +490,5 @@ class _AbacusMixin:
                 graph_['Hon'], graph_['iHon'] = convert_complex(Hon)
                 graph_['Hoff'], graph_['iHoff'] = convert_complex(Hoff)
 
+        graph_['_abacus_csr_step'] = step
         return graph_

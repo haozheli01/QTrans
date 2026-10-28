@@ -10,6 +10,145 @@ import numpy as np
 import re
 
 
+def read_abacus_image_shifts(log_path, stru_path, species, lattice, positions):
+    """Recover ABACUS images relative to STRU (row-vector cell, all in Bohr).
+
+    Only a single fixed-structure SCF is supported. Rounded log lattice vectors
+    validate the reference cell; they are never used to recover image integers.
+    """
+    context = f"{log_path} (STRU: {stru_path})"
+    with open(stru_path) as handle:
+        stru_lines = [line.split('#')[0].split('//')[0].strip() for line in handle]
+    stru_lines = [line for line in stru_lines if line]
+    lat0 = float(stru_lines[stru_lines.index('LATTICE_CONSTANT') + 1])
+    pos_type = stru_lines[stru_lines.index('ATOMIC_POSITIONS') + 1].lower()
+    if pos_type not in ('direct', 'cartesian'):
+        raise ValueError(f"{context}: unsupported STRU coordinate unit {pos_type!r}")
+    lattice = np.asarray(lattice, dtype=np.float64)
+    positions = np.asarray(positions, dtype=np.float64)
+    if (not np.isfinite(lat0) or lat0 <= 0 or lattice.shape != (3, 3)
+            or positions.shape != (len(species), 3)
+            or not np.all(np.isfinite(lattice)) or not np.all(np.isfinite(positions))):
+        raise ValueError(f"{context}: invalid STRU lattice/positions (Bohr)")
+    with open(log_path) as handle:
+        content = handle.read()
+    lines = content.splitlines()
+    modes = re.findall(r'^\s*calculation\b\s*(?:=|:)?\s*(\S+)', content, re.M | re.I)
+    if any(mode.lower() != 'scf' for mode in modes):
+        raise ValueError(f"{context}: only fixed-structure SCF is supported, got {modes}")
+    ions = {int(value) for value in re.findall(r'\bION\s*=\s*(\d+)', content)}
+    if ions and ions != {1}:
+        raise ValueError(f"{context}: multiple/unsupported ionic frames {sorted(ions)}")
+    counts = re.findall(r'TOTAL ATOM NUMBER\s*=\s*(\d+)', content)
+    if len(counts) != 1 or int(counts[0]) != len(species):
+        raise ValueError(f"{context}: expected one TOTAL ATOM NUMBER = {len(species)}, got {counts}")
+    headers = [i for i, line in enumerate(lines)
+               if re.match(r'^\s*(?:CARTESIAN|DIRECT) COORDINATES\b', line)]
+    if len(headers) != 1:
+        raise ValueError(f"{context}: expected exactly one coordinate table, found {len(headers)}")
+    header = lines[headers[0]].strip()
+    cartesian = re.fullmatch(
+        r'CARTESIAN COORDINATES\s*\(\s*UNIT\s*=\s*(\S+)\s+Bohr\s*\)\.?', header)
+    if cartesian:
+        scale = float(cartesian[1])
+        if not np.isfinite(scale) or abs(scale - lat0) > 1e-10:
+            raise ValueError(f"{context}: Cartesian UNIT {scale} Bohr != STRU {lat0} Bohr (tolerance 1e-10 Bohr)")
+        prefix = 'tauc'
+    elif re.fullmatch(r'DIRECT COORDINATES\s*\.?', header):
+        scale, prefix = 1.0, 'taud'
+    else:
+        raise ValueError(f"{context}: unknown coordinate header/unit {header!r}")
+    # Check the printed cell using its deliberately coarser output precision.
+    lattice_headers = [i for i, line in enumerate(lines) if line.strip().startswith('Lattice vectors:')]
+    if len(lattice_headers) != 1:
+        raise ValueError(f"{context}: expected one log lattice, found {len(lattice_headers)}")
+    index = lattice_headers[0]
+    if lines[index].strip() != 'Lattice vectors: (Cartesian coordinate: in unit of a_0)':
+        raise ValueError(f"{context}: unknown log lattice unit {lines[index].strip()!r}")
+    try:
+        printed_cell = np.array([[float(v) for v in row.split()]
+                                 for row in lines[index + 1:index + 4]], dtype=np.float64) * lat0
+    except ValueError as exc:
+        raise ValueError(f"{context}: malformed log lattice (Bohr)") from exc
+    if (printed_cell.shape != (3, 3) or not np.all(np.isfinite(printed_cell))
+            or np.any(np.abs(printed_cell - lattice) > 1e-8 + 1e-5 * np.abs(lattice))):
+        raise ValueError(f"{context}: log lattice differs from STRU (Bohr; component tolerance 1e-8 + 1e-5*abs(reference))")
+    row_indices = []
+    actual, type_counts = [], {}
+    index = headers[0] + 1
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+    if index < len(lines) and re.match(r'^\s*atom\s+x\s+y\s+z\b', lines[index]):
+        index += 1
+    for atom, element in enumerate(species, 1):
+        if index >= len(lines):
+            raise ValueError(f"{context}: missing coordinate row for atom {atom} ({element})")
+        fields = lines[index].split()
+        type_counts[element] = type_counts.get(element, 0) + 1
+        expected = f'{prefix}_{element}{type_counts[element]}'
+        if len(fields) < 4 or fields[0] != expected:
+            raise ValueError(f"{context}: atom {atom}: expected {expected}, got {lines[index]!r}")
+        try:
+            xyz = np.array(fields[1:4], dtype=np.float64)
+        except ValueError as exc:
+            raise ValueError(f"{context}: invalid coordinates at atom {atom} ({expected})") from exc
+        if not np.all(np.isfinite(xyz)):
+            raise ValueError(f"{context}: non-finite coordinates at atom {atom} ({expected})")
+        actual.append(xyz)
+        row_indices.append(index)
+        index += 1
+    all_rows = [i for i, line in enumerate(lines) if re.match(r'^\s*tau[cd]_', line)]
+    if row_indices != all_rows:
+        raise ValueError(f"{context}: extra/orphan coordinate rows or multiple frames")
+    actual = np.asarray(actual, dtype=np.float64)
+    actual = actual * scale if prefix == 'tauc' else actual @ lattice
+    delta = actual - positions
+    try:
+        fractional = np.linalg.solve(lattice.T, delta.T).T
+    except np.linalg.LinAlgError as exc:
+        raise ValueError(f"{context}: singular STRU lattice (Bohr)") from exc
+    if not np.all(np.isfinite(fractional)) or np.any(np.abs(fractional) >= 2**52):
+        raise ValueError(f"{context}: invalid/unrepresentable periodic image")
+    images = np.rint(fractional).astype(np.int64)
+    residual = np.linalg.norm(delta - images @ lattice, axis=1)
+    if np.any(residual > 1e-5):
+        atom = int(np.argmax(residual))
+        raise ValueError(f"{context}: atom {atom + 1} ({species[atom]}): periodic-image residual {residual[atom]:.12g} Bohr exceeds 1e-5 Bohr")
+    return images
+
+
+def correct_abacus_graph_images(graph, images, lattice):
+    """Relabel edges after matching the raw H/S keys; preserve matrix values/order."""
+    edges = np.asarray(graph['edge_index'], dtype=np.int64).reshape(2, -1)
+    shifts = np.asarray(graph['cell_shift'], dtype=np.int64).reshape(-1, 3)
+    images = np.asarray(images, dtype=np.int64)
+    correction = images[edges[1]] - images[edges[0]]
+    if not np.any(correction):
+        return graph
+    corrected = shifts + correction
+    neighbours = corrected @ np.asarray(lattice, dtype=np.float64)
+    as_lists = isinstance(graph['cell_shift'], list)
+    graph['cell_shift'] = corrected.tolist() if as_lists else corrected
+    graph['nbr_shift'] = neighbours.tolist() if as_lists else neighbours
+    return graph
+
+
+def align_abacus_spin_graph(reference, other, context):
+    """Align a second collinear channel using the original (i,j,R) keys."""
+    if reference['_abacus_csr_step'] != other['_abacus_csr_step']:
+        raise ValueError(f"{context}: collinear CSR STEP mismatch")
+    def keys(graph):
+        return [(int(i), int(j), *map(int, r)) for (i, j), r in
+                zip(np.asarray(graph['edge_index']).T, graph['cell_shift'])]
+    target, source = keys(reference), keys(other)
+    lookup = {key: i for i, key in enumerate(source)}
+    if len(lookup) != len(source) or len(set(target)) != len(target) or set(target) != set(source):
+        missing = next(iter(set(target) - set(source)), None)
+        extra = next(iter(set(source) - set(target)), None)
+        raise ValueError(f"{context}: collinear edge key sets differ (missing {missing}, extra {extra}; zero-based atoms)")
+    return [[channel[lookup[key]] for key in target] for channel in other['Hoff']]
+
+
 def read_abacus_input(filepath: str):
     # return unit is angstrom, \mu_B and Hartree/Bohr
     def parse_orbitals(orbital_data: str) -> int:
@@ -34,30 +173,32 @@ def read_abacus_input(filepath: str):
         num_atoms_per_species = []
         positions = []
         magmoms = []
+        if len(species) != len(num_orbitals):
+            raise ValueError(f"{filepath}: ATOMIC_SPECIES/NUMERICAL_ORBITAL type count mismatch")
+
+        def next_nonempty():
+            for raw_line in fp:
+                value = raw_line.split('//')[0].split('#')[0]
+                if value.strip():
+                    return value
+            raise ValueError(f"{filepath}: incomplete ATOMIC_POSITIONS block")
         
         for is_ in range(len(num_orbitals)):
             # element
-            while True:
-                line = fp.readline().split('//')[0].split('#')[0]
-                if line.strip() != '':
-                    break
+            line = next_nonempty()
+            if line.strip() != species[is_]:
+                raise ValueError(f"{filepath}: ATOMIC_POSITIONS species {is_ + 1}: expected {species[is_]}, got {line.strip()!r}")
             # mag
-            while True:
-                line = fp.readline().split('//')[0].split('#')[0]
-                if line.strip() != '':
-                    break
+            line = next_nonempty()
             # num
-            while True:
-                line = fp.readline().split('//')[0].split('#')[0]
-                if line.strip() != '':
-                    na = int(line)
-                    num_atoms_per_species.append(na)
-                    break
+            line = next_nonempty()
+            na = int(line)
+            if na <= 0:
+                raise ValueError(f"{filepath}: invalid atom count for species {species[is_]}: {na}")
+            num_atoms_per_species.append(na)
             ia = 0
             while ia < na:
-                line = fp.readline().split('//')[0].split('#')[0]
-                if line.strip() == '':
-                    continue
+                line = next_nonempty()
                 tmp = line.split()
                 positions.append([float(tmp[0]), float(tmp[1]), float(tmp[2])])
                 mag_keywords = ['mag', 'magmom']

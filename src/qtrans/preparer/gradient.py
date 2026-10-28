@@ -6,11 +6,11 @@ from qtrans.core.errors import InputParameterError
 from qtrans.data.basis import basis_def_dicts
 from qtrans.io.abacus import read_abacus_input
 from qtrans.io.abacus import write_abacus_input
+from qtrans.io.abacus import read_abacus_image_shifts, correct_abacus_graph_images
 from qtrans.io.openmx import write_openmx_input
 from qtrans.numerics.sparse import build_sparse_matrix
 from qtrans.numerics.sparse import build_sparse_matrix_collinear_split
 from qtrans.numerics.sparse import build_sparse_matrix_soc
-from qtrans.parallel.mpi import barrier_ranks
 from scipy.sparse import csr_matrix
 import json
 import math
@@ -465,9 +465,16 @@ class _GradientMixin:
 
     def prep_grad_mat_epc(self):
         if self.graph_data_sc_path:
+            error = None
             if self.rank == 0:
-                self._gen_grad_mat_epc()
-            barrier_ranks(self.comm)
+                try:
+                    self._gen_grad_mat_epc()
+                except Exception as exc:
+                    error = f"{type(exc).__name__}: {exc}"
+            if self.comm is not None:
+                error = self.comm.bcast(error, root=0)
+            if error is not None:
+                raise RuntimeError(f"Gradient preparation failed on rank 0: {error}")
         else:
             pass
 
@@ -483,28 +490,25 @@ class _GradientMixin:
             lattice = lattice * QTcts.ANGtoBOHR # convert to atomic unit
             positions = positions * QTcts.ANGtoBOHR # convert to atomic unit
         except Exception as e:
-            print(f"Error reading STRU file: {e}. Skipping...")
+            raise RuntimeError(f"{folder}: failed reading STRU {stru_file_path}: {e}") from e
+        images = read_abacus_image_shifts(
+            os.path.join(output_folder_path, 'running_scf.log'),
+            stru_file_path, species, lattice, positions)
         
         # Load sparse overlap matrices
         SR = os.path.join(output_folder_path, 'data-SR-sparse_SPIN0.csr')
         # Generate graphs for overlap
         graphS = self.get_abacus_hamiltonian_graph(SR, atomic_numbers, lattice, positions, basis_def,
                                                     graph={}, skip=False, tojson=True)
+        correct_abacus_graph_images(graphS, images, lattice)
+        graphS.pop('_abacus_csr_step')
         
         # Output file name
-        filename = 'HS.json'
+        filename = os.path.join(folder, 'HS.json')
         graphS["Son"] = graphS.pop("Hon")
         graphS["Soff"] = graphS.pop("Hoff")
 
-        # Write the graph data to the JSON file
-        with open(filename, 'w') as f:
-            json.dump(graphS, f, separators=[',', ':'])
-
-        # Reopen the file for formatting (newlines after commas for readability)
-        with open(filename, 'r') as f:
-            file_content = f.read()
-            formatted_content = re.sub(r', *"', ',\n"', file_content)
-
-        # Write the formatted content back to the file
+        # Keep the existing list format and comma/newline serialization.
+        formatted_content = re.sub(r', *"', ',\n"', json.dumps(graphS, separators=[',', ':']))
         with open(filename, 'w') as f:
             f.write(formatted_content)
