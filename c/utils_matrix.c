@@ -85,6 +85,29 @@ double w0gauss(double *x, int *ngauss, double *result, double *arg)
 }
 
 
+/* Match Python w0gauss for superconductivity without changing other kernels. */
+static inline double superconductivity_delta(double x, int gauss_type)
+{
+    if (gauss_type == 0)
+        return exp(-fmin(200.0, x * x)) * UTILS_SQRT_INVPI;
+    if (gauss_type == -99) {
+        double arg = fmin(36.0, fabs(x));
+        return 1.0 / (2.0 + 2.0 * cosh(arg));
+    }
+    double result, arg;
+    return w0gauss(&x, &gauss_type, &result, &arg);
+}
+
+static int validate_superconductivity_gauss(long gauss_type)
+{
+    if (gauss_type == -99 || gauss_type == -1 ||
+            (gauss_type >= 0 && gauss_type <= 10))
+        return 1;
+    PyErr_SetString(PyExc_ValueError,
+                    "gauss_type must be -99, -1, or an integer from 0 to 10");
+    return 0;
+}
+
 typedef struct {
     int icell;
     int jcell;
@@ -599,14 +622,16 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *ar
     PyArrayObject *eig_k_obj;
     PyArrayObject *eig_kpq_obj;
     double phonon_frequency_cutoff, inv_degaussw, efermi, weight_k;
+    int gauss_type = 0;
 
-    if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOdddd", &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
+    if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOdddd|i", &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
                           &phase_k_obj, &phase_kpq_obj, &grad_mat_obj, &wave_k_obj, &wave_kpq_obj,
                           &enk_match_table_obj, &emkpq_match_table_obj, &eig_k_obj, &eig_kpq_obj, &epc_strengths_obj,
-                          &phonon_frequency_cutoff, &inv_degaussw, &efermi, &weight_k))
+                          &phonon_frequency_cutoff, &inv_degaussw, &efermi, &weight_k, &gauss_type))
     {
         return NULL;
     }
+    if (!validate_superconductivity_gauss(gauss_type)) return NULL;
 
     double *freq = DOUBLEP(freq_obj);
     double *atomic_mass = DOUBLEP(atomic_mass_obj);
@@ -687,18 +712,17 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse(PyObject *self, PyObject *ar
         if (!enk_match_table[jband])
             continue;
 
-        // 内联 w0gauss (ngauss=0): result = exp(-fmin(200, x*x)) * UTILS_SQRT_INVPI
+        /* Electronic delta function with the configured smearing. */
         tmp_r1 = (eig_k[jband] - efermi) * inv_degaussw;
-        delta_nk = exp(-fmin(200.0, tmp_r1 * tmp_r1)) * UTILS_SQRT_INVPI * inv_degaussw;
+        delta_nk = superconductivity_delta(tmp_r1, gauss_type) * inv_degaussw;
 
         for (iband = 0; iband < MB; iband++)
         {
             if (!emkpq_match_table[iband])
                 continue;
 
-            // 内联 w0gauss (ngauss=0): result = exp(-fmin(200, x*x)) * UTILS_SQRT_INVPI
             tmp_r2 = (eig_kpq[iband] - efermi) * inv_degaussw;
-            delta_mkq = exp(-fmin(200.0, tmp_r2 * tmp_r2)) * UTILS_SQRT_INVPI * inv_degaussw;
+            delta_mkq = superconductivity_delta(tmp_r2, gauss_type) * inv_degaussw;
 
             double weight_factor = delta_nk * delta_mkq * weight_k;
 
@@ -793,22 +817,25 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_batch(PyObject *self, PyObje
     PyObject *freq_arg, *mass_arg, *phon_arg, *phase_k_arg, *phase_kpq_arg;
     PyObject *cache_arg, *wave_k_arg, *wave_kpq_arg, *enk_arg, *emkpq_arg;
     PyObject *eig_k_arg, *eig_kpq_arg, *weight_arg, *out_arg;
-    PyObject *cutoff_arg, *inv_arg, *efermi_arg;
+    PyObject *cutoff_arg, *inv_arg, *efermi_arg, *gauss_arg = NULL;
     if (!PyArg_UnpackTuple(args,
                            "eliashberg_spectrum_cal_EPC_helper_sparse_batch",
-                           17, 17,
+                           17, 18,
                            &freq_arg, &mass_arg, &phon_arg,
                            &phase_k_arg, &phase_kpq_arg, &cache_arg,
                            &wave_k_arg, &wave_kpq_arg, &enk_arg, &emkpq_arg,
                            &eig_k_arg, &eig_kpq_arg, &weight_arg, &out_arg,
-                           &cutoff_arg, &inv_arg, &efermi_arg)) {
+                           &cutoff_arg, &inv_arg, &efermi_arg, &gauss_arg)) {
         return NULL;
     }
 
     double cutoff = PyFloat_AsDouble(cutoff_arg);
     double inv_degaussw = PyFloat_AsDouble(inv_arg);
     double efermi = PyFloat_AsDouble(efermi_arg);
+    long gauss_value = gauss_arg == NULL ? 0 : PyLong_AsLong(gauss_arg);
     if (PyErr_Occurred()) return NULL;
+    if (!validate_superconductivity_gauss(gauss_value)) return NULL;
+    int gauss_type = (int)gauss_value;
 
     if (!PyCapsule_IsValid(cache_arg, SPARSE_GRAD_CACHE_CAPSULE)) {
         PyErr_SetString(PyExc_TypeError,
@@ -1024,13 +1051,11 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_batch(PyObject *self, PyObje
             for (int jband = 0; jband < nb; ++jband) {
                 if (!enk[eig_k_base + (size_t)jband]) continue;
                 double x_n = (eig_k[eig_k_base + (size_t)jband] - efermi) * inv_degaussw;
-                double delta_n = exp(-fmin(200.0, x_n * x_n)) *
-                                 UTILS_SQRT_INVPI * inv_degaussw;
+                double delta_n = superconductivity_delta(x_n, gauss_type) * inv_degaussw;
                 for (int iband = 0; iband < mb; ++iband) {
                     if (!emkpq[eig_kpq_base + (size_t)iband]) continue;
                     double x_m = (eig_kpq[eig_kpq_base + (size_t)iband] - efermi) * inv_degaussw;
-                    double delta_m = exp(-fmin(200.0, x_m * x_m)) *
-                                     UTILS_SQRT_INVPI * inv_degaussw;
+                    double delta_m = superconductivity_delta(x_m, gauss_type) * inv_degaussw;
                     double weight_factor = delta_n * delta_m * weight_k[ik];
                     for (int ibranch = 0; ibranch < nbranches; ++ibranch)
                         epc[ibranch] = 0.0 + 0.0 * I;
@@ -1097,14 +1122,16 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject
     PyArrayObject *eig_k_obj;
     PyArrayObject *eig_kpq_obj;
     double phonon_frequency_cutoff, inv_degaussw, efermi, weight_k;
+    int gauss_type = 0;
 
-    if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOdddd", &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
+    if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOOdddd|i", &freq_obj, &atomic_mass_obj, &eigen_vec_phon_obj,
                           &phase_k_obj, &phase_kpq_obj, &grad_mat_obj, &wave_k_obj, &wave_kpq_obj,
                           &enk_match_table_obj, &emkpq_match_table_obj, &eig_k_obj, &eig_kpq_obj, &epc_strengths_obj,
-                          &phonon_frequency_cutoff, &inv_degaussw, &efermi, &weight_k))
+                          &phonon_frequency_cutoff, &inv_degaussw, &efermi, &weight_k, &gauss_type))
     {
         return NULL;
     }
+    if (!validate_superconductivity_gauss(gauss_type)) return NULL;
 
     double *freq = DOUBLEP(freq_obj);
     double *atomic_mass = DOUBLEP(atomic_mass_obj);
@@ -1189,7 +1216,7 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject
             continue;
 
         tmp_r1 = (eig_k[jband] - efermi) * inv_degaussw;
-        delta_nk = exp(-fmin(200.0, tmp_r1 * tmp_r1)) * UTILS_SQRT_INVPI * inv_degaussw;
+        delta_nk = superconductivity_delta(tmp_r1, gauss_type) * inv_degaussw;
 
         for (iband = 0; iband < MB; iband++)
         {
@@ -1197,7 +1224,7 @@ PyObject *eliashberg_spectrum_cal_EPC_helper_sparse_soc(PyObject *self, PyObject
                 continue;
 
             tmp_r2 = (eig_kpq[iband] - efermi) * inv_degaussw;
-            delta_mkq = exp(-fmin(200.0, tmp_r2 * tmp_r2)) * UTILS_SQRT_INVPI * inv_degaussw;
+            delta_mkq = superconductivity_delta(tmp_r2, gauss_type) * inv_degaussw;
 
             double weight_factor = delta_nk * delta_mkq * weight_k;
 

@@ -122,9 +122,13 @@ class IsotropicFSRProblem:
 class EPCTransitionTable:
     """Sparse, directed state-to-state phonon spectral weights.
 
-    ``coupling_weight[e]`` is the integrated alpha^2 F weight for one
-    transition and already includes electronic/q-point quadrature weights.
-    Solvers therefore do not multiply it by ``state_weights`` again.
+    For FSR, ``coupling_weight[e]`` is the integrated alpha^2 F weight
+    (Hartree), including Fermi-surface quadrature weights. For FBW it is
+    the weighted spectral coefficient C_e (Hartree**2): w_j * |g_e|**2
+    for discrete states, or u_j times the integrated spectral weight for
+    energy bins, where u_j = w_j / N_F. Electronic/q-point weights are
+    already included; solvers must not multiply them in again. Neither
+    convention includes a pi prefactor.
     """
 
     number_of_states: int
@@ -163,13 +167,19 @@ class EPCTransitionTable:
 
 @dataclass(frozen=True)
 class StateResolvedProblem:
-    """State-resolved FSR or fixed-chemical-potential FBW problem."""
+    """State-resolved FSR or fixed-chemical-potential FBW problem.
+
+    FBW requires unnormalized ``fbw_energy_weights`` u_j = w_j / N_F
+    in Hartree for the Coulomb energy sum. ``state_weights`` are normalized
+    averaging weights and are used only for reporting in FBW.
+    """
 
     approximation: EliashbergApproximation
     state_weights: np.ndarray
     transitions: EPCTransitionTable
     energies: Optional[np.ndarray] = None
     state_metadata: Mapping[str, np.ndarray] = field(default_factory=dict)
+    fbw_energy_weights: Optional[np.ndarray] = None
 
     def __post_init__(self):
         approximation = EliashbergApproximation.parse(self.approximation)
@@ -182,12 +192,30 @@ class StateResolvedProblem:
             raise ValueError("state_weights must be non-negative and have a positive sum.")
         weights = np.ascontiguousarray(weights / np.sum(weights))
         energies = self.energies
+        fbw_energy_weights = None
         if approximation.is_fbw:
             if energies is None:
                 raise ValueError("FBW problems require state energies relative to E_F.")
             energies = _float_array(energies, "energies", 1)
             if energies.size != weights.size:
                 raise ValueError("energies length does not match number_of_states.")
+            if self.fbw_energy_weights is None:
+                raise ValueError(
+                    "FBW problems require fbw_energy_weights = w_j / N_F in "
+                    "Hartree; these cannot be inferred from normalized "
+                    "state_weights. FBW coupling_weight must use Hartree**2."
+                )
+            fbw_energy_weights = _float_array(
+                self.fbw_energy_weights, "fbw_energy_weights", 1
+            )
+            if fbw_energy_weights.size != weights.size:
+                raise ValueError(
+                    "fbw_energy_weights length does not match number_of_states."
+                )
+            if np.any(fbw_energy_weights < 0.0) or not np.any(fbw_energy_weights > 0.0):
+                raise ValueError(
+                    "fbw_energy_weights must be non-negative and have a positive sum."
+                )
         elif energies is not None:
             energies = _float_array(energies, "energies", 1)
         if not isinstance(self.state_metadata, Mapping):
@@ -203,6 +231,7 @@ class StateResolvedProblem:
         object.__setattr__(self, "approximation", approximation)
         object.__setattr__(self, "state_weights", weights)
         object.__setattr__(self, "energies", energies)
+        object.__setattr__(self, "fbw_energy_weights", fbw_energy_weights)
         object.__setattr__(self, "state_metadata", metadata)
 
 

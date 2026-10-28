@@ -600,6 +600,19 @@ class _ConfigMixin:
         self._set('save_matsubara',        validate_bool,         'superconductivity', 5258)
         self._set('restart',               validate_bool,         'superconductivity', 5259)
 
+        if (not np.all(np.isfinite(self.omega_range))
+                or self.omega_range[0] < 0.0
+                or self.omega_range[1] <= self.omega_range[0]):
+            raise InputParameterError(
+                5242, 'superconductivity', 'omega_range',
+                "omega_range must be finite [min, max] with 0 <= min < max."
+            )
+        if not np.isfinite(self.omega_step):
+            raise InputParameterError(
+                5243, 'superconductivity', 'omega_step',
+                "omega_step must be finite and positive."
+            )
+
         if self.mus[0] < 0.0 or self.mus[1] <= self.mus[0] or self.mus[2] <= 0.0:
             raise InputParameterError(
                 5241, 'superconductivity', 'mus',

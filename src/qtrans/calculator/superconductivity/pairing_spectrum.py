@@ -2,6 +2,7 @@
 
 from mpi4py import MPI
 from qtrans.core.constants import QTcts
+from qtrans.core.errors import InputParameterError
 from qtrans.core.logging import log
 from qtrans.core.logging import time_logger
 from qtrans.extensions import eliashberg_spectrum_cal_EPC_helper_sparse
@@ -17,6 +18,30 @@ from qtrans.parallel.mpi import print_peak_memeory
 from qtrans.core.batch import get_k_batch_size
 import numpy as np
 import os
+
+
+def _superconductivity_omega_grid(omega_range, omega_step):
+    """Build the historical positive-frequency grid, with explicit validation."""
+    bounds = np.asarray(omega_range, dtype=float)
+    if (bounds.shape != (2,) or not np.all(np.isfinite(bounds))
+            or bounds[0] < 0.0 or bounds[1] <= bounds[0]):
+        raise InputParameterError(
+            5242, 'superconductivity', 'omega_range',
+            "omega_range must be finite [min, max] with 0 <= min < max."
+        )
+    if not np.isfinite(omega_step) or omega_step <= 0.0:
+        raise InputParameterError(
+            5243, 'superconductivity', 'omega_step',
+            "omega_step must be finite and positive."
+        )
+    start = bounds[0] + omega_step if bounds[0] < QTcts.TENPM10 else bounds[0]
+    omegas = np.arange(start, bounds[1] + omega_step / 10, omega_step)
+    if omegas.size == 0:
+        raise InputParameterError(
+            5242, 'superconductivity', 'omega_range',
+            "omega_range and omega_step produce an empty frequency grid."
+        )
+    return omegas
 
 
 def _sparse_epc_q_none_batched(calculator, q, freq, phon_vec_q,
@@ -97,7 +122,7 @@ def _sparse_epc_q_none_batched(calculator, q, freq, phon_vec_q,
                     wave_k_batch, wave_kpq, enk_batch, ematch_batch,
                     eig_k_batch, eig_kpq_batch, weights_batch, epc_batch,
                     calculator.phonon_frequency_cutoff, calculator.inv_smeark,
-                    calculator.efermi)
+                    calculator.efermi, gauss_type=calculator.gauss_type)
                 epc_q += np.sum(epc_batch, axis=0)
                 batch_used = True
             except NativeExtensionUnavailable:
@@ -121,9 +146,9 @@ def _sparse_epc_q_none_batched(calculator, q, freq, phon_vec_q,
             phase_k = phase_k_all[:, global_idx]
             phase_kpq = phase_kpq_all[:, local_solve]
             for ibnd in np.where(inside)[0]:
-                delta_nk = w0gauss((eig_k[ibnd] - calculator.efermi) * calculator.inv_smeark) * calculator.inv_smeark
+                delta_nk = w0gauss((eig_k[ibnd] - calculator.efermi) * calculator.inv_smeark, calculator.gauss_type) * calculator.inv_smeark
                 for jbnd in np.where(np.abs(eig_kpq[local_solve] - calculator.efermi) < calculator.e_thr)[0]:
-                    delta_mkq = w0gauss((eig_kpq[local_solve, jbnd] - calculator.efermi) * calculator.inv_smeark) * calculator.inv_smeark
+                    delta_mkq = w0gauss((eig_kpq[local_solve, jbnd] - calculator.efermi) * calculator.inv_smeark, calculator.gauss_type) * calculator.inv_smeark
                     tmp1 = np.outer(np.conj(wave_kpq[local_solve, jbnd]), wave_k[ibnd])
                     weight_factor = delta_nk * delta_mkq * weights_k_useful[global_idx]
                     for ibranch in valid_branches:
@@ -198,10 +223,7 @@ class _PairingSpectrumMixin:
         q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
 
         # initial the omega
-        if self.omega_range[0] < QTcts.TENPM10:
-            omegas_list = np.arange(self.omega_range[0]+self.omega_step, self.omega_range[1]+self.omega_step/10, self.omega_step)
-        else:
-            omegas_list = np.arange(self.omega_range[0], self.omega_range[1]+self.omega_step/10, self.omega_step)
+        omegas_list = _superconductivity_omega_grid(self.omega_range, self.omega_step)
 
         nks_fbz = self.k_size[0] * self.k_size[1] * self.k_size[2]
         nks_ibz = len(k_grid)
@@ -226,8 +248,9 @@ class _PairingSpectrumMixin:
             nbands_col = nbands
             self.weight_k *= 2.0
 
-        enks_all = self.comm.allgather(enks_local.reshape(nbands_col, nks_local))
-        wave_ks_all = self.comm.allgather(wave_ks_local)
+        enks_local = enks_local.reshape(nbands_col, nks_local)
+        enks_all = [enks_local] if self.comm is None else self.comm.allgather(enks_local)
+        wave_ks_all = [wave_ks_local] if self.comm is None else self.comm.allgather(wave_ks_local)
         del enks_local, wave_ks_local
 
         enks = np.concatenate(enks_all, axis=-1)    # (nbands, nks) or (2*nbands, nks) for collinear
@@ -265,7 +288,7 @@ class _PairingSpectrumMixin:
 
         enk_match_tables = np.abs(enks_useful - self.efermi) < self.e_thr  # (nbands, nks_useful_local) or (2, nbands, nks_useful_local)
         phase_k_all = np.exp(QTcts.JTWOPI * (self.nbr_shift_of_cell_sc @ k_grid_useful.T))  # (ncells, nks_useful_local)
-        delta_nk_all = w0gauss((enks_useful - self.efermi) * self.inv_smeark) * self.inv_smeark
+        delta_nk_all = w0gauss((enks_useful - self.efermi) * self.inv_smeark, self.gauss_type) * self.inv_smeark
 
         if self.rank == 0:
             logger = time_logger(nqs_local, 'eliashberg_spectrum_cal_epc_dense')
@@ -307,7 +330,7 @@ class _PairingSpectrumMixin:
                 if not emkq_match_table.any():
                     continue
                 # pre-compute delta_mkq for all bands at k+q
-                delta_mkq_all_bands = w0gauss((eig_kpqs - self.efermi) * self.inv_smeark) * self.inv_smeark
+                delta_mkq_all_bands = w0gauss((eig_kpqs - self.efermi) * self.inv_smeark, self.gauss_type) * self.inv_smeark
                 # use pre-computed phase_k; compute phase_kpq
                 phase_k = phase_k_all[:, ik]
                 phase_kpq = np.exp(QTcts.JTWOPI * (self.nbr_shift_of_cell_sc @ kpq)) # shape: (ncells,)
@@ -445,10 +468,7 @@ class _PairingSpectrumMixin:
             self.weight_q = float(restart_data['weight_q'])
 
             # Reconstruct omegas_list
-            if self.omega_range[0] < QTcts.TENPM10:
-                omegas_list = np.arange(self.omega_range[0]+self.omega_step, self.omega_range[1]+self.omega_step/10, self.omega_step)
-            else:
-                omegas_list = np.arange(self.omega_range[0], self.omega_range[1]+self.omega_step/10, self.omega_step)
+            omegas_list = _superconductivity_omega_grid(self.omega_range, self.omega_step)
 
             nomegas = len(omegas_list)
             nqs = epc_strengths.shape[-2]
@@ -486,10 +506,7 @@ class _PairingSpectrumMixin:
         q_grid = self._get_monkhorst_pack(self.q_size, return_frac=True)
 
         # initial the omega
-        if self.omega_range[0] < QTcts.TENPM10:
-            omegas_list = np.arange(self.omega_range[0]+self.omega_step, self.omega_range[1]+self.omega_step/10, self.omega_step)
-        else:
-            omegas_list = np.arange(self.omega_range[0], self.omega_range[1]+self.omega_step/10, self.omega_step)
+        omegas_list = _superconductivity_omega_grid(self.omega_range, self.omega_step)
 
         nks_fbz = self.k_size[0] * self.k_size[1] * self.k_size[2]
         nks_ibz = len(k_grid)
@@ -531,7 +548,8 @@ class _PairingSpectrumMixin:
             nbands_col = nbands
             self.weight_k *= 2.0
 
-        enks_all = self.comm.allgather(enks_local.reshape(nbands_col, nks_local))
+        enks_local = enks_local.reshape(nbands_col, nks_local)
+        enks_all = [enks_local] if self.comm is None else self.comm.allgather(enks_local)
         if (self.spinor_mode == 'none' and not self.soc_switch):
             # Avoid mpi4py pickle for the large initial wave table.  The
             # helper uses bounded typed broadcasts and preserves the
@@ -539,7 +557,7 @@ class _PairingSpectrumMixin:
             wave_ks = _bcast_array_by_rank_chunks(wave_ks_local, self.comm)
             wave_ks_all = None
         else:
-            wave_ks_all = self.comm.allgather(wave_ks_local)
+            wave_ks_all = [wave_ks_local] if self.comm is None else self.comm.allgather(wave_ks_local)
         del enks_local, wave_ks_local
 
         enks = np.concatenate(enks_all, axis=-1)    # (nbands, nks) or (2*nbands, nks) for collinear
@@ -634,7 +652,7 @@ class _PairingSpectrumMixin:
         # Gather local epc_strengths and freq_grid from all ranks to rank 0
         epc_strengths_gathered = gather_to_rank_root(epc_strengths, self.comm, root=0)
         freq_grid_gathered = gather_to_rank_root(freq_grid, self.comm, root=0)
-        q_indices_gathered = self.comm.gather(q_global_indices_local, root=0)
+        q_indices_gathered = gather_to_rank_root(q_global_indices_local, self.comm, root=0)
         if self.rank == 0:
             epc_strengths_all = np.concatenate(epc_strengths_gathered, axis=-2)  # (2, nqs, nbranches)
             freq_grid_all = np.concatenate(freq_grid_gathered, axis=0)  # (nqs, nbranches)
