@@ -32,10 +32,11 @@ class _FullBandwidthSolverBase:
         frequency_grid = frequencies[None, :]
         energy_grid = self.problem.energies[:, None]
         for _ in range(self.settings.max_iterations):
-            denominator = np.sqrt((frequency_grid * z) ** 2 + energy_grid ** 2)
+            # The energy sum is explicit: no FSR square root or pi prefactor.
+            denominator = (frequency_grid * z) ** 2 + energy_grid ** 2
             amplitude = frequency_grid * z / denominator
             z_new = 1.0 + (
-                np.pi * temperature / frequency_grid
+                temperature / frequency_grid
                 * self.kernel.apply(amplitude, temperature, "difference")
             )
             if np.any(z_new <= 0.0) or not np.all(np.isfinite(z_new)):
@@ -55,14 +56,14 @@ class _FullBandwidthSolverBase:
 
     def _coulomb_term(self, amplitude, frequencies, mu_star):
         mask = frequencies <= self.settings.coulomb_cutoff
-        weighted = self.problem.state_weights[:, None] * amplitude[:, mask]
+        weighted = self.problem.fbw_energy_weights[:, None] * amplitude[:, mask]
         return 2.0 * mu_star * np.sum(weighted)
 
     def leading_eigenvalue(self, temperature, mu_star):
         frequencies = self._frequencies(temperature)
         z = self._normal_z(temperature, frequencies)
         shape = z.shape
-        denominator = np.sqrt(
+        denominator = (
             (frequencies[None, :] * z) ** 2
             + self.problem.energies[:, None] ** 2
         )
@@ -71,7 +72,7 @@ class _FullBandwidthSolverBase:
             amplitude = np.asarray(vector, dtype=float).reshape(shape) / denominator
             phonon = self.kernel.apply(amplitude, temperature, "sum")
             coulomb = self._coulomb_term(amplitude, frequencies, mu_star)
-            return (np.pi * temperature * (phonon - coulomb)).ravel()
+            return (temperature * (phonon - coulomb)).ravel()
 
         return dominant_real_eigenvalue(
             matvec,
@@ -106,19 +107,19 @@ class _FullBandwidthSolverBase:
         converged = False
         iterations = 0
         for iterations in range(1, self.settings.max_iterations + 1):
-            denominator = np.sqrt(
+            denominator = (
                 (frequency_grid * z) ** 2 + energy_grid ** 2 + phi ** 2
             )
             normal_amplitude = frequency_grid * z / denominator
             pair_amplitude = phi / denominator
             z_new = 1.0 + (
-                np.pi * temperature / frequency_grid
+                temperature / frequency_grid
                 * self.kernel.apply(normal_amplitude, temperature, "difference")
             )
             coulomb = self._coulomb_term(
                 pair_amplitude, frequencies, mu_star
             )
-            phi_new = np.pi * temperature * (
+            phi_new = temperature * (
                 self.kernel.apply(pair_amplitude, temperature, "sum") - coulomb
             )
             if np.any(z_new <= 0.0) or not (

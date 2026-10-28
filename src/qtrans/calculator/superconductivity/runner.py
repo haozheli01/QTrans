@@ -122,6 +122,10 @@ class EliashbergRunner:
                 metadata.update(problem.state_metadata)
                 if problem.energies is not None:
                     metadata["energies"] = np.asarray(problem.energies)
+                if self.settings.approximation.is_fbw:
+                    metadata["state_fbw_energy_weights"] = np.asarray(
+                        problem.fbw_energy_weights
+                    )
             gap = state.phi / state.z
             results.append(EliashbergResult(
                 approximation=self.settings.approximation,

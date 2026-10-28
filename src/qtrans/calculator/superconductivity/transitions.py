@@ -43,11 +43,14 @@ class EPCStateProvider:
 
 
 def load_state_resolved_problem(path, approximation):
-    """Load a normalized state-resolved problem from a non-pickled NPZ file.
+    """Load a state-resolved problem from a non-pickled NPZ file.
 
     Required arrays are ``state_weights``, ``source_state``, ``target_state``,
     ``phonon_frequency``, and ``coupling_weight``. FBW files additionally need
-    ``energies`` in Hartree relative to the fixed normal-state Fermi level.
+    ``energies`` in Hartree relative to the fixed normal-state Fermi level,
+    and unnormalized ``fbw_energy_weights`` = w_j / N_F in Hartree. FBW
+    ``coupling_weight`` contains weighted spectral coefficients in Hartree**2;
+    FSR retains its integrated alpha^2 F weights in Hartree.
     """
     approximation = EliashbergApproximation.parse(approximation)
     if approximation == EliashbergApproximation.ISOTROPIC_FSR:
@@ -55,13 +58,18 @@ def load_state_resolved_problem(path, approximation):
     path = os.path.abspath(os.fspath(path))
     with np.load(path, allow_pickle=False) as data:
         required = ("state_weights",) + _TRANSITION_KEYS
+        if approximation.is_fbw:
+            required += ("energies", "fbw_energy_weights")
         missing = [name for name in required if name not in data]
-        if approximation.is_fbw and "energies" not in data:
-            missing.append("energies")
         if missing:
+            hint = (
+                " FBW requires explicit fbw_energy_weights = w_j / N_F in "
+                "Hartree and coupling_weight in Hartree**2; normalized "
+                "state_weights cannot supply the missing energy measure."
+            ) if approximation.is_fbw else ""
             raise ValueError(
-                "Eliashberg data file {!r} is missing arrays: {}."
-                .format(path, ", ".join(missing))
+                "Eliashberg data file {!r} is missing arrays: {}.{}"
+                .format(path, ", ".join(missing), hint)
             )
         state_weights = np.asarray(data["state_weights"], dtype=float)
         transitions = EPCTransitionTable(
@@ -73,6 +81,8 @@ def load_state_resolved_problem(path, approximation):
         )
         energies = np.asarray(data["energies"], dtype=float) \
             if "energies" in data else None
+        fbw_energy_weights = np.asarray(data["fbw_energy_weights"], dtype=float) \
+            if approximation.is_fbw else None
         standard = set(required) | {"energies", "approximation"}
         metadata = {
             name: np.asarray(data[name])
@@ -92,6 +102,7 @@ def load_state_resolved_problem(path, approximation):
         transitions=transitions,
         energies=energies,
         state_metadata=metadata,
+        fbw_energy_weights=fbw_energy_weights,
     )
 
 
@@ -116,4 +127,6 @@ def problem_fingerprint(problem):
         update(problem.transitions.target_state)
         update(problem.transitions.phonon_frequency)
         update(problem.transitions.coupling_weight)
+        if problem.approximation.is_fbw:
+            update(problem.fbw_energy_weights)
     return digest.hexdigest()
