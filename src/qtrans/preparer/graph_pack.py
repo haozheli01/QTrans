@@ -41,29 +41,9 @@ class _GraphPackMixin:
                     # raise RuntimeError(f"Error: Missing necessary files to generate graph data!")
         
         elif self.DFT_software == 'abacus':
-            required_filenames = ['STRU']
-            if self.magnetic_type == 'collinear':
-                required_filenames_in_output_folder = ['data-HR-sparse_SPIN0.csr', 'data-HR-sparse_SPIN1.csr', 
-                                                       'data-SR-sparse_SPIN0.csr', self.abacus_scf_log]
-            else:
-                required_filenames_in_output_folder = ['data-HR-sparse_SPIN0.csr',  
-                                                       'data-SR-sparse_SPIN0.csr', self.abacus_scf_log]
-            useful_folders = []
-            for folder in folders:
-                missing_files = []
-                for filename in required_filenames:
-                    filepath = os.path.join(folder, filename)
-                    if not check_path_exist(filepath):
-                        missing_files.append(filename)
-                for filename in required_filenames_in_output_folder:
-                    filepath = os.path.join(os.path.join(folder, self.abacus_out_folder), filename)
-                    if not check_path_exist(filepath):
-                        missing_files.append(filename)
-                if not missing_files:
-                    useful_folders.append(folder)
-                else:
-                    print(f"Neglect folder '{folder}': missing {', '.join(missing_files)}")
-                    # raise RuntimeError(f"Error: Missing necessary files to generate graph data!")
+            # Validate on the assigned ranks so missing inputs cannot silently
+            # change displacement indices or strand peers waiting for scatter.
+            useful_folders = list(folders)
         return useful_folders
 
     def pack_graph_data(self):
@@ -72,16 +52,24 @@ class _GraphPackMixin:
 
         graphs_local = dict()
         
-        for ifolder, each in enumerate(self.data_folders_local):
-            if self.DFT_software == 'openmx':
-                if self.is_pred_graph:
-                    graph_tmp = self._gen_graph_data_nonscf(each, basis_def)
-                else:
-                    graph_tmp = self._gen_graph_data_scf(each, basis_def)
-            elif self.DFT_software == 'abacus':
-                graph_tmp = self._gen_graph_data_abacus(each, basis_def)
-            if not (graph_tmp is None):
-                graphs_local[self.data_folders_index_local[ifolder]] = graph_tmp
+        local_error = None
+        try:
+            for ifolder, each in enumerate(self.data_folders_local):
+                if self.DFT_software == 'openmx':
+                    if self.is_pred_graph:
+                        graph_tmp = self._gen_graph_data_nonscf(each, basis_def)
+                    else:
+                        graph_tmp = self._gen_graph_data_scf(each, basis_def)
+                elif self.DFT_software == 'abacus':
+                    graph_tmp = self._gen_graph_data_abacus(each, basis_def)
+                if not (graph_tmp is None):
+                    graphs_local[self.data_folders_index_local[ifolder]] = graph_tmp
+        except Exception as exc:
+            local_error = f"rank {self.rank}, folder {each}: {type(exc).__name__}: {exc}"
+        errors = self.comm.allgather(local_error) if self.comm is not None else [local_error]
+        if any(error is not None for error in errors):
+            raise RuntimeError("graph-pack failed before graph gather:\n" +
+                               '\n'.join(error for error in errors if error is not None))
 
         graphs_all = gather_to_rank_root(graphs_local, self.comm, root=0)
         if self.rank == 0:
