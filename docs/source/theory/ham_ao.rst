@@ -1,55 +1,108 @@
-=====================================
-Hamiltonian in Atomic Orbitals Basis
-=====================================
+=========================================
+Hamiltonian in an Atomic Orbital Basis
+=========================================
 
-Hamiltonian
+Bloch States
 ------------
 
-Using atomic orbital basis, we could describe the Bloch state :math:`\left | \nu\mathbf{k}  \right \rangle` as :cite:`zhongAcceleratingCalculationElectron2024`:
+In a localized atomic orbital basis, a Bloch state can be expanded as
+:cite:`zhongAcceleratingCalculationElectron2024`
 
 .. math::
-    \left | \nu\mathbf{k}  \right \rangle = \frac{1}{\sqrt{N}}\sum_{n'}^{N} \mathrm{e}^{\mathrm{i}{\mathbf{R}}_{n'}\cdot\mathbf{k}}
-    \sum_{j\beta}C^{\mathbf{k},\nu}_{j\beta} \left | \phi_{n'j\beta}  \right \rangle,
-    \label{eq:blochstate}
 
-where :math:`\nu` is the band index, and :math:`\mathbf{k}` is the wave vector of the Bloch state. :math:`N` is the number of unit cells
-in Born-von Karman supercell, and :math:`\mathbf{R}_{n'}` is the lattice vector of the :math:`n\text{th}` unit cell.
-The :math:`C^{\mathbf{k},\nu}_{j\beta}` is the expansion coefficient of :math:`\left | \phi_{n'j\beta}  \right \rangle`.
-And the atomic orbits satisfy:
+    |\nu\mathbf{k}\rangle = \frac{1}{\sqrt{N}}
+    \sum_{n=1}^{N} \mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_{n}}
+    \sum_{j\beta} C^{\mathbf{k},\nu}_{j\beta}|\phi_{nj\beta}\rangle,
 
-.. math::
-    \left \langle \mathbf{r} | \phi_{n'j\beta}  \right \rangle = \phi_{j\beta}(\mathbf{r} - \mathbf{R}_{n'} - \boldsymbol{\tau}_{j}),
-
-where :math:`\boldsymbol{\tau}_{j}` is the relative position of the :math:`j\text{th}` atom in its unit cell, and :math:`\beta` is the index
-of orbit.
-
-The Hamiltonian in atomic orbital representation can be expressed by:
+where :math:`\nu` is the band index, :math:`\mathbf{k}` is the crystal wave vector,
+and :math:`N` is the number of unit cells in the Born-von Kármán supercell.
+The lattice vector :math:`\mathbf{R}_{n}` locates the :math:`n`-th unit cell,
+:math:`j` labels an atom within that cell, and :math:`\beta` labels an orbital
+on that atom. The coefficients :math:`C^{\mathbf{k},\nu}_{j\beta}` specify the
+expansion of the Bloch state. The localized orbitals are defined by
 
 .. math::
-    \hat{\mathcal{H}}=\sum_{m'n'i'j'\alpha'\beta'} \widetilde{H}_{m'i'\alpha',n'j'\beta'} \left| \phi_{m'i'\alpha'}\right \rangle \left \langle \phi_{n'j'\beta'}\right|,
 
-where :math:`\widetilde{H} = S^{-1}HS^{-1}` and :math:`S_{mi\alpha,nj\beta} = \left\langle \phi_{mi\alpha}| \phi_{nj\beta} \right\rangle`.
-The hamiltoninian matrix elements satisfy :math:`H_{mi\alpha,nj\beta} = \left \langle \phi_{mi\alpha}| \hat{\mathcal{H}} | \phi_{nj\beta}\right \rangle`
-   
+    \langle\mathbf{r}|\phi_{nj\beta}\rangle
+    = \phi_{j\beta}(\mathbf{r}-\mathbf{R}_{n}-\boldsymbol{\tau}_{j}),
 
-Electron Eigen Problem
-------------------------
+where :math:`\boldsymbol{\tau}_{j}` is the position of atom :math:`j` relative
+to the origin of its unit cell. Here, the Bloch phase contains only the lattice
+vector :math:`\mathbf{R}_{n}`; the atomic position :math:`\boldsymbol{\tau}_{j}`
+is included in the orbital definition. The reciprocal-space matrices below
+use this same phase convention.
 
-Given the inherent non-orthogonality of atomic orbital basis sets, the determination of electronic energies and wave functions
-necessitates the solution of a generalized eigenvalue problem :cite:`zhongTransferableEquivariantGraph2023`. Using Fourier transformation,
-we write down the Hamiltonian matrix element in the reciprocal space as:
+Hamiltonian and Overlap Matrices
+--------------------------------
 
-.. math::
-    H^{\mathbf{k}}_{i\alpha,j\beta} = \sum_{n}\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_{n}}H_{0i\alpha,nj\beta}
-
-and also the overlap matrix element as:
+Atomic orbitals are generally nonorthogonal. The real-space Hamiltonian and
+overlap matrix elements are defined as
 
 .. math::
-    S^{\mathbf{k}}_{i\alpha,j\beta} = \sum_{n}\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_{n}}S_{0i\alpha,nj\beta}
 
-and the generalized eigenvalue problem can be expressed as:
+    H_{mi\alpha,nj\beta}
+    &= \langle\phi_{mi\alpha}|\hat{\mathcal{H}}|\phi_{nj\beta}\rangle, \\
+    S_{mi\alpha,nj\beta}
+    &= \langle\phi_{mi\alpha}|\phi_{nj\beta}\rangle.
+
+Assuming that the basis is linearly independent, the overlap matrix :math:`S`
+is invertible. Within the space spanned by this basis, the Hamiltonian operator
+can be written as
 
 .. math::
-    H^{\mathbf{k}}\psi_{\nu\mathbf{k}} = \varepsilon_{\nu\mathbf{k}}S^{\mathbf{k}}\psi_{\nu\mathbf{k}},
 
-where :math:`\varepsilon_{\nu\mathbf{k}}` is the electronic energy of Bloch state :math:`\left|\nu\mathbf{k}\right\rangle`.
+    \hat{\mathcal{H}}_{\mathrm{AO}}
+    = \sum_{mi\alpha,nj\beta}
+    |\phi_{mi\alpha}\rangle
+    \widetilde{H}_{mi\alpha,nj\beta}
+    \langle\phi_{nj\beta}|,
+    \qquad \widetilde{H}=S^{-1}HS^{-1}.
+
+The matrix :math:`\widetilde{H}` gives the coefficients of the operator in this
+outer-product expansion; it differs from the matrix of Hamiltonian elements
+:math:`H`. The two factors of :math:`S^{-1}` account for the nonorthogonality
+of the basis. For an orthonormal basis, :math:`S=I` and
+:math:`\widetilde{H}=H`.
+
+Generalized Eigenvalue Problem
+------------------------------
+
+For a periodic system, translational symmetry allows the real-space matrices
+to be Fourier transformed into reciprocal space:
+
+.. math::
+
+    H^{\mathbf{k}}_{i\alpha,j\beta}
+    &= \sum_n \mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_{n}}
+    H_{0i\alpha,nj\beta}, \\
+    S^{\mathbf{k}}_{i\alpha,j\beta}
+    &= \sum_n \mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_{n}}
+    S_{0i\alpha,nj\beta},
+
+where the index :math:`0` denotes the reference cell at
+:math:`\mathbf{R}_0=\mathbf{0}`, and the sum runs over relative lattice vectors
+with Born–von Kármán periodic boundary conditions.
+
+The electronic energies and expansion coefficients are obtained by solving
+the generalized eigenvalue problem :cite:`zhongTransferableEquivariantGraph2023`
+
+.. math::
+
+    H^{\mathbf{k}}\mathbf{C}_{\nu\mathbf{k}}
+    = \varepsilon_{\nu\mathbf{k}}
+    S^{\mathbf{k}}\mathbf{C}_{\nu\mathbf{k}},
+
+where :math:`\varepsilon_{\nu\mathbf{k}}` is the energy of the Bloch state
+:math:`|\nu\mathbf{k}\rangle` and the components of
+:math:`\mathbf{C}_{\nu\mathbf{k}}` are :math:`C^{\mathbf{k},\nu}_{j\beta}`.
+The eigenvectors are chosen to satisfy the overlap-weighted orthonormality
+condition
+
+.. math::
+
+    \mathbf{C}_{\nu\mathbf{k}}^{\dagger}
+    S^{\mathbf{k}}\mathbf{C}_{\mu\mathbf{k}}
+    = \delta_{\nu\mu},
+
+which ensures that the corresponding Bloch states are normalized and mutually
+orthogonal at each :math:`\mathbf{k}`.

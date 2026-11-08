@@ -6,21 +6,26 @@
 figure {
     display: flex;
     flex-direction: column;
-    align-items: center; /* 图片居中 */
+    align-items: center;
     margin: 1em 0;
   }
   
   figure img {
     display: block;
-    margin: 0 auto; /* 让图片本身也居中 */
+    margin: 0 auto;
     max-width: 100%;
     height: auto;
   }
   
   figure figcaption {
-    align-self: flex-start; /* 让caption左对齐 */
+    align-self: flex-start;
     font-size: 0.9em;
     margin-top: 0.5em;
+}
+/* for icon figure */
+.wy-side-nav-search > a img.logo {
+    width: 120px;
+    height: auto;
 }
 
 /* for font */
@@ -78,15 +83,6 @@ body {
     caption-side: top;
     text-align: center;
 }
-
-/* a.reference.internal {
-    color: #4400ff;
-    text-decoration: none;
-}
-    
-a.reference.internal:visited {
-    color: #990099;
-} */
 
 a.reference.internal code {
     font-family: monospace;

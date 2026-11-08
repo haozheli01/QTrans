@@ -123,7 +123,7 @@ We can also plot the phonon dispersion of Si, as shown in Figure 2.
 .. _electron-self-energy-modes:
 
 Electron self-energy by phonon branch
-------------------------------------
+----------------------------------------
 
 Added 2026-10-23. Merge this fragment into a complete band-renormalization
 input containing the original structure, phonons, gradients, band selection,

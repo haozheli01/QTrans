@@ -4,10 +4,11 @@ Installation
 
 Requirements
 -------------
-**QTrans** requires the following prerequisites for installation:
+**QTrans** requires Python 3.9 or later. Python 3.9 is recommended for optimal compatibility and stability.
 
-* `Python`_ 3.9 or newer (We recommend Python 3.9 for stability)
-* Python libraries:
+The following Python packages are required:
+
+* Core dependencies:
 
   * pymatgen     == 2023.5.10
   * phonopy      == 2.19.1
@@ -19,60 +20,71 @@ Requirements
   * scipy        == 1.10.1
   * tqdm         == 4.65.0
   * easydict     == 1.9
+  * setuptools   == 77
+
+* Additional dependencies for HamGNN integration:
+
   * torch-geometric == 2.0.4
   * torch_sparse    == 0.6.13
   * torch-scatter   == 2.0.9
-  * The pre-built C extension ``numpy_extension-1.0.1-cp39-cp39-linux_x86_64.whl``
+
+* Compiler requirements:
+
+  * A C compiler with OpenMP support is required for compilation.
 
 Installation
 -------------
-There are two main methods for setting up the Python environment and installing **QTrans**:
+There are two ways to set up the Python environment and install **QTrans**:
 
 1. Conda-based Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Using provided ``environment.yaml``, one can build the environment for **QTrans** via Conda.
+This method uses the provided environment.yaml file to create a Conda environment with the required dependencies.
 
-1.Run the following command to create the environment::
+**Step 1.Create the Conda environment** 
+
+Run the following command::
 
   [user]$ conda env create -f environment.yaml -n QTrans
 
-2.After creating the environment, install **QTrans**::
+**Step 2.Activate the environment**::
+
+  [user]$ conda activate QTrans
+
+**Step 3.Download and install QTrans**:
+
+Clone the QTrans repository and install the package in editable mode::
 
   [user]$ git clone ***.git
   [user]$ cd QTrans
-  [user]$ python setup.py install
+  [user]$ python -m pip install -e .
 
-3.Install the pre-built C extension::
-
-  [user]$ pip install numpy_extension-1.0.1-cp39-cp39-linux_x86_64.whl
-
-2. Using the Pre-built Conda Environment
+2. Pre-built Conda Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The easiest way to install **QTrans** is by using the pre-built Conda environment we provide:
+For convenience, we also provide a pre-built Conda environment, 
+allowing users to set up **QTrans** without manually resolving its dependencies.
 
-1.Download the pre-built **QTrans** Conda environment from `<download_link>`.
+**Step 1.Download the pre-built environment** 
+Download the pre-built **QTrans** environment archive from the following link:  `<download_link>`.
 
-2.Move it into your Conda environment folder and unpack the file ``QTrans.tar.gz``::
+**Step 2. Extract the environment archive** 
+Move QTrans.tar.gz to your Conda environments directory and extract it::
 
   [user]$ cd ~/softwares/miniconda/miniconda3/envs/ # Modify this path according to your environment
   [user]$ mkdir QTrans && cd QTrans
   [user]$ mv QTrans.tar.gz ./
   [user]$ tar xvf QTrans.tar.gz
 
-3.Check the conda environment list, there would be an environment named **QTrans**::
+**Step 3. Verify the environment** 
+
+Check whether the **QTrans** environment appears in the Conda environment list::
 
   [user]$ conda env list
-    
-4.After unpacking the environment, install **QTrans**::
+
+**Step 4. Download and install QTrans** 
+
+Clone the **QTrans** repository and install the package in editable mode::
 
   [user]$ git clone ***.git
   [user]$ cd QTrans
-  [user]$ python setup.py install
-
-5.Install the pre-built C extension::
-
-  [user]$ pip install numpy_extension-1.0.1-cp39-cp39-linux_x86_64.whl
-
-
-.. _Python: https://www.python.org/
+  [user]$ python -m pip install -e .

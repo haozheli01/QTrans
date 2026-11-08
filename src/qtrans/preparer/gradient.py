@@ -252,8 +252,8 @@ class _GradientMixin:
                     dSon_cell[icell] = dict()
                 if icell == (0,0,0):
                     dSon_cell[icell][tar] = (Son_cell[icell][tar]-Son_HS_dSon_tmp[0]) / self.dSon_delta_r
-                else:
-                    dSon_cell[icell][tar] = (Son_cell[icell][tar]-Son_cell[icell][0]) / self.dSon_delta_r
+                # else:   # We do not need to calculate dSon for other cells, because we only need dSon for the central cell (0,0,0) to calculate the gradient matrix.
+                #     dSon_cell[icell][tar] = (Son_cell[icell][tar]-Son_cell[icell][0]) / self.dSon_delta_r
             dSon[Element(each).Z] = dSon_cell
             print(f"Finished on-site overlap gradient calculation for element: {each}.")
         return dSon

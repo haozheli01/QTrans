@@ -11,7 +11,7 @@ class Constants:
     EXP_MAXARG = 200.0
     MAX_BUFFER_BYTES = 1.5 * (1024 ** 3)  # 1.5 GB
     AXIS_MAP = {'h': 0, 'k': 1, 'l': 2}
-    LOG_LENGTH = 120
+    LOG_LENGTH = 100
 
     # numbers
     PI = math.pi

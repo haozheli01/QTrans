@@ -1,50 +1,112 @@
 .. _theory_superconductivity:
 
-==================
+=================
 Superconductivity
-==================
+=================
 
-Allen-Dynes critical temperature
-----------------------------------
+**QTrans** estimates the superconducting transition temperature using a
+simplified Allen-Dynes formula. 
+The spectral definitions below use the isotropic, nonmagnetic,
+spin-degenerate case as the reference convention.
 
-The superconducting critical temperature :math:`T_\text{c}` can be estimated using the semi-empirical Allen-Dynes formula.
-We start from the phonon linewidth, which can be expressed as:
+Eliashberg Spectral Function
+----------------------------
 
-.. math::
-    \gamma_{\mathbf{q}b} = 2\pi \omega_{\mathbf{q}b}\sum_{\mu\nu\mathbf{k}} {\left|g^{\mathbf{q}b}_{\mu\mathbf{k+q},\nu\mathbf{k}}\right|}^{2}
-    \delta(\varepsilon_{\nu\mathbf{k}} - \varepsilon_\text{F})\delta(\varepsilon_{\mu\mathbf{k+q}} - \varepsilon_\text{F}).
+Let :math:`N_F=N(\varepsilon_F)` denote the electronic density of states per
+unit cell, per unit energy, and per spin at the Fermi energy
+:math:`\varepsilon_F`. The band sums below include one copy of each
+spin-degenerate band, and Brillouin-zone integrals are normalized by the
+Brillouin-zone volume :math:`\Omega_{\mathrm{BZ}}`. The variable
+:math:`\omega` denotes angular frequency, and the electron-phonon coupling
+matrix element :math:`g_{\mu\nu b}(\mathbf{k},\mathbf{q})` has units of energy.
 
-Then, the Eliashberg spectral function can be written as:
-
-.. math::
-    \alpha^{2}F(\omega) = \frac{1}{2\pi N(\varepsilon_\text{F})}\sum_{\mathbf{q}b}
-    \frac{\gamma_{\mathbf{q}b}}{\omega_{\mathbf{q}b}}\delta(\omega - \omega_{\mathbf{q}b}).
-
-So, the electron phonon coupling constant can be estimated by:
-
-.. math::
-    \lambda = 2\int\frac{\alpha^2 F(\omega)}{\omega}d\omega.
-
-The logarithmic average of phonon frequencies :math:`\omega_\text{log}` is defined as:
+In this convention, define the phonon linewidth parameter in angular-frequency
+units as
 
 .. math::
-    \omega_\text{log} = \text{exp}\left[ \frac{2}{\lambda} \int \frac{\alpha^2 F(\omega)}{\omega}\text{log}(\omega)d\omega \right],
 
-Finally, we can use Allen-Dynes formula to compute the :math:`T_\text{c}` as:
+    \gamma_{\mathbf{q}b}
+    = 2\pi\omega_{\mathbf{q}b}\sum_{\mu\nu}
+    \int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+    |g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2
+    \delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_F)
+    \delta(\varepsilon_{\mu\mathbf{k+q}}-\varepsilon_F).
+
+The corresponding energy linewidth parameter is
+:math:`\hbar\gamma_{\mathbf{q}b}`. The Eliashberg spectral function is
 
 .. math::
-    T_\text{c} = \frac{\omega_\text{log}}{1.2}\text{exp}(-\frac{1.04(1+\lambda)}{\lambda - \mu^{*}(1+0.62\lambda)}),
 
-where :math:`\mu^{*}` is the semi-empirical Coulomb pseudopotential. 
+    \alpha^2F(\omega)
+    = \frac{1}{2\pi\hbar N_F}\sum_b
+    \int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+    \frac{\gamma_{\mathbf{q}b}}{\omega_{\mathbf{q}b}}
+    \delta(\omega-\omega_{\mathbf{q}b}).
 
-QTrans returns :math:`T_\text{c}=0` when
-:math:`\lambda-\mu^{*}(1+0.62\lambda)\leq 0`. This is the convention used
-outside the attractive regime of this estimate; the exponential is evaluated
+This normalization agrees with the ordinary Eliashberg spectral function
+in :ref:`theory_resistivity`. The dimensionless electron–phonon coupling
+constant is
+
+.. math::
+
+    \lambda=2\int_0^\infty\frac{d\omega}{\omega}\alpha^2F(\omega).
+
+The factor of 2 in this frequency integral is part of the definition of
+:math:`\lambda`; it is not an additional spin degeneracy factor. Spin counting
+must instead be consistent between the electronic band sums and :math:`N_F`.
+
+For :math:`\lambda>0`, the logarithmic average phonon frequency is
+
+.. math::
+
+    \omega_{\mathrm{log}}
+    = \exp\left[
+    \frac{2}{\lambda}\int_0^\infty\frac{d\omega}{\omega}
+    \alpha^2F(\omega)\log\left(\omega\right)
+    \right],
+
+where :math:`\omega_{\mathrm{ref}}>0` is an arbitrary reference frequency that
+makes the logarithm dimensionless. Its value cancels from the result.
+These integrals assume a dynamically stable phonon spectrum with positive
+frequencies; imaginary modes require a separate assessment of structural
+stability.
+
+Allen-Dynes Critical Temperature
+--------------------------------
+
+The simplified Allen-Dynes expression implemented in **QTrans** is
+
+.. math::
+
+    T_{\mathrm{c}}
+    = \frac{\hbar\omega_{\mathrm{log}}}{1.2k_{\mathrm{B}}}
+    \exp\left[-\frac{1.04(1+\lambda)}
+    {\lambda-\mu^*(1+0.62\lambda)}\right],
+
+where :math:`\mu^*` is the dimensionless effective Coulomb pseudopotential.
+This semi-empirical estimate describes isotropic, phonon-mediated pairing.
+The full Allen-Dynes formula contains additional strong-coupling and
+spectral-shape correction factors :math:`f_1f_2`; these factors are set to
+unity in the current implementation. The simplified estimate should therefore
+be used with care for strongly coupled or strongly anisotropic systems.
+
+**QTrans** returns :math:`T_{\mathrm{c}}=0` when
+:math:`\lambda-\mu^*(1+0.62\lambda)\leq0`. This is an implementation convention
+outside the attractive regime of the estimate, rather than a general
+criterion for the absence of superconductivity. The exponential is evaluated
 only when the denominator is positive.
 
+.. note::
+
+    Internally, **QTrans** uses phonon energies in Hartree. The logarithmic
+    average returned by the code is therefore the energy
+    :math:`E_{\mathrm{log}}=\hbar\omega_{\mathrm{log}}`. The code evaluates
+    :math:`k_{\mathrm{B}}T_{\mathrm{c}}` in Hartree and converts the result to
+    kelvin for output. The spectral coordinate in ``a2f.dat`` is an energy
+    in meV, despite being labeled ``omega``.
 
 Anisotropic Superconductivity
-----------------------------------
+-----------------------------
 
-In progress
+Under development.
 

@@ -1,15 +1,14 @@
 .. QTrans documentation master file
 
-QTrans: Calculations for transport properties
-=================================================================================================
+QTrans
+======
+
+A Python package for calculating **Q**\ uasiparticle **Trans**\ port properties.
 
 .. image:: ./_static/intro.png
    :alt: intro.png
-   :width: 800px
-   :height: 800px
-   :scale: 100 %
+   :width: 80%
    :align: center
-   :class: custom-class
 
 News:
 

@@ -8,7 +8,7 @@ import sphinxcontrib
 
 # -- Project information -----------------------------------------------------
 project = 'QTrans'
-copyright = '2025, Shixu Liu'
+copyright = '2026, Yang\'s Group'
 author = 'Shixu Liu, Haozhe Li'
 release = '0.1'
 
