@@ -28,7 +28,7 @@ to electron-phonon coupling and transport properties.
 
 * **Calculation** (``QTrans_run``) reads the prepared electronic, phonon, and
   coupling data to evaluate band structures, densities of states,
-  electron–phonon matrix elements, and derived properties, including
+  electron-phonon matrix elements, and derived properties, including
   conductivity, carrier mobility, resistivity, intrinsic dielectric
   breakdown strength, and superconducting critical temperature.
 

@@ -44,19 +44,19 @@ This method uses the provided environment.yaml file to create a Conda environmen
 
 Run the following command::
 
-  [user]$ conda env create -f environment.yaml -n QTrans
+  conda env create -f environment.yaml -n QTrans
 
 **Step 2.Activate the environment**::
 
-  [user]$ conda activate QTrans
+  conda activate QTrans
 
-**Step 3.Download and install QTrans**:
+**Step 3. Download and install** **QTrans**:
 
-Clone the QTrans repository and install the package in editable mode::
+Clone the **QTrans** repository and install the package in editable mode::
 
-  [user]$ git clone ***.git
-  [user]$ cd QTrans
-  [user]$ python -m pip install -e .
+  git clone ***.git
+  cd QTrans
+  python -m pip install -e .
 
 2. Pre-built Conda Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,23 +68,23 @@ allowing users to set up **QTrans** without manually resolving its dependencies.
 Download the pre-built **QTrans** environment archive from the following link:  `<download_link>`.
 
 **Step 2. Extract the environment archive** 
-Move QTrans.tar.gz to your Conda environments directory and extract it::
+Move ``QTrans.tar.gz`` to your Conda environments directory and extract it::
 
-  [user]$ cd ~/softwares/miniconda/miniconda3/envs/ # Modify this path according to your environment
-  [user]$ mkdir QTrans && cd QTrans
-  [user]$ mv QTrans.tar.gz ./
-  [user]$ tar xvf QTrans.tar.gz
+  cd ~/softwares/miniconda/miniconda3/envs/ # Modify this path according to your environment
+  mkdir QTrans && cd QTrans
+  mv QTrans.tar.gz ./
+  tar xvf QTrans.tar.gz
 
 **Step 3. Verify the environment** 
 
 Check whether the **QTrans** environment appears in the Conda environment list::
 
-  [user]$ conda env list
+  conda env list
 
-**Step 4. Download and install QTrans** 
+**Step 4. Download and install** **QTrans**
 
 Clone the **QTrans** repository and install the package in editable mode::
 
-  [user]$ git clone ***.git
-  [user]$ cd QTrans
-  [user]$ python -m pip install -e .
+  git clone ***.git
+  cd QTrans
+  python -m pip install -e .

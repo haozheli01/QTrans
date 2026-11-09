@@ -79,6 +79,52 @@ supercell, provided both describe the same reference crystal.
 The optional ``prep_mode: vasp-ph`` provides a VASP-based route for preparing
 phonon force sets. Existing compatible phonon data can be used directly.
 
+.. important::
+
+   Phonopy uses different physical units for different calculator interfaces.
+   QTrans loads ``FORCE_SETS`` using Phonopy's default VASP convention:
+   displacements in angstroms and forces in eV/angstrom. When using
+   ``FORCE_SETS`` generated through a non-VASP interface, convert its values
+   to these units before supplying it to **QTrans**. The file format alone does
+   not identify the unit convention.
+
+The relevant
+`Phonopy interface conventions <https://phonopy.github.io/phonopy/interfaces.html>`_
+are summarized below. These are interface conventions, rather than
+alternative unit systems selected automatically by **QTrans**.
+
+.. list-table:: 
+   :header-rows: 1
+   :widths: 16 20 16 22 26
+
+   * - Interface
+     - Length
+     - Atomic mass
+     - Force
+     - Force constants
+   * - VASP
+     - angstrom
+     - amu
+     - eV/angstrom
+     - eV/angstrom\ :sup:`2`
+   * - SIESTA
+     - bohr
+     - amu
+     - eV/angstrom
+     - eV/(angstrom bohr)
+   * - ABACUS
+     - bohr
+     - amu
+     - eV/angstrom
+     - eV/(angstrom bohr)
+
+For example, in ``FORCE_SETS`` generated through Phonopy's ABACUS interface,
+multiply the displacement vectors in bohr by approximately ``0.529177`` to
+convert them to angstroms. Forces already expressed in eV/angstrom remain
+unchanged. If converting force constants instead, divide values in
+eV/(angstrom bohr) by the same factor to obtain eV/angstrom\ :sup:`2`.
+Always check the units of the actual source data before conversion.
+
 Data passed to calculation
 --------------------------
 

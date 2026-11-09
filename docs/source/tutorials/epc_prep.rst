@@ -7,9 +7,6 @@ EPC Gradient Matrix Preparation
 In this section we show how to prepare the EPC gradient matrix in QTrans via the ``grad-epc`` mode of **QTrans_prep**, 
 using aluminum and iron as examples.
 
-.. warning::
-    The ``grad-epc`` mode of ``QTrans_prep`` runs in serial.
-
 
 EPC Gradient Matrix of Al
 ------------------------------
@@ -78,13 +75,26 @@ Here, we use **OpenMX** to perform the self-consistent DFT calculations and extr
 which are saved in ``graph_data_QTrans.npz``. 
 You can also predict and generate the Hamiltonian matrices of those supercells using **HamGNN**.
 
+.. note::
+
+    To pack multiple supercell calculation folders, set
+    ``graph_pack.data_folder`` to select those folders and run, for example:
+
+    .. code-block:: bash
+
+        mpirun -np 4 QTrans_prep --config input_graph.yaml > graph_pack.out
+
+    Each rank builds the graphs for its assigned folders. Rank 0 gathers
+    and saves them together in ``graph_data_QTrans.npz``. See
+    :ref:`tutorial_obtain_hs` for the graph-packing configuration.
+
 3. Generation of Gradient Matrix
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                     
 Now, we need to configure the ``input_epc_2.yaml`` file according to the above generated files.
 Set :ref:`graph_data_sc_path <prep_graph_data_sc_path>` to ``./perturb/graph_data_QTrans.npz``,
 and :ref:`mat_info_sc_path <prep_mat_info_sc_path>` to ``./perturb/mat_info_sc.npy``.
-Then, we could issue the following command:
+Run the gradient calculation with a single process:
 
 .. code-block:: none
 
@@ -117,3 +127,10 @@ as it contains both structural and magnetic information.
     The magnetic moments of magnetic atoms in the current **OpenMX** input file should correspond to the 
     values obtained after self-consistent calculations, rather than the initial guesses.
 
+.. note::
+
+    The ``grad-epc`` mode performs its main work on rank 0, including writing
+    perturbed-supercell inputs and computing the gradient matrices. These
+    steps do not benefit from MPI parallel execution; use a single process
+    as shown below. The separate ``graph-pack`` step supports MPI parallel
+    execution across multiple supercell calculation folders.
