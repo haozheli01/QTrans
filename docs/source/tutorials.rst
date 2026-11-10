@@ -7,6 +7,7 @@ Tutorials
 
    tutorials/obtain_hs
    tutorials/epc_prep
+   tutorials/phonon_prep
    tutorials/qp_disp
    tutorials/qp_dos
    tutorials/epc_path

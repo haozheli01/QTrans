@@ -5,20 +5,240 @@ Generation of Hamiltonian and Overlap Matrices
 ==================================================
 
 This tutorial explains how to prepare electronic data for **QTrans** using the
-aluminum (Al) examples. **QTrans** stores the structure, orbital basis, Hamiltonian,
-and overlap matrices in graph data, normally ``graph_data.npz``.
+nonmagnetic aluminum (Al) and ferromagnetic iron (Fe) as examples.
+**QTrans** stores the structure, orbital basis, Hamiltonian,
+and overlap matrices in graph data, written as ``graph_data_QTrans.npz``
+by ``graph-pack``. Tutorial data directories may rename this file to
+``graph_data.npz``.
 
 Paths below are relative to the tutorial repository root. Run graph packing
-from the relevant ``graph-pack/`` directory so that relative paths in the
+from the relevant graph-packing directory so that relative paths in the
 YAML configuration resolve correctly. Each example includes a ``ref/``
 directory with previously generated inputs and outputs for comparison.
+The **QTrans** YAML configurations below are shown in full, with
+machine-specific paths replaced by ``/path/to/...`` placeholders.
+Omitted optional parameters use the program defaults.
 
 
 Based on DFT Calculations
 -------------------------
 
-1. From ABACUS
-^^^^^^^^^^^^^^
+1. OpenMX: Al as the main example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Install OpenMX and obtain the ``read_openmx`` matrix-export executable
+from the `HamGNN repository <https://github.com/QuantumLab-ZY/HamGNN/>`_.
+**QTrans** invokes ``read_openmx`` to extract Hamiltonian and overlap matrices
+from OpenMX binary outputs into a temporary ``HS.json`` file. The separate
+``openmx_postprocess`` executable is needed for the HamGNN preprocessing
+route described later; it is not required for packing the SCF matrices in these examples.
+
+For detailed DFT parameter settings and instructions on using OpenMX, refer
+to the manuals on the `official OpenMX website <https://www.openmx-square.org/>`_.
+The steps below focus on generating and converting the outputs needed by
+**QTrans**.
+
+
+
+The example is located in ``tutorials/Al/openmx/graph-pack/``. Its ``ref/``
+directory contains outputs for reference.
+
+Step 1. Prepare the executables and input
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Before running the example:
+
+* Update ``DATA.PATH`` in ``DFT/openmx_Al.dat`` to your OpenMX pseudopotential
+  and atomic-orbital data directory.
+* Update ``software_path.openmx_read_path`` in ``input_graph.yaml`` to an
+  executable ``read_openmx``.
+* Make sure ``openmx`` is available in your shell, or use its full path in
+  the command below.
+
+The supplied input uses the GGA-PBE functional, the ``Al7.0-s2p2d1`` orbital
+basis, and the ``Al_PBE19`` pseudopotential without spin polarization.
+It sets ``scf.energycutoff`` to 200 Ry, ``scf.Kgrid`` to ``18 18 18``,
+``scf.ElectronicTemperature`` to 300 K, and ``scf.criterion`` to
+``1.0e-12`` Hartree. Keep ``HS.fileout on`` enabled to write the binary
+Hamiltonian and overlap data required by **QTrans**. Check convergence
+before applying these settings to another system.
+
+Step 2. Run the self-consistent calculation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From the repository root, run:
+
+.. code-block:: bash
+
+   cd tutorials/Al/openmx/graph-pack/DFT/
+   mpirun -np 8 openmx openmx_Al.dat > openmx_scf.out
+   cd ..
+
+The input sets ``System.Name`` to ``crystal``, so the files needed for graph
+packing are ``DFT/crystal.scfout`` and ``DFT/crystal.out``.
+``openmx_scf.out`` is the redirected terminal output; it is distinct from
+``crystal.out``, which **QTrans** reads for structure and convergence information.
+Check that the SCF calculation converged before continuing.
+
+Step 3. Configure graph packing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The complete ``input_graph.yaml`` is:
+
+.. code-block:: yaml
+
+   basic:
+     prep_mode: 'graph-pack'
+     outdir: './'
+
+   software_path:
+     openmx_read_path: ./read_openmx
+
+   material:
+     nao_max: 14
+     DFT_software: openmx
+
+   graph_pack:
+     HSout_filename: 'crystal.scfout'
+     vbout_filename: 'crystal.out'
+     data_folder: ./DFT/
+     converge_step_ratio: 0.9
+
+Replace the executable path with your installation path.
+:ref:`nao_max <prep_nao_max>` selects the orbital definition used to pack the
+data and must match the electronic-structure setup. This DFT example uses
+``14`` for the aluminum basis used here.
+A larger atomic-orbital basis can improve accuracy at a higher computational
+cost. Set :ref:`nao_max <prep_nao_max>` to match the basis used in the DFT
+calculation; increasing this parameter alone does not improve accuracy.
+
+:ref:`HSout_filename <prep_HSout_filename>` identifies the binary matrix file,
+and :ref:`vbout_filename <prep_vbout_filename>` identifies the OpenMX text
+output. :ref:`data_folder <prep_data_folder>` selects the calculation folders.
+For multiple calculations, it can be a glob pattern such as ``./DFT/*/``;
+folders missing required files are reported and skipped.
+
+The parameter :ref:`converge_step_ratio <prep_converge_step_ratio>` filters
+calculations using their SCF iteration count relative to ``scf.maxIter``.
+The example uses ``0.9``. This filter supplements checking the SCF convergence
+and does not set the convergence tolerance of OpenMX.
+
+Step 4. Pack and inspect the result
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From ``tutorials/Al/openmx/graph-pack/``, run:
+
+.. code-block:: bash
+
+   QTrans_prep --config input_graph.yaml > graph_pack.out
+
+The output is ``graph_data_QTrans.npz`` in ``basic.outdir``. Check that
+``graph_pack.out`` reports one useful folder and successful completion.
+Reference files are available at:
+
+.. code-block:: text
+
+   ref/
+     DFT/crystal.scfout
+     DFT/crystal.out
+     DFT/openmx_scf.out
+     graph_data_QTrans.npz
+     graph_pack.out
+
+Reference logs may contain paths from the original calculation environment;
+use the paths shown above for the current directory layout.
+
+For unit-cell calculations, provide the generated dataset through
+``basic.graph_data_path_uc`` in the calculator configuration. To prepare EPC
+from displaced-supercell data, continue with :ref:`tutorial-epc-grad-prep`.
+
+.. warning::
+
+   **QTrans** creates and removes ``HS.json`` in each selected calculation
+   folder during matrix extraction. Use folders without an existing
+   ``HS.json`` and avoid concurrent graph-packing jobs in the same folders.
+
+
+2. OpenMX: magnetic Fe
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The bcc Fe example is located in ``tutorials/Fe/openmx/graph-pack/``.
+Follow the same SCF and graph-packing sequence as for Al, with the changes
+below.
+
+Spin-polarized DFT input
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Update ``DATA.PATH`` in ``DFT/openmx_Fe.dat``. The supplied input uses
+``Fe5.5H-s3p2d1`` and ``Fe_PBE19H``, a 200 Ry cutoff, a
+``22 x 22 x 22`` k-point mesh, and ``scf.criterion: 1.0e-10`` Hartree.
+Its key magnetic settings are:
+
+.. code-block:: text
+
+   scf.SpinPolarization    on
+   HS.fileout             on
+
+   <Atoms.SpeciesAndCoordinates
+     1  Fe  0.0000000  0.0000000  0.0000000  10.00  6.00  on
+   Atoms.SpeciesAndCoordinates>
+
+The unequal initial spin populations seed a magnetic state; they do not
+specify the final converged magnetic moment. Check both SCF convergence
+and the resulting magnetic state in ``crystal.out``. This example treats
+collinear magnetism without spin-orbit coupling.
+
+Matching graph-packing settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The complete Fe ``input_graph.yaml`` is shown below. Its magnetic setting
+is the main difference from the Al configuration:
+
+.. code-block:: yaml
+
+   basic:
+     prep_mode: 'graph-pack'
+     outdir: './'
+
+   software_path:
+     openmx_read_path: ./read_openmx
+
+   material:
+     nao_max: 14
+     DFT_software: openmx
+     magnetic_type: collinear # Fe is ferromagnetic!
+
+   graph_pack:
+     HSout_filename: 'crystal.scfout'
+     vbout_filename: 'crystal.out'
+     data_folder: ./DFT/
+     converge_step_ratio: 0.9
+
+``magnetic_type: collinear`` tells **QTrans** to retain the two spin channels.
+It must match ``scf.SpinPolarization on`` in the DFT calculation; the default
+nonmagnetic setting used for Al is not appropriate for this Fe dataset.
+``nao_max: 14`` selects the OpenMX orbital definition, which includes the
+Fe basis used here. See :ref:`ao_define_title` and
+:ref:`valence_electrons_title` for the orbital and electron-count definitions.
+
+From the tutorial repository root, run:
+
+.. code-block:: bash
+
+   cd tutorials/Fe/openmx/graph-pack/DFT/
+   mpirun -np 8 openmx openmx_Fe.dat > openmx.out
+   cd ..
+   QTrans_prep --config input_graph.yaml > graph.out
+
+Set ``software_path.openmx_read_path`` to your matrix-export executable
+before packing. The output is ``graph_data_QTrans.npz``; compare it and
+``graph.out`` with the corresponding files in ``ref/``. The reference log
+reports ``Dealing with a COLLINEAR magnetic system.`` and one useful folder.
+For subsequent calculations, keep ``basic.magnetic_type: collinear`` and
+the no-SOC setting consistent with this prepared dataset.
+
+3. ABACUS: the Al workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For detailed DFT parameter settings and instructions on using ABACUS, refer
 to the `official ABACUS documentation <https://abacus.deepmodeling.com/en/latest/>`_.
@@ -32,7 +252,10 @@ Step 1. Prepare the ABACUS input
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``DFT/`` directory contains ``INPUT``, ``STRU``, and ``KPT`` for an
-LCAO self-consistent calculation of aluminum. Before running:
+LCAO self-consistent calculation of aluminum. The overall sequence is the
+same as for OpenMX: run DFT, locate the matrix outputs, then run
+``QTrans_prep``. ABACUS supplies CSR matrices that **QTrans** reads directly,
+so no ``read_openmx`` conversion is needed. Before running:
 
 * Update ``pseudo_dir`` and ``orbital_dir`` in ``INPUT`` to your local
   pseudopotential and numerical-orbital directories.
@@ -88,8 +311,8 @@ follows, replacing the data-directory paths with your local paths:
 .. code-block:: yaml
 
    basic:
-     prep_mode: graph-pack
-     outdir: ./
+     prep_mode: 'graph-pack'
+     outdir: './'
 
    software_path:
      abacus_dftdata_dir: /path/to/SG15_ONCV
@@ -100,7 +323,7 @@ follows, replacing the data-directory paths with your local paths:
      DFT_software: abacus
 
    graph_pack:
-     data_folder: ./DFT/
+     data_folder: ./DFT
      abacus_out_folder: OUT.Al
      abacus_scf_log: running_scf.log
 
@@ -125,149 +348,20 @@ Run from ``tutorials/Al/abacus/graph-pack/``:
 The resulting ``graph_data_QTrans.npz`` is written to ``basic.outdir`` and
 can be supplied through ``basic.graph_data_path_uc`` for unit-cell calculations.
 Compare with ``ref/graph.out`` and ``ref/graph_data_QTrans.npz`` in this
-``graph-pack/`` directory. The reference directory
-also includes the DFT inputs and the required ``OUT.Al`` files.
+``graph-pack/`` directory. The reference directory also includes the DFT inputs and the required ``OUT.Al`` files.
 
-2. From OpenMX
-^^^^^^^^^^^^^^
-
-For detailed DFT parameter settings and instructions on using OpenMX, refer
-to the manuals on the `official OpenMX website <https://www.openmx-square.org/>`_.
-The steps below focus on generating and converting the outputs needed by
-**QTrans**.
-
-The example is located in ``tutorials/Al/openmx/graph-pack/``. Its ``ref/``
-directory contains outputs for reference.
-
-Step 1. Prepare the executables and input
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Install OpenMX and the ``read_openmx`` matrix-export executable available
-from the `HamGNN repository <https://github.com/QuantumLab-ZY/HamGNN/>`_.
-**QTrans** invokes ``read_openmx`` to extract Hamiltonian and overlap matrices
-from OpenMX binary outputs into a temporary ``HS.json`` file.
-
-Before running the example:
-
-* Update ``DATA.PATH`` in ``DFT/openmx_Al.dat`` to your OpenMX pseudopotential
-  and atomic-orbital data directory.
-* Update ``software_path.openmx_read_path`` in ``input_graph.yaml`` to an
-  executable ``read_openmx``. The supplied value, ``./read_openmx``, assumes
-  the executable is in the ``graph-pack`` directory; it is not included there.
-* Make sure ``openmx`` is available in your shell, or use its full path in
-  the command below.
-
-The supplied input uses the GGA-PBE functional, the ``Al7.0-s2p2d1`` orbital
-basis, and the ``Al_PBE19`` pseudopotential without spin polarization.
-It sets ``scf.energycutoff`` to 200 Ry, ``scf.Kgrid`` to ``18 18 18``,
-``scf.ElectronicTemperature`` to 300 K, and ``scf.criterion`` to
-``1.0e-12`` Hartree. Keep ``HS.fileout on`` enabled to write the binary
-Hamiltonian and overlap data required by **QTrans**. Check convergence
-before applying these settings to another system.
-
-Step 2. Run the self-consistent calculation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-From the repository root, run:
-
-.. code-block:: bash
-
-   cd tutorials/Al/openmx/graph-pack/DFT/
-   mpirun -np 8 openmx openmx_Al.dat > openmx_scf.out
-   cd ..
-
-The input sets ``System.Name`` to ``crystal``, so the files needed for graph
-packing are ``DFT/crystal.scfout`` and ``DFT/crystal.out``.
-``openmx_scf.out`` is the redirected terminal output; it is distinct from
-``crystal.out``, which **QTrans** reads for structure and convergence information.
-Check that the SCF calculation converged before continuing.
-
-Step 3. Configure graph packing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The supplied ``input_graph.yaml`` uses:
-
-.. code-block:: yaml
-
-   basic:
-     prep_mode: graph-pack
-     outdir: ./
-
-   software_path:
-     openmx_read_path: /path/to/read_openmx
-
-   material:
-     nao_max: 14
-     DFT_software: openmx
-
-   graph_pack:
-     HSout_filename: crystal.scfout
-     vbout_filename: crystal.out
-     data_folder: ./DFT/
-     converge_step_ratio: 0.9
-
-Replace the executable path with your installation path.
-:ref:`nao_max <prep_nao_max>` selects the orbital definition used to pack the
-data and must match the electronic-structure setup. This DFT example uses
-``14`` for the aluminum basis used here.
-
-:ref:`HSout_filename <prep_HSout_filename>` identifies the binary matrix file,
-and :ref:`vbout_filename <prep_vbout_filename>` identifies the OpenMX text
-output. :ref:`data_folder <prep_data_folder>` selects the calculation folders.
-For multiple calculations, it can be a glob pattern such as ``./DFT/*/``;
-folders missing required files are reported and skipped.
-
-The parameter :ref:`converge_step_ratio <prep_converge_step_ratio>` filters
-calculations using their SCF iteration count relative to ``scf.maxIter``.
-The example uses ``0.9``. This filter supplements checking the SCF convergence
-and does not set the convergence tolerance of OpenMX.
-
-Step 4. Pack and inspect the result
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-From ``tutorials/Al/openmx/graph-pack/``, run:
-
-.. code-block:: bash
-
-   QTrans_prep --config input_graph.yaml > graph_pack.out
-
-The output is ``graph_data_QTrans.npz`` in ``basic.outdir``. Check that
-``graph_pack.out`` reports one useful folder and successful completion.
-Reference files are available at:
-
-.. code-block:: text
-
-   ref/
-     DFT/crystal.scfout
-     DFT/crystal.out
-     DFT/openmx_scf.out
-     graph_data_QTrans.npz
-     graph_pack.out
-
-Reference logs may contain paths from the original calculation environment;
-use the paths shown above for the current directory layout.
-
-For unit-cell calculations, provide the generated dataset through
-``basic.graph_data_path_uc`` in the calculator configuration. To prepare EPC
-from displaced-supercell data, continue with :ref:`tutorial-epc-grad-prep`.
-
-.. warning::
-
-   **QTrans** creates and removes ``HS.json`` in each selected calculation
-   folder during matrix extraction. Use folders without an existing
-   ``HS.json`` and avoid concurrent graph-packing jobs in the same folders.
 
 Based on HamGNN Prediction with OpenMX
 --------------------------------------------
 
 We can also predict the Hamiltonian using **HamGNN**.
 The prediction example is located in
-``tutorials/Al/openmx/predict_HamGNN/``. It uses the universal Hamiltonian model
+``tutorials/Al/openmx/predict-HamGNN/``. It uses the universal Hamiltonian model
 :cite:`zhongZhongUniversalMachineLearning2024`, available from
 `Zenodo <https://doi.org/10.5281/zenodo.10827117>`_.
 
 Prepare graph data for prediction
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The prediction route first constructs graph data containing the structure,
 overlap matrices, and non-self-consistent Hamiltonian contribution. **HamGNN**
@@ -277,7 +371,7 @@ From the repository root, enter the DFT directory:
 
 .. code-block:: bash
 
-   cd tutorials/Al/openmx/predict_HamGNN/DFT/
+   cd tutorials/Al/openmx/predict-HamGNN/DFT/
 
 Update ``DATA.PATH`` in ``openmx_Al.dat`` and ensure that
 ``openmx_postprocess`` and ``read_openmx`` are compatible with your OpenMX
@@ -294,9 +388,20 @@ Run the preprocessing command:
 
 This step produces ``overlap.scfout``. The graph-packing configuration uses
 ``DFT_software: openmx`` and ``nao_max: 26`` to match the universal model's
-orbital definition. Configure the relevant block as follows:
+orbital definition. The complete ``input_graph.yaml`` is:
 
 .. code-block:: yaml
+
+   basic:
+     prep_mode: 'graph-pack'
+     outdir: './'
+
+   software_path:
+     openmx_read_path: ./read_openmx
+
+   material:
+     nao_max: 26
+     DFT_software: openmx
 
    graph_pack:
      HSout_filename: null
@@ -322,14 +427,14 @@ by HamGNN:
 **HamGNN** expects ``graph_data.npz`` in the directory specified by
 ``dataset_params.graph_data_path``. The supplied ``predict/HamGNN_config.yaml``
 sets this path to ``../DFT/``. Previously generated preprocessing outputs
-are available in ``predict_HamGNN/ref/DFT/``.
+are available in ``predict-HamGNN/ref/DFT/``.
 
 Prediction configuration
-^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before running inference, update ``setup.checkpoint_path`` in
 ``predict/HamGNN_config.yaml`` to the downloaded model and use a compatible
-**HamGNN** environment. The example selects ``setup.stage: test``,
+**HamGNN** environment. This Al example selects ``setup.stage: test``,
 ``output_nets.HamGNN_out.nao_max: 26``, and ``add_H0: True``. Keep the model,
 orbital definition, graph data, and non-self-consistent contribution consistent.
 
@@ -342,7 +447,7 @@ Run the prediction from the ``predict`` directory:
 
 The predicted Hamiltonian is written to
 ``version_0/prediction_hamiltonian.npy`` for the reference run. Reference
-outputs are provided in ``predict_HamGNN/ref/predict/``, including
+outputs are provided in ``predict-HamGNN/ref/predict/``, including
 ``HamGNN_test.out`` and the prediction file. The output version directory
 may change for subsequent runs.
 
@@ -351,6 +456,11 @@ the structures, ordering, and orbital basis must match. For EPC gradient
 preparation, set ``grad_epc.use_prediction: True`` and supply the prediction
 through ``grad_epc.pred_H_sc_path`` together with matching supercell graph
 data and mapping, as described in :ref:`tutorial-epc-grad-prep`.
+
+The prediction example above is for nonmagnetic Al. The magnetic Fe
+example in this tutorial uses spin-polarized DFT data; applying a model to
+Fe requires a model and graph representation compatible with that magnetic
+configuration.
 
 For HamGNN installation and inference details, consult the
 `HamGNN documentation <https://github.com/QuantumLab-ZY/HamGNN/>`_.

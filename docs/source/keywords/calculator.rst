@@ -1371,8 +1371,7 @@ self-energy block
     All ``3 * natoms`` branches are saved after the q sum and electronic
     degeneracy average. Existing total self-energy and spectrum formats are
     preserved. The NPZ is created exclusively; use a new output directory for
-    each run. See :ref:`electron-self-energy-modes` for axes, units, memory
-    requirements, and validation instructions.
+    each run.
 
 :ref:`Back to top <cal_title_keywords>`
 

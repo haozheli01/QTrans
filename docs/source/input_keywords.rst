@@ -8,3 +8,4 @@ Input Keywords
    keywords/preparer
    keywords/calculator
    keywords/ao_define
+   keywords/valence_electrons

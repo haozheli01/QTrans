@@ -82,7 +82,7 @@ phonon force sets. Existing compatible phonon data can be used directly.
 .. important::
 
    Phonopy uses different physical units for different calculator interfaces.
-   QTrans loads ``FORCE_SETS`` using Phonopy's default VASP convention:
+   **QTrans** loads ``FORCE_SETS`` using Phonopy's default VASP convention:
    displacements in angstroms and forces in eV/angstrom. When using
    ``FORCE_SETS`` generated through a non-VASP interface, convert its values
    to these units before supplying it to **QTrans**. The file format alone does
@@ -124,6 +124,8 @@ convert them to angstroms. Forces already expressed in eV/angstrom remain
 unchanged. If converting force constants instead, divide values in
 eV/(angstrom bohr) by the same factor to obtain eV/angstrom\ :sup:`2`.
 Always check the units of the actual source data before conversion.
+For a step-by-step Al example using VASP or ABACUS, see
+:ref:`tutorial-phonon-prep`.
 
 Data passed to calculation
 --------------------------

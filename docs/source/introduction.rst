@@ -15,4 +15,4 @@ determine properties such as electrical conductivity, resistivity, intrinsic bre
 superconducting critical temperature. **QTrans** supports input from both first-principles calculations and predicted
 data from machine learning methods like `HamGNN <https://github.com/QuantumLab-ZY/HamGNN>`_, which significantly accelerating the computation of coupling matrix elements.
 
-Please consider cite this paper if you have used **QTrans** in your research.
+.. Please consider cite this paper if you have used **QTrans** in your research.
