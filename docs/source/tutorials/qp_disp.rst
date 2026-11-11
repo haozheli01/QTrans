@@ -7,7 +7,7 @@ Dispersion of Quasiparticle
 In this tutorial, we introduce the calculation of quasiparticle dispersion using **QTrans**.
 
 -------------------------------------
-Electron dispersion of Si
+Electronic dispersion of Si
 -------------------------------------
 
 This tutorial illustrates the calculation of the electron dispersion of the semiconductor Si.

@@ -506,7 +506,6 @@ The complete ``input-sparse.yaml`` is:
     advanced:
       read_sparse_grad_mat: True
       magnetic_type: 'collinear'
-      magnetic_tolerance: 0.4
 
     phonon:
       supercell_matrix: [[5.0, 0.0, 0.0], [0, 5, 0], [0, 0, 5]]

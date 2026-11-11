@@ -159,7 +159,7 @@ The resulting DOS is plotted in Figure 1.
 
 The DOS curve calculated using the tetrahedron method is generally smoother than raw discrete data
 but differs fundamentally from smearing methods. It retains sharp features near band edges and Van Hove
-singularities without artificial broadening, without the artificial broadening of a smearing kernel. Converge the mesh
+singularities without the artificial broadening of a smearing kernel. Converge the mesh
 for either method before comparing fine spectral features.
 
 ----------------------

@@ -63,10 +63,8 @@ For :math:`\lambda>0`, the logarithmic average phonon frequency is
     = \exp\left[
     \frac{2}{\lambda}\int_0^\infty\frac{d\omega}{\omega}
     \alpha^2F(\omega)\log\left(\omega\right)
-    \right],
+    \right].
 
-where :math:`\omega_{\mathrm{ref}}>0` is an arbitrary reference frequency that
-makes the logarithm dimensionless. Its value cancels from the result.
 These integrals assume a dynamically stable phonon spectrum with positive
 frequencies; imaginary modes require a separate assessment of structural
 stability.

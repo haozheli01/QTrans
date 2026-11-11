@@ -14,8 +14,8 @@ superconducting critical temperature :math:`T_c` of bulk fcc aluminum.
    smearing settings are not fully converged. Converge these parameters
    before using the results for quantitative predictions.
 
-QTrans + OpenMX
---------------------------------------
+**QTrans** + OpenMX
+-------------------
 
 Step 1. Prepare the input data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -202,8 +202,8 @@ values saved in ``a2f.dat`` and the numerical integration.
    **Figure 1:**  Eliashberg spectral function :math:`\alpha^2F(\omega)` of Al (blue solid
    line) and cumulative coupling :math:`\lambda(\omega)` (black dashed line).
 
-QTrans + ABACUS
---------------------------------------
+**QTrans** + ABACUS
+-------------------
 
 The corresponding ABACUS example is in
 ``tutorials/Al/abacus/superconductivity/``. It uses the ABACUS electronic

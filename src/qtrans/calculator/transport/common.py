@@ -235,13 +235,13 @@ class _TransportCommonMixin:
                 freq_grid, boson_vecs = self._phonon_cal(q_grid_local)
             nqs_local = len(freq_grid)
             boson_vecs = boson_vecs.reshape(nqs_local, nbranches, self.natoms, 3)
+            # Phonopy uses fractional q; compare the cutoff in Cartesian units.
+            q_grid_local = self._frac2car(q_grid_local)
             q_cut_sq = self.q_cut * self.q_cut
             if (not is_metal) and (self.apply_correction or self.quadrupole_correction):
                 apply_correction_for_qs = np.sum(np.square(q_grid_local), axis=1) < q_cut_sq
             else:
                 apply_correction_for_qs = np.zeros(len(q_grid_local), dtype=bool)
-            # change fractional coordinates to cartesian coordinates
-            q_grid_local = self._frac2car(q_grid_local)
         else:
             q_grid_local = np.empty((0, 3))
             freq_grid = np.empty((0, nbranches))

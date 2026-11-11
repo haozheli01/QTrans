@@ -448,6 +448,47 @@ gradient file and ``epc.mat_info_sc_path`` to its matching mapping. Use
 ``False`` with ``grad_mat.npy``. The electronic unit-cell data, phonon
 reference cell, basis, magnetic settings, and gradients must be consistent.
 
+For OpenMX Al, the generated files are handed to the calculation tutorials
+as follows (paths are relative to the tutorial repository root):
+
+.. list-table:: 
+   :header-rows: 1
+   :widths: 40 30 30
+
+   * - Generated file under ``tutorials/Al/openmx/``
+     - Destination under the same directory
+     - Calculator input key
+   * - ``graph-pack/graph_data_QTrans.npz``
+     - ``data/graph_data.npz``
+     - ``basic.graph_data_path_uc``
+   * - ``epc-prep/grad_mat.npy`` or ``epc-prep/grad_mat_sparse.npy``
+     - ``data/grad_mat.npy`` or ``data/grad_mat_sparse.npy``
+     - ``epc.grad_mat_path``
+   * - ``epc-prep/perturb/mat_info_sc.npy``
+     - ``data/mat_info_sc.npy``
+     - ``epc.mat_info_sc_path``
+
+After successfully generating the gradients, run from the tutorial
+repository root:
+
+.. code-block:: bash
+
+   cp -i tutorials/Al/openmx/epc-prep/grad_mat.npy tutorials/Al/openmx/data/grad_mat.npy
+   cp -i tutorials/Al/openmx/epc-prep/grad_mat_sparse.npy tutorials/Al/openmx/data/grad_mat_sparse.npy
+   cp -i tutorials/Al/openmx/epc-prep/perturb/mat_info_sc.npy tutorials/Al/openmx/data/mat_info_sc.npy
+
+The ``-i`` option asks before replacing supplied example data. Alternatively,
+keep all generated files in a separate directory and update the paths in
+the calculator YAML. Copy the matching mapping whenever the gradients are
+replaced; a mapping from another supercell preparation is not interchangeable.
+For OpenMX Fe or ABACUS Al, use the corresponding material/software paths
+and copy the outputs of that case rather than the Al/OpenMX files.
+
+These steps do not prepare the phonon inputs. Follow
+:ref:`tutorial-phonon-prep` for ``FORCE_SETS`` and its reference structure,
+and keep the phonon and EPC structures consistent. The complete calculator
+YAML files in the following tutorials show the final input paths.
+
 If using predicted Hamiltonians instead of SCF Hamiltonians, set
 ``grad_epc.use_prediction: True`` and provide ``grad_epc.pred_H_sc_path``
 together with matching supercell graph data. A unit-cell prediction alone

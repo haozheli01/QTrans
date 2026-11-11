@@ -44,7 +44,7 @@ This method uses the provided environment.yaml file to create a Conda environmen
 
 Run the following command::
 
-  conda env create -f environment.yaml -n QTrans
+  conda env create -f environment.yml -n QTrans
 
 **Step 2.Activate the environment**::
 

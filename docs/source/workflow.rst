@@ -4,7 +4,7 @@
 Workflow
 ========
 
-QTrans connects electronic-structure and phonon data to electron-phonon
+**QTrans** connects electronic-structure and phonon data to electron-phonon
 coupling (EPC) and transport properties through two stages: **preparation**
 (``QTrans_prep``) and **calculation** (``QTrans_run``). Preparation produces
 reusable real-space datasets; calculation evaluates the selected property
@@ -15,7 +15,7 @@ using these datasets and the requested sampling meshes.
    :width: 75%
    :align: center
 
-   Figure 1. Overview of the QTrans workflow. Electronic Hamiltonians are obtained
+   Figure 1. Overview of the **QTrans** workflow. Electronic Hamiltonians are obtained
    from first-principles calculations or machine learning predictions.
    Together with phonon data and real-space gradients, they provide the
    ingredients for EPC and transport calculations.
@@ -61,7 +61,7 @@ Preserve the structure ordering from the displacement generation step.
 Run ``grad-epc`` again, providing ``graph_data_sc_path`` and
 ``mat_info_sc_path`` in the ``grad_epc`` block. For predicted Hamiltonians,
 also set ``use_prediction: True`` and supply ``pred_H_sc_path``.
-QTrans constructs the real-space EPC gradients, including the overlap
+**QTrans** constructs the real-space EPC gradients, including the overlap
 contributions required by the atomic-orbital basis, and writes
 ``grad_mat.npy`` and ``grad_mat_sparse.npy`` to ``outdir``.
 See :ref:`tutorial-epc-grad-prep` for the complete procedure.
@@ -179,7 +179,7 @@ and gradient construction. To run the calculator with MPI, use, for example:
 
    mpirun -np 8 QTrans_run --config input_calc.yaml > calculation.out
 
-Internally, QTrans reads the configuration, loads the required electronic,
+Internally, **QTrans** reads the configuration, loads the required electronic,
 phonon, and gradient data, and dispatches the selected calculation. For EPC
 calculations, it combines electronic states, phonon modes, and real-space
 gradients to obtain coupling matrix elements at the requested k and q points.

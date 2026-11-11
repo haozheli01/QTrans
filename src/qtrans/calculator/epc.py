@@ -53,12 +53,13 @@ class _EPCMixin:
         # calculate the phonon spectrum
         freq_grid, phon_vecs = self._phonon_cal(q_path)
         phon_vecs = phon_vecs.reshape(-1, nbranches, self.natoms, 3)
+        # Phonopy uses fractional q; the configured cutoff uses Cartesian units.
+        q_path = self._frac2car(q_path)
         if self.apply_correction or self.quadrupole_correction:
             apply_correction_for_qs = np.linalg.norm(q_path, axis=1) < self.q_cut
         else:
             apply_correction_for_qs = np.zeros(nqs, dtype=bool)
         k_fix = self._frac2car(k_fix)[0]
-        q_path = self._frac2car(q_path)
         epc_all:np.ndarray = None
         eig_k, wave_k = self._elec_cal_torch(k_fix)
         phase_k = np.exp(QTcts.JTWOPI*np.sum(self.nbr_shift_of_cell_sc*k_fix[None,:], axis=-1)) # shape: (ncells, )

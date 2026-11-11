@@ -1,5 +1,5 @@
 ==============
-Teams
+Team
 ==============
 
 **Code contributors:**

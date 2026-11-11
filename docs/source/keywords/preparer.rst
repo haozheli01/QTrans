@@ -6,7 +6,7 @@ Structure of the input data
 ---------------------------
 
 We use a ``yaml`` file as the input configuration.
-For different ``cal_mode`` values, the program requires different input blocks.
+For different ``prep_mode`` values, the program requires different input blocks.
 However, the parameters in **basic** block must always be defined in the input file.
 The format is as follows:
 
@@ -323,11 +323,19 @@ material block
 
 .. _prep_DFT_software:
 .. param-card:: DFT_software
-   :options: 'openmx'
+   :options: 'openmx' | 'abacus' | 'siesta'
    :default: None
    :block: material
 
-    The program generates files according to the specified DFT software.
+    Selects the DFT software associated with the input data and generated files.
+
+    - ``openmx``: OpenMX interface.
+    - ``abacus``: ABACUS interface.
+    - ``siesta``: SIESTA basis definitions are listed in
+      :ref:`Atomic Orbital Basis Definition <ao_define_title>`, but the current
+      preparer input validation does not yet accept this option.
+
+    Use ``openmx`` or ``abacus`` for the preparation workflows documented here.
 
 :ref:`Back to top <prep_title_keywords>`
 
@@ -419,7 +427,7 @@ grad_epc block
    :default: 0.0001
    :block: grad_epc
 
-    The threshold (in Hartree) below which
+    The threshold (in Hartree/bohr) below which
     elements in the sparse gradient matrix are neglected.
 
 :ref:`Back to top <prep_title_keywords>`

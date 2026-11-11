@@ -234,7 +234,7 @@ Set ``software_path.openmx_read_path`` to your matrix-export executable
 before packing. The output is ``graph_data_QTrans.npz``; compare it and
 ``graph.out`` with the corresponding files in ``ref/``. The reference log
 reports ``Dealing with a COLLINEAR magnetic system.`` and one useful folder.
-For subsequent calculations, keep ``basic.magnetic_type: collinear`` and
+For subsequent transport property calculations, keep ``advanced.magnetic_type: collinear`` and
 the no-SOC setting consistent with this prepared dataset.
 
 3. ABACUS: the Al workflow
@@ -483,3 +483,29 @@ For HamGNN installation and inference details, consult the
    A single folder is processed by one rank, so the single-folder examples
    above use a single process. Gradient matrix generation with ``grad-epc``
    is performed on rank 0 and does not benefit from MPI parallel execution.
+
+Passing unit-cell data to the calculator
+----------------------------------------
+
+The calculation tutorials read ``data/graph_data.npz`` within each
+material/software directory. Graph packing writes
+``graph_data_QTrans.npz``; renaming the copied file does not change its contents.
+For example, after completing the OpenMX Al graph-packing calculation,
+run from the tutorial repository root:
+
+.. code-block:: bash
+
+   cp -i tutorials/Al/openmx/graph-pack/graph_data_QTrans.npz tutorials/Al/openmx/data/graph_data.npz
+
+The ``-i`` option asks before replacing supplied example data. To preserve
+those data, keep your generated file in a separate directory and update
+``basic.graph_data_path_uc`` in the complete calculator YAML instead.
+The same handoff applies to OpenMX Fe and ABACUS Al, using their respective
+material/software directories. Copy the unit-cell dataset, not the graph
+containing the displaced supercells.
+
+For the prediction route, use the graph and predicted Hamiltonian files
+specified in the prediction section above; copying a graph alone does not
+substitute the predicted Hamiltonian. Continue with
+:ref:`tutorial-epc-grad-prep` for gradient data and
+:ref:`tutorial-phonon-prep` for phonon force data.

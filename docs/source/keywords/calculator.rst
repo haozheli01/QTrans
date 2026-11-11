@@ -12,7 +12,7 @@ The format is as follows:
 
 .. code-block:: none
 
-    baisc:
+    basic:
         cal_mode: <cal_mode>
         graph_data_path_uc: <graph_data_path_uc>
         nao_max: <nao_max>
@@ -387,7 +387,8 @@ dos block
     Specifies the number of energy sampling points
     used in the density of states (DOS) calculation.  
     The energy range defined in :ref:`dos_erange <cal_dos_erange>`
-    is uniformly partitioned into this number of intervals.
+    is sampled uniformly at this number of points, including both endpoints
+    (giving ``dos_npoints - 1`` intervals).
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -461,7 +462,7 @@ dispersion block
 
 .. _cal_high_symmetry_points:
 .. param-card:: high_symmetry_points
-   :options: <b><i>*LIST[LISTS[INT, INT, INT]]*</i></b>
+   :options: <b><i>*LIST[LIST[FLOAT, FLOAT, FLOAT]]*</i></b>
    :default: None
    :block: dispersion
 
@@ -571,7 +572,18 @@ phonon block
    :default: './FORCE_SETS'
    :block: phonon
 
-    The FORCE_SETS file used for phonon calculations with the Phonopy package.
+    Path to the phonon force data loaded by Phonopy. Supported inputs are
+    extensionless text ``FORCE_SETS`` or ``FORCE_CONSTANTS`` files,
+    force-constant files ending in ``.h5`` or ``.hdf5``, and Phonopy
+    ``.yaml`` files containing the required structure and force data.
+
+    For text inputs, the first line distinguishes ``FORCE_SETS`` (one field)
+    from ``FORCE_CONSTANTS`` (two fields). These files are read using the
+    default VASP unit convention: displacements in angstrom, forces in
+    eV/angstrom, and force constants in eV/angstrom squared. A filename
+    does not identify or convert units. See
+    :ref:`Phonon Force Data Preparation <tutorial-phonon-prep>` for the
+    workflow and the conversion required for ABACUS-generated force sets.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -583,7 +595,7 @@ phonon block
 
     If **True**, the system is treated as polar,
     and the non-analytic correction to the phonon frequencies is included.
-    In addition, the dipole contribution tothe long-range electron-phonon
+    In addition, the dipole contribution to the long-range electron-phonon
     coupling matrix elements is included.
 
 :ref:`Back to top <cal_title_keywords>`
@@ -814,7 +826,7 @@ transport block
    :default: 300.0
    :block: transport
 
-    Temperature of the system, in Klevin.
+    Temperature of the system, in Kelvin.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -834,7 +846,11 @@ transport block
    :default: 25
    :block: transport
 
-    Smearing width (in meV) applied to the delta function in the summation over phonon states.
+    Energy broadening (in meV). In scattering-rate calculations, it broadens
+    the energy-conservation delta function involving the electronic energy
+    difference and phonon absorption or emission. In superconductivity and
+    resistivity spectra, it broadens the phonon-energy delta function on the
+    spectral energy grid. It is a numerical width, not a phonon temperature.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -889,9 +905,11 @@ conductivity block
    :default: 0.2
    :block: conductivity
 
-    Specifies the width (in eV) of the energy window centered around 
-    the Fermi level or band edge. This window determines the range of 
-    electronic states included in transport-related calculations.
+    Specifies the energy cutoff (in eV) for selecting electronic states.
+    For metals, it is the half-width of the window around the Fermi level.
+    For semiconductors, it is the energy extent into the conduction band
+    from the CBM, or into the valence band from the VBM.
+    This selection limits the states included in transport-related calculations.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -933,7 +951,7 @@ conductivity block
    :block: conductivity
 
     The scale parameter :math:`\gamma` of the Cauchy distribution used for importance sampling.  
-    This is only effective when ``MC_sampling = 'cauchy'``.
+    This is only effective when ``MC_sampling: cauchy``.
 
     The probability density function is given by:
 
@@ -962,7 +980,8 @@ conductivity block
    :block: conductivity
 
     The number of sampling **q** points in the Monte Carlo integration.
-    This is only effective when ``MC_sampling = 'cauchy'``.
+    This is effective for both ``MC_sampling: cauchy`` and
+    ``MC_sampling: uniform``; it is unused for regular-grid sampling.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -972,7 +991,8 @@ conductivity block
    :default: 10000000000000000.0
    :block: conductivity
 
-    The carrier concentration in :math:`\text{cm}^{-3}`.
+    The carrier concentration in :math:`\mathrm{cm}^{-3}` for a three-dimensional
+    system, or :math:`\mathrm{cm}^{-2}` when ``advanced.system_2D: True``.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -1036,9 +1056,12 @@ conductivity block
    :default: 0.00001
    :block: conductivity
 
-    Convergence threshold for the iterative solution of the Boltzmann Transport Equation (IBTE),  
-    defined as the maximum allowed error (in Siemens/m) between consecutive iterations.  
-    This parameter is only effective when ``mob_level = 'ibte'``.
+    Absolute convergence threshold for the iterative Boltzmann Transport
+    Equation (IBTE). The maximum change in tensor components between
+    consecutive iterations is compared with this value: conductivity in
+    S/m for metals, or mobility in :math:`\mathrm{cm}^2/(\mathrm{V}\,\mathrm{s})`
+    for semiconductors. This parameter is only effective when
+    ``mob_level: ibte``.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -1160,13 +1183,21 @@ breakdown block
    :default: None
    :block: breakdown
 
-    **This feature is not yet implemented.**
-    Path to the data file containing
-    the computed scattering rates and energy loss rates,
-    generated by **QTrans**.
-    If not **None**, the program will
-    read the scattering rates and energy loss rates from the file
-    instead of computing them.
+    Path to a previously generated **QTrans** breakdown rate file. If not
+    ``None``, the scattering and energy-loss rates are read from this file
+    instead of being recomputed.
+
+    The file must have six whitespace-separated columns:
+    ``ik_ibz``, ``ibnd``, ``weight_k``, ``enk``, ``scattering_rate``, and
+    ``energy_loss_rate``. Indices are zero-based and must match the current
+    irreducible k-point ordering and band selection. Energy and rates use
+    internal atomic units: Hartree, Hartree, and Hartree squared,
+    respectively (with atomic time and hbar = 1). Comment lines start with
+    ``#``. Duplicate index pairs are rejected; omitted states remain unavailable.
+
+    Reuse a file only with compatible structures, bands, k-point grids,
+    temperature, phonon data, and broadening settings. Older files expressed
+    in eV, 1/ps, and eV/ps require unit conversion before reuse.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -1203,8 +1234,10 @@ resistivity block
    :block: resistivity
 
     Number of charge carriers per unit cell used in Ziman's resistivity formula.  
-    If set to a non-positive value, **QTrans** will automatically estimate it based 
-    on the number of band crossings at the Fermi level.
+    If set to a negative value, **QTrans** will automatically estimate it based
+    on the number of band crossings at the Fermi level. This is a heuristic
+    estimate, not a carrier-density integral. Zero is invalid because this
+    quantity enters the denominator of the resistivity formula.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -1243,9 +1276,11 @@ boltzmann block
    :default: 0.2
    :block: boltzmann
 
-    Specifies the width (in eV) of the energy window centered around 
-    the Fermi level or band edge. This window determines the range of 
-    electronic states included in Boltzmann calculations.
+    Specifies the energy cutoff (in eV) for selecting electronic states.
+    For metals, it is the half-width of the window around the Fermi level.
+    For semiconductors, it is the energy extent into the conduction band
+    from the CBM, or into the valence band from the VBM.
+    This selection limits the states included in Boltzmann calculations.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -1255,7 +1290,8 @@ boltzmann block
    :default: 10000000000000000.0
    :block: boltzmann
 
-    The carrier concentration in :math:`\text{cm}^{-3}`.
+    The carrier concentration in :math:`\mathrm{cm}^{-3}` for a three-dimensional
+    system, or :math:`\mathrm{cm}^{-2}` when ``advanced.system_2D: True``.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -1265,7 +1301,7 @@ boltzmann block
    :default: 300.0
    :block: boltzmann
 
-    Temperature of the lattice system, in Klevin.
+    Temperature of the lattice system, in Kelvin.
 
 :ref:`Back to top <cal_title_keywords>`
 

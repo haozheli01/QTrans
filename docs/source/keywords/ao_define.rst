@@ -275,7 +275,7 @@ openmx_19
           - 6.0
           - Cr6.0.pao
         * - Mn
-          - s3p2d1
+          - s3p2d2
           - 6.0
           - Mn6.0.pao
         * - Fe
@@ -509,7 +509,7 @@ openmx_26
           - 6.0
           - Cr6.0.pao
         * - Mn
-          - s3p2d1
+          - s3p2d2
           - 6.0
           - Mn6.0.pao
         * - Fe
@@ -521,7 +521,7 @@ openmx_26
           - 6.0
           - Co6.0H.pao
         * - Ni
-          - s3p2d1
+          - s3p2d2f1
           - 6.0
           - Ni6.0H.pao
         * - Cu
@@ -728,12 +728,178 @@ openmx_26
 siesta_13
 -------------
 
+The table specifies the orbital composition used by **QTrans**.
+SIESTA orbital cutoff radii and basis-generation settings depend on the
+DFT input and are not prescribed by this mapping.
+
+    .. list-table::
+        :header-rows: 1
+        :class: custom-table center-align-text
+        :name: ao-siesta-13-table
+
+        * - Element
+          - Orbital composition
+          - Number of orbitals
+        * - H
+          - s2p1
+          - 5
+        * - He
+          - s2p1
+          - 5
+        * - Li
+          - s2p1
+          - 5
+        * - Be
+          - s2p1
+          - 5
+        * - B
+          - s2p2d1
+          - 13
+        * - C
+          - s2p2d1
+          - 13
+        * - N
+          - s2p2d1
+          - 13
+        * - O
+          - s2p2d1
+          - 13
+        * - F
+          - s2p2d1
+          - 13
+        * - Ne
+          - s2p2d1
+          - 13
+        * - Na
+          - s2p1
+          - 5
+        * - Mg
+          - s2p1
+          - 5
+        * - Al
+          - s2p2d1
+          - 13
+        * - Si
+          - s2p2d1
+          - 13
+        * - P
+          - s2p2d1
+          - 13
+        * - S
+          - s2p2d1
+          - 13
+        * - Cl
+          - s2p2d1
+          - 13
+        * - Ar
+          - s2p2d1
+          - 13
+        * - K
+          - s2p1
+          - 5
+        * - Ca
+          - s2p1
+          - 5
+        * - Ga
+          - s2p2d1
+          - 13
+        * - As
+          - s2p2d1
+          - 13
+
+
 :ref:`Back to top <ao_define_title>`
 
 .. _ao_define_siesta_19:
 
 siesta_19
 -------------
+
+The table specifies the orbital composition used by **QTrans**.
+SIESTA orbital cutoff radii and basis-generation settings depend on the
+DFT input and are not prescribed by this mapping.
+
+    .. list-table::
+        :header-rows: 1
+        :class: custom-table center-align-text
+        :name: ao-siesta-19-table
+
+        * - Element
+          - Orbital composition
+          - Number of orbitals
+        * - H
+          - s2p1
+          - 5
+        * - He
+          - s2p1
+          - 5
+        * - Li
+          - s2p1
+          - 5
+        * - Be
+          - s2p1
+          - 5
+        * - B
+          - s2p2d1
+          - 13
+        * - C
+          - s2p2d1
+          - 13
+        * - N
+          - s2p2d1
+          - 13
+        * - O
+          - s2p2d1
+          - 13
+        * - F
+          - s2p2d1
+          - 13
+        * - Ne
+          - s2p2d1
+          - 13
+        * - Na
+          - s2p1
+          - 5
+        * - Mg
+          - s2p1
+          - 5
+        * - Al
+          - s2p2d1
+          - 13
+        * - Si
+          - s2p2d1
+          - 13
+        * - P
+          - s2p2d1
+          - 13
+        * - S
+          - s2p2d1
+          - 13
+        * - Cl
+          - s2p2d1
+          - 13
+        * - Ar
+          - s2p2d1
+          - 13
+        * - K
+          - s2p1
+          - 5
+        * - Ca
+          - s2p1
+          - 5
+        * - Ga
+          - s2p2d1
+          - 13
+        * - As
+          - s2p2d1
+          - 13
+        * - Ti
+          - s3p2d2
+          - 19
+        * - Mo
+          - s2p1d2
+          - 15
+
 
 :ref:`Back to top <ao_define_title>`
 

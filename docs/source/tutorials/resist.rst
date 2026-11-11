@@ -33,8 +33,8 @@ We first use the dense gradient matrix to perform the calculation on a 16x16x16 
 The smearings for both k-point and q-point integrations are set to 40 meV using ``smeark: 40`` and
 ``smearq: 40``. The smearing type is set to the derivative of the Fermi-Dirac function via ``gauss_type: -99``.
 Here ``smeark`` sets the electronic kernel width; it is independent of
-``temperature``. The transport spectrum uses Gaussian broadening for its
-energy-conservation delta functions. The temperature is set to the room temperature with ``temperature: 300.0``.
+``temperature``. The transport spectrum uses Gaussian broadening for delta functions. 
+The temperature is set to the room temperature with ``temperature: 300.0``.
 Other necessary settings for the resistivity calculation are specified in the ``resistivity`` block.
 The parameter ``ziman_nc`` represents the number of carriers per unit cell in the Ziman's resistivity formula.
 It can be set manually.
