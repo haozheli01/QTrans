@@ -53,6 +53,6 @@ Run the following command::
 
 Clone the **QTrans** repository and install the package in editable mode::
 
-  git clone ***.git
+  git clone https://github.com/haozheli01/QTrans.git
   cd QTrans
   python -m pip install -e .
