@@ -4,8 +4,6 @@ This module is called only by the conductivity/mobility sparse guard in
 ``scattering.py``.  Other transport physics keeps its established path.
 """
 
-from mpi4py import MPI
-import os
 from qtrans.core.constants import QTcts
 from qtrans.core.logging import time_logger
 from qtrans.extensions import prepare_sparse_grad_cache
@@ -21,7 +19,6 @@ _MPI_BUDGET = 256 * 1024 ** 2
 _CHANNEL_DTYPE = [('ik', int), ('ikpq_ibz', int), ('ikpq_fbz', int),
                   ('iband', int), ('jband', int), ('trans_prob', float)]
 _Q_PHASE_BLOCK_SIZE = 4096
-_TRACE_ENV = 'QTRANS_TRACE_MOBILITY_STARTUP'
 
 
 def validate_commensurate_lookup(calculator, k_ibz, k_fbz, grid2ir, q_frac):
@@ -144,32 +141,6 @@ def _collect_useful_k_wave_table(k_grid_all, eigen_local, wave_local,
     return np.ascontiguousarray(k_global), eig_global, wave_global
 
 
-def _trace_startup_record(calculator, label, local_seconds, extra=None):
-    """Optional rank timing collector; enabled only by the trace env flag."""
-    if calculator.comm is None:
-        return
-    payload = (int(calculator.rank), float(local_seconds), extra or {})
-    records = calculator.comm.gather(payload, root=0)
-    if calculator.rank == 0:
-        slow = max(records, key=lambda item: item[1])
-        fast = min(records, key=lambda item: item[1])
-        avg = sum(item[1] for item in records) / len(records)
-        extra_text = ''
-        if extra:
-            extra_parts = []
-            for key in sorted(extra):
-                values = [float(item[2].get(key, 0.0)) for item in records]
-                unit = '' if key.endswith('_size') else 's'
-                extra_parts.append(
-                    f'{key}_min={min(values):.6f}{unit} '
-                    f'{key}_avg={sum(values) / len(values):.6f}{unit} '
-                    f'{key}_max={max(values):.6f}{unit}')
-            extra_text = ' ' + ' '.join(extra_parts)
-        print(f'TRACE {label}: min={fast[1]:.6f}s avg={avg:.6f}s '
-              f'max={slow[1]:.6f}s slow_rank={slow[0]}{extra_text}',
-              flush=True)
-
-
 def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
                                         band_indice, band_edge_energy,
                                         mob_level='erta', is_metal=False,
@@ -179,6 +150,8 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
     The q phase table is built at most ``_Q_PHASE_BLOCK_SIZE`` q points at a
     time.  ``hash-cyclic`` ownership has already been resolved by stable hash
     sorting and round-robin partitioning before entering this function.
+    Progress reports completed local q points on rank 0, after all k batches
+    for each q, matching the superconducting EPC spectrum calculation.
     """
     nbands = len(band_indice)
     nks = len(k_grid)
@@ -196,8 +169,6 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
     rate_all = np.full((nbands, nks), np.inf)
     rate_resolved = (np.full((nbands, nks, nbranches), np.inf)
                      if mode_resolved else None)
-    trace = os.environ.get(_TRACE_ENV) == '1'
-    trace_t0 = getattr(calculator, '_mobility_trace_t0', None)
     (threshold, k_grid_all, eigen, wave_local, vnks, q_local, weight_local,
      freq_grid, phon_vecs, apply_correction) = calculator._transport_prepare(
          k_grid, q_grid, band_indice, band_edge_energy, is_metal)
@@ -209,11 +180,6 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
                               grid2ir is None):
         raise RuntimeError('Sparse mobility k+q lookup has inconsistent shape.')
 
-    if calculator.rank == 0:
-        logger = time_logger(
-            total_cycles=max(1, (len(q_local) + _Q_PHASE_BLOCK_SIZE - 1) //
-                             _Q_PHASE_BLOCK_SIZE),
-            routine_name='scattering_rate_cal_epc_sparse')
     k_global, eig_global, wave_global = _collect_useful_k_wave_table(
         k_grid_all, eigen, wave_local, calculator.comm,
         chunk_bytes=_MPI_BUDGET)
@@ -232,55 +198,46 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
         (k_global @ calculator.nbr_shift_of_cell_sc.T)))
     mass = np.ascontiguousarray(calculator.atomic_mass, dtype=np.float64)
     channels = []
-    cache_t0 = MPI.Wtime() if trace else None
-    cache = prepare_sparse_grad_cache(calculator.grad_mat)
-    cache_seconds = MPI.Wtime() - cache_t0 if trace else 0.0
-    if trace and trace_t0 is not None:
-        _trace_startup_record(
-            calculator, 'startup_ready_before_q_block',
-            MPI.Wtime() - trace_t0,
-            {'cache_s': cache_seconds,
-             'qsplit_s': getattr(calculator, '_mobility_trace_qsplit_s', -1.0),
-             'phonon_s': getattr(calculator, '_mobility_trace_phonon_s', -1.0)})
     nq = len(q_local)
-    qblocks = max(1, (nq + _Q_PHASE_BLOCK_SIZE - 1) // _Q_PHASE_BLOCK_SIZE)
-    phase_seconds_total = 0.0
-    first_progress_reported = False
+    logger = (time_logger(nq, 'scattering_rate_cal_epc_sparse')
+              if calculator.rank == 0 and nq else None)
+    cache = prepare_sparse_grad_cache(calculator.grad_mat)
+    qblocks = (nq + _Q_PHASE_BLOCK_SIZE - 1) // _Q_PHASE_BLOCK_SIZE
     try:
         for qblock in range(qblocks):
             qstart = qblock * _Q_PHASE_BLOCK_SIZE
             qstop = min(qstart + _Q_PHASE_BLOCK_SIZE, nq)
             qblock_points = np.ascontiguousarray(q_local[qstart:qstop])
-            phase_t0 = MPI.Wtime() if trace else None
             q_phases = np.ascontiguousarray(np.exp(
                 QTcts.JTWOPI *
                 (calculator.nbr_shift_of_cell_sc @ qblock_points.T)).T)
             atomic_phases = np.ascontiguousarray(np.exp(
                 QTcts.JTWOPI *
                 (calculator.graph_data.pos @ qblock_points.T)).T)
-            phase_seconds_total += MPI.Wtime() - phase_t0 if trace else 0.0
-            for start in range(0, nks, batch_size):
-                stop = min(start + batch_size, nks)
-                k_block = np.ascontiguousarray(k_global[start:stop])
-                eig_k = np.ascontiguousarray(eig_global[start:stop])
-                wave_k = np.ascontiguousarray(wave_global[start:stop])
-                global_k = np.arange(start, stop, dtype=int)
-                mask_k = _inside_window(eig_k, threshold, is_metal,
-                                         calculator.is_hole)
-                active = np.flatnonzero(mask_k.any(axis=1))
-                if not active.size:
+            # Complete every k batch for one q before advancing progress.
+            for iq_block, q in enumerate(qblock_points):
+                iq = qstart + iq_block
+                freq = np.ascontiguousarray(freq_grid[iq], dtype=np.float64)
+                if not np.any(freq >= calculator.phonon_frequency_cutoff):
+                    if logger is not None:
+                        logger.step(iq + 1)
                     continue
-                k_active = np.ascontiguousarray(k_block[active])
-                eig_active = np.ascontiguousarray(eig_k[active])
-                wave_active = np.ascontiguousarray(wave_k[active])
-                mask_active = np.ascontiguousarray(mask_k[active])
-                ik_active = global_k[active]
-                phase_active = np.ascontiguousarray(phase_k_all[ik_active])
-                for iq_block, q in enumerate(qblock_points):
-                    iq = qstart + iq_block
-                    freq = np.ascontiguousarray(freq_grid[iq], dtype=np.float64)
-                    if not np.any(freq >= calculator.phonon_frequency_cutoff):
+                phvec = np.ascontiguousarray(
+                    atomic_phases[iq_block][None, :, None] * phon_vecs[iq])
+                bose_q = np.ascontiguousarray(bose_weight(
+                    freq, calculator.temperature))
+                for start in range(0, nks, batch_size):
+                    stop = min(start + batch_size, nks)
+                    mask_k = initial_mask[start:stop]
+                    active = np.flatnonzero(mask_k.any(axis=1))
+                    if not active.size:
                         continue
+                    ik_active = start + active
+                    k_active = np.ascontiguousarray(k_global[ik_active])
+                    eig_active = np.ascontiguousarray(eig_global[ik_active])
+                    wave_active = np.ascontiguousarray(wave_global[ik_active])
+                    mask_active = np.ascontiguousarray(mask_k[active])
+                    phase_active = np.ascontiguousarray(phase_k_all[ik_active])
                     kpq = np.ascontiguousarray(k_active + q)
                     bz_indices = calculator._get_kpq_BZ_index(kpq) if (
                         table is not None or is_ibte) else None
@@ -318,8 +275,6 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
                     phase_in = np.ascontiguousarray(phase_active[selected])
                     phase_out = np.ascontiguousarray(
                         phase_in * q_phases[iq_block][None, :])
-                    phvec = np.ascontiguousarray(
-                        atomic_phases[iq_block][None, :, None] * phon_vecs[iq])
                     corr = np.zeros(
                         (len(selected), nbands, nbands, nbranches),
                         dtype=np.complex128)
@@ -346,8 +301,7 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
                         freq, mass, phvec, phase_in, phase_out, cache,
                         wave_in, wave_kpq, mask_in, mask_kpq, matches,
                         eig_in, eig_kpq,
-                        np.ascontiguousarray(bose_weight(
-                            freq, calculator.temperature)),
+                        bose_q,
                         np.ascontiguousarray(fermi_weight(
                             eig_kpq - calculator.efermi,
                             calculator.temperature)),
@@ -371,15 +325,8 @@ def scattering_rate_sparse_none_batched(calculator, k_grid, q_grid,
                                         ik, int(q_indices[iq]), ibz, fbz,
                                         int(ib), int(jb),
                                         float(trans_batch[row, ib, jb])))
-            if trace and not first_progress_reported:
-                _trace_startup_record(
-                    calculator, 'first_progress_global',
-                    MPI.Wtime() - trace_t0,
-                    {'q_block_size': _Q_PHASE_BLOCK_SIZE,
-                     'phase_s': phase_seconds_total})
-                first_progress_reported = True
-            if calculator.rank == 0:
-                logger.step(qblock + 1)
+                if logger is not None:
+                    logger.step(iq + 1)
     finally:
         del cache
 

@@ -16,8 +16,9 @@ class _PhononKernelMixin:
     def _phonon_cal_q_batch(self, q_grid):
         """Build at most 4096 dynamical matrices using one Phonopy object.
 
-        Called only by the nonmagnetic, no-SOC, sparse mobility order-0
-        guard.  The configured DynamicalMatrix retains its NAC parameters
+        Used for metallic conductivity and semiconductor mobility under the
+        nonmagnetic, no-SOC, sparse order-0 guard.  The configured
+        DynamicalMatrix retains its NAC parameters
         and Gonze dataset between blocks.  With no nac_q_direction argument,
         the Gamma-point behavior matches the existing scalar call.
         """

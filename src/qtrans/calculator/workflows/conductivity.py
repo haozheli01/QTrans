@@ -1,5 +1,4 @@
 """Electrical and thermal conductivity calculation workflow."""
-from mpi4py import MPI
 """Conductivity and mobility calculation-mode entry point."""
 
 from qtrans.core.constants import QTcts
@@ -246,8 +245,6 @@ class _ConductivityMixin:
         k_grid_local = k_grid_ibz_usefull[_sl_start:_sl_end]
         k_index_local = unique_kpts[_sl_start:_sl_end]
         if local_q_partition:
-            trace_q_partition0 = MPI.Wtime() if os.environ.get(
-                'QTRANS_TRACE_MOBILITY_STARTUP') == '1' else None
             if self.rank == 0:
                 q_parts = get_q_rank_index_parts(
                     q_grid_fbz, self.rank_size,
@@ -262,17 +259,7 @@ class _ConductivityMixin:
             self._mobility_q_global_indices = self.comm.scatter(q_parts, root=0)
             del q_coord_parts, q_weight_parts, q_parts
             self._mobility_q_prepartitioned = True
-            if trace_q_partition0 is not None:
-                self._mobility_trace_qsplit_s = (
-                    MPI.Wtime() - trace_q_partition0)
         self._print_mesh_mpi_check(nks_fbz, nks_ibz, nks_ibz_usefull, n_q_fbz)
-        # BEGIN QTRANS_STARTUP_TRACE (remove with tests/test_mobility_startup_trace.py)
-        # This is a synchronized reference immediately after the mesh/rank
-        # report.  MPI.Wtime values are only compared as local elapsed times.
-        if os.environ.get('QTRANS_TRACE_MOBILITY_STARTUP') == '1':
-            self.comm.Barrier()
-            self._mobility_trace_t0 = MPI.Wtime()
-        # END QTRANS_STARTUP_TRACE
         # Pre-compute unit conversion factors used repeatedly in ERTA/IBTE
         _sigma_unit = 1.0 / (self.volume_uc * nks_fbz) / (QTcts.HARTREEtoOHM * QTcts.BOHRtoM)
         _mob_unit_base = QTcts.EV * self.inv_cell / nks_fbz / (QTcts.HBAR_EV * QTcts.BOHRtoCM)

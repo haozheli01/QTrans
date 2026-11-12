@@ -10,7 +10,6 @@ from qtrans.numerics.gaussian import w0gauss
 from qtrans.parallel.mpi import split_into_rank, get_q_rank_indices
 from typing import Union
 import math
-import os
 import numpy as np
 import spglib
 
@@ -225,7 +224,7 @@ class _TransportCommonMixin:
         apply_correction_for_qs = None
         if q_grid_local.size > 0:
             use_q_batch = (
-                self.cal_mode == 'conductivity' and not is_metal
+                self.cal_mode == 'conductivity'
                 and self.spinor_mode == 'none' and not self.soc_switch
                 and self.magnetic_type == 'none' and self.read_sparse_grad_mat
                 and self.LRC_taylor_order == 0)
@@ -353,8 +352,6 @@ class _TransportCommonMixin:
 
         if reduced_type == 'k':
             # q points are parallelized and q grid is split
-            trace_startup = (os.environ.get(
-                'QTRANS_TRACE_MOBILITY_STARTUP') == '1')
             sparse_mobility = (self.cal_mode == 'conductivity' and
                                self.spinor_mode == 'none' and not self.soc_switch
                                and self.read_sparse_grad_mat)
@@ -367,14 +364,10 @@ class _TransportCommonMixin:
                 q_grid_local = np.ascontiguousarray(q_grid)
                 weights_q_local = np.ascontiguousarray(self.weight_q)
             elif sparse_mobility:
-                # BEGIN QTRANS_STARTUP_TRACE (remove with tests/test_mobility_startup_trace.py)
-                trace_q0 = MPI.Wtime() if trace_startup else None
                 q_indices = get_q_rank_indices(
                     q_grid, self.rank, self.rank_size,
                     split_mode=getattr(self, 'q_split_mode', 'contiguous'),
                     q_size=self.q_size)
-                if trace_startup:
-                    self._mobility_trace_qsplit_s = MPI.Wtime() - trace_q0
                 self._mobility_q_global_indices = q_indices
                 q_grid_local = np.asarray(q_grid)[q_indices]
                 weights_q_local = np.asarray(self.weight_q)[q_indices]
@@ -389,13 +382,8 @@ class _TransportCommonMixin:
             del q_grid
             nbranches = self._get_nbranches()
 
-            if trace_startup:
-                trace_phonon0 = MPI.Wtime()
             # compute boson spectrum
             q_grid_local, freq_grid, boson_vecs, apply_correction_for_qs = self._compute_phonon_spectrum(q_grid_local, nbranches, is_metal)
-            if trace_startup:
-                self._mobility_trace_phonon_s = MPI.Wtime() - trace_phonon0
-            # END QTRANS_STARTUP_TRACE
 
             # k grid is split
             split_sections = np.zeros(self.rank_size, dtype=int)
