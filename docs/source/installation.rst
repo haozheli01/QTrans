@@ -34,9 +34,8 @@ The following Python packages are required:
 
 Installation
 -------------
-There are two ways to set up the Python environment and install **QTrans**:
 
-1. Conda-based Installation
+Conda-based Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This method uses the provided environment.yaml file to create a Conda environment with the required dependencies.
 
@@ -54,37 +53,6 @@ Run the following command::
 
 Clone the **QTrans** repository and install the package in editable mode::
 
-  git clone ***.git
-  cd QTrans
-  python -m pip install -e .
-
-2. Pre-built Conda Environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For convenience, we also provide a pre-built Conda environment, 
-allowing users to set up **QTrans** without manually resolving its dependencies.
-
-**Step 1.Download the pre-built environment** 
-Download the pre-built **QTrans** environment archive from the following link:  `<download_link>`.
-
-**Step 2. Extract the environment archive** 
-Move ``QTrans.tar.gz`` to your Conda environments directory and extract it::
-
-  cd ~/softwares/miniconda/miniconda3/envs/ # Modify this path according to your environment
-  mkdir QTrans && cd QTrans
-  mv QTrans.tar.gz ./
-  tar xvf QTrans.tar.gz
-
-**Step 3. Verify the environment** 
-
-Check whether the **QTrans** environment appears in the Conda environment list::
-
-  conda env list
-
-**Step 4. Download and install** **QTrans**
-
-Clone the **QTrans** repository and install the package in editable mode::
-
-  git clone ***.git
+  git clone https://github.com/haozheli01/QTrans.git
   cd QTrans
   python -m pip install -e .
