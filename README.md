@@ -36,6 +36,12 @@ coverage and outstanding validation work.
 
 ## License
 
-QTrans is free software licensed under the GNU General Public License,
-version 3 or (at your option) any later version (`GPL-3.0-or-later`). See
-[`LICENSE`](LICENSE) for the complete license text.
+This project is licensed under the MIT License.
+
+Copyright (c) 2026 Yang's Group.
+
+You are free to use, modify, and distribute this software for academic,
+research, and commercial purposes, subject to the terms and conditions
+of the MIT License.
+
+See the [LICENSE](LICENSE) file for the full license text.
