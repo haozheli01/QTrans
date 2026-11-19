@@ -6,7 +6,7 @@
 
 **From electronic Hamiltonians to electron–phonon coupling and transport properties**
 
-[Documentation](https://haozheli01.github.io/QTrans/)
+Explore the [online documentation](https://haozheli01.github.io/QTrans/) for installation instructions, theoretical background, input parameters, and step-by-step tutorials.
 
 
 ## Overview
