@@ -1,0 +1,185 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Team" href="teams.html" />
+    <link rel="prev" title="Introduction" href="../introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../introduction.html">Introduction</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qtrans-components"><strong>QTrans</strong> components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#software-interfaces">Software interfaces</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="teams.html">Team</a></li>
+<li class="toctree-l2"><a class="reference internal" href="refers.html">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../introduction.html">Introduction</a></li>
+      <li class="breadcrumb-item active">Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/intro/overview.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h2>
+<p><strong>QTrans</strong> is a software package designed for calculating transport phenomena arising from quasiparticle scattering.
+It employs a finite-difference method to compute electron-quasiparticle coupling matrix elements, which are then used to
+determine properties such as electrical conductivity, resistivity, intrinsic breakdown strength, and
+superconducting critical temperature. <strong>QTrans</strong> supports input from both first-principles calculations and predicted
+Hamiltonians from machine learning methods such as
+<a class="reference external" href="https://github.com/QuantumLab-ZY/HamGNN">HamGNN</a>. These predictions can
+reduce the cost of obtaining electronic data for displaced supercells.</p>
+</section>
+<section id="qtrans-components">
+<h2><strong>QTrans</strong> components<a class="headerlink" href="#qtrans-components" title="Link to this heading"></a></h2>
+<p><strong>QTrans</strong> consists of two main components: <strong>preparation</strong> and <strong>calculation</strong>.
+Together, they provide a workflow from electronic-structure and phonon data
+to electron-phonon coupling and transport properties.</p>
+<ul class="simple">
+<li><p><strong>Preparation</strong> (<code class="docutils literal notranslate"><span class="pre">QTrans_prep</span></code>) converts electronic-structure outputs into
+the data format used by <strong>QTrans</strong> and constructs the real-space gradient
+matrices required for electron-phonon coupling calculations. It can use
+Hamiltonians obtained from first-principles calculations or machine
+learning predictions, and also provides tools for preparing phonon
+force-set data.</p></li>
+<li><p><strong>Calculation</strong> (<code class="docutils literal notranslate"><span class="pre">QTrans_run</span></code>) reads the prepared electronic, phonon, and
+coupling data to evaluate band structures, densities of states,
+electron-phonon matrix elements, and derived properties, including
+conductivity, carrier mobility, resistivity, intrinsic dielectric
+breakdown strength, and superconducting critical temperature.</p></li>
+</ul>
+<p>The preparation step produces reusable datasets, allowing multiple
+calculations with different sampling meshes, temperatures, and other
+settings without repeating the underlying data preparation.</p>
+</section>
+<section id="software-interfaces">
+<h2>Software interfaces<a class="headerlink" href="#software-interfaces" title="Link to this heading"></a></h2>
+<p>The following software packages provide electronic data, Hamiltonian
+predictions, or phonon data used by <strong>QTrans</strong>. Available preparation
+interfaces depend on the workflow; consult the corresponding tutorial.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.openmx-square.org/">OpenMX</a> (Open source package for Material eXplorer) is a software package for
+nanoscale material simulations based on density functional theory (DFT),
+norm-conserving pseudopotentials, and pseudo-atomic localized basis functions.</p></li>
+<li><p><a class="reference external" href="https://abacus.deepmodeling.com/en/latest/">ABACUS</a> (Atomic-orbital Based Ab-initio Computation at USTC) is an open-source
+computer code package based on density functional theory (DFT).</p></li>
+<li><p><a class="reference external" href="https://siesta-project.org/siesta/index.html">SIESTA</a> is both a method and its computer program implementation, to perform efficient
+electronic structure calculations and ab initio molecular dynamics simulations of
+molecules and solids.</p></li>
+<li><p><a class="reference external" href="https://honpas.ustc.edu.cn/">HONPAS</a> (Hefei Order-N Packages for Ab initio Simulations) is an ab initio
+electronic structure calculation software package for linear scaling
+first-principles density functional theory (DFT) calculations of large-scale systems.</p></li>
+<li><p><a class="reference external" href="https://github.com/QuantumLab-ZY/HamGNN">HamGNN</a> is an E(3) equivariant graph neural network designed to train and predict
+ab initio tight-binding (TB) Hamiltonians for molecules and solids.</p></li>
+<li><p><a class="reference external" href="https://phonopy.github.io/phonopy/">Phonopy</a> is an open source package for phonon calculations at harmonic and quasi-harmonic levels.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="teams.html" class="btn btn-neutral float-right" title="Team" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

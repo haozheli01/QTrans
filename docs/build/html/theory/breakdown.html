@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intrinsic Dielectric Breakdown &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Smearing Methods" href="smear_method.html" />
+    <link rel="prev" title="Superconductivity" href="superconductivity.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="velocity.html">Electronic Velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc.html">Electron-Phonon Coupling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conductivity.html">Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resistivity.html">Resistivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconductivity.html">Superconductivity</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Intrinsic Dielectric Breakdown</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#energy-gain-from-the-electric-field">Energy Gain from the Electric Field</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#electron-phonon-scattering-rate">Electron-Phonon Scattering Rate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#net-energy-loss-to-phonons">Net Energy Loss to Phonons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#breakdown-criterion">Breakdown Criterion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="smear_method.html">Smearing Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Intrinsic Dielectric Breakdown</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/breakdown.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="intrinsic-dielectric-breakdown">
+<span id="theory-breakdown"></span><h1>Intrinsic Dielectric Breakdown<a class="headerlink" href="#intrinsic-dielectric-breakdown" title="Link to this heading"></a></h1>
+<a class="custom-class reference internal image-reference" href="../_images/breakdown.png"><img alt="Illustration of the intrinsic dielectric breakdown model." class="custom-class align-center" src="../_images/breakdown.png" style="width: 419px; height: 200px;" />
+</a>
+<p><strong>QTrans</strong> estimates the intrinsic dielectric breakdown field by comparing
+field-induced electron heating with energy transfer to phonons
+<span id="id1">[<a class="reference internal" href="../intro/refers.html#id6" title="Y. Sun, S. A. Boggs, and R. Ramprasad. The intrinsic electrical breakdown strength of insulators from first principles. Applied Physics Letters, 101(13):132906, September 2012. doi:10.1063/1.4755841.">6</a>, <a class="reference internal" href="../intro/refers.html#id5" title="Shixu Liu, Hongjun Xiang, Xin-Gao Gong, and Ji-Hui Yang. Intrinsic Breakdown Strength: Theoretical Derivation and First-Principles Calculations. Physical Review Letters, 134(8):086301, February 2025. doi:10.1103/PhysRevLett.134.086301.">7</a>]</span>.
+This energy-balance model describes dilute conduction electrons interacting
+with an equilibrium phonon bath. It uses a scalar effective mass and an
+energy-averaged scattering time; it does not include defect-assisted or
+thermal breakdown mechanisms.</p>
+<section id="energy-gain-from-the-electric-field">
+<h2>Energy Gain from the Electric Field<a class="headerlink" href="#energy-gain-from-the-electric-field" title="Link to this heading"></a></h2>
+<p>For an electron with energy <span class="math notranslate nohighlight">\(E\)</span> in an electric field of magnitude
+<span class="math notranslate nohighlight">\(F\)</span>, the model uses the energy gain rate</p>
+<div class="math notranslate nohighlight">
+\[A(E,F)=\frac{e^2\tau(E)F^2}{3m^*},\]</div>
+<p>where <span class="math notranslate nohighlight">\(e&gt;0\)</span> is the elementary charge and <span class="math notranslate nohighlight">\(m^*&gt;0\)</span> is the effective
+electron mass. The factor of <span class="math notranslate nohighlight">\(1/3\)</span> belongs to the three-dimensional
+isotropic heating model used here. Both <span class="math notranslate nohighlight">\(A(E,F)\)</span> and the energy loss
+rate defined below have units of energy per unit time.</p>
+<p>The energy-dependent relaxation time is defined as the reciprocal of the
+average scattering rate on a constant-energy surface:</p>
+<div class="math notranslate nohighlight">
+\[\frac{1}{\tau(E)}
+= \frac{1}{D(E)}\sum_\nu\int_{\mathrm{BZ}}
+\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+\frac{1}{\tau_{\nu\mathbf{k}}}
+\delta(\varepsilon_{\nu\mathbf{k}}-E),\]</div>
+<p>with the density of states</p>
+<div class="math notranslate nohighlight">
+\[D(E)=\sum_\nu\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+\delta(\varepsilon_{\nu\mathbf{k}}-E).\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\nu\)</span> labels a conduction band, <span class="math notranslate nohighlight">\(\mathbf{k}\)</span> is an electron
+wave vector, and <span class="math notranslate nohighlight">\(\Omega_{\mathrm{BZ}}\)</span> is the Brillouin-zone volume.
+The same band selection, integration weights, and spin-counting convention
+must be used in the numerator and <span class="math notranslate nohighlight">\(D(E)\)</span>. This definition averages
+<span class="math notranslate nohighlight">\(\tau_{\nu\mathbf{k}}^{-1}\)</span> before taking its reciprocal; it is not an
+arithmetic average of the state-resolved relaxation times in present version.</p>
+</section>
+<section id="electron-phonon-scattering-rate">
+<h2>Electron-Phonon Scattering Rate<a class="headerlink" href="#electron-phonon-scattering-rate" title="Link to this heading"></a></h2>
+<p>In the dilute-carrier limit, Pauli blocking of the final conduction states
+is neglected. Fermi’s golden rule then gives</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{1}{\tau_{\nu\mathbf{k}}}
+={}&amp; \frac{2\pi}{\hbar}\sum_{\mu b}
+\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2 \\
+&amp;\times\Big[
+n^0_{\mathbf{q}b}
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
++\hbar\omega_{\mathbf{q}b}) \\
+&amp;\qquad+(n^0_{\mathbf{q}b}+1)
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
+-\hbar\omega_{\mathbf{q}b})\Big].\end{split}\]</div>
+<p>The matrix element <span class="math notranslate nohighlight">\(g_{\mu\nu b}(\mathbf{k},\mathbf{q})\)</span> couples the
+initial electron state <span class="math notranslate nohighlight">\(|\nu\mathbf{k}\rangle\)</span> to the final state
+<span class="math notranslate nohighlight">\(|\mu\mathbf{k+q}\rangle\)</span> through phonon mode <span class="math notranslate nohighlight">\((\mathbf{q},b)\)</span>.
+The phonon has angular frequency <span class="math notranslate nohighlight">\(\omega_{\mathbf{q}b}\)</span> and equilibrium
+Bose–Einstein occupation <span class="math notranslate nohighlight">\(n^0_{\mathbf{q}b}\)</span>. The terms proportional
+to <span class="math notranslate nohighlight">\(n^0_{\mathbf{q}b}\)</span> and <span class="math notranslate nohighlight">\(n^0_{\mathbf{q}b}+1\)</span> describe phonon
+absorption and emission, respectively.</p>
+</section>
+<section id="net-energy-loss-to-phonons">
+<h2>Net Energy Loss to Phonons<a class="headerlink" href="#net-energy-loss-to-phonons" title="Link to this heading"></a></h2>
+<p>The net energy loss rate is obtained by weighting each emission or absorption
+process by the energy transferred to the phonon bath and averaging over
+initial electron states at energy <span class="math notranslate nohighlight">\(E\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}B(E)
+={}&amp; \frac{2\pi}{\hbar D(E)}\sum_{\nu\mu b}
+\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+\hbar\omega_{\mathbf{q}b}|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2 \\
+&amp;\times\Big[
+(n^0_{\mathbf{q}b}+1)
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
+-\hbar\omega_{\mathbf{q}b}) \\
+&amp;\qquad-n^0_{\mathbf{q}b}
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
++\hbar\omega_{\mathbf{q}b})\Big]
+\delta(\varepsilon_{\nu\mathbf{k}}-E).\end{split}\]</div>
+<p>Emission contributes positively to <span class="math notranslate nohighlight">\(B(E)\)</span>, whereas absorption contributes
+negatively. Thus <span class="math notranslate nohighlight">\(B(E)\)</span> is a net loss rate and can be negative where
+phonon absorption dominates. In contrast, both processes contribute
+positively to the total scattering rate <span class="math notranslate nohighlight">\(\tau(E)^{-1}\)</span>.</p>
+</section>
+<section id="breakdown-criterion">
+<h2>Breakdown Criterion<a class="headerlink" href="#breakdown-criterion" title="Link to this heading"></a></h2>
+<p>The von Hippel criterion <span id="id2">[<a class="reference internal" href="../intro/refers.html#id7" title="A. Von Hippel. Electric breakdown of solid and liquid insulators. Journal of Applied Physics, 8(12):815–832, December 1937. doi:10.1063/1.1710258.">8</a>]</span> requires
+field-induced heating to exceed the net phonon energy loss throughout the
+energy interval needed for impact ionization:</p>
+<div class="math notranslate nohighlight">
+\[A(E,F)&gt;B(E)
+\quad\text{for all }E\in[E_{\mathrm{CBM}},E_{\mathrm{CBM}}+E_{\mathrm{g}}],\]</div>
+<p>where <span class="math notranslate nohighlight">\(E_{\mathrm{CBM}}\)</span> is the conduction-band minimum and
+<span class="math notranslate nohighlight">\(E_{\mathrm{g}}\)</span> is the band gap. The upper endpoint is an approximate
+impact-ionization threshold in this model; actual thresholds can depend on
+the band structure and momentum conservation.</p>
+<p>For <span class="math notranslate nohighlight">\(B(E)\geq0\)</span>, balancing gain and loss gives the local threshold</p>
+<div class="math notranslate nohighlight">
+\[F_{\mathrm{th}}(E)
+= \frac{\sqrt{3m^*}}{e}
+\sqrt{\frac{B(E)}{\tau(E)}}.\]</div>
+<p>The breakdown field is the largest local threshold in the interval:</p>
+<div class="math notranslate nohighlight">
+\[F_{\mathrm{bd}}
+= \max_{E\in[E_{\mathrm{CBM}},E_{\mathrm{CBM}}+E_{\mathrm{g}}]}
+\Big[\frac{\sqrt{3m^*}}{e}
+\sqrt{\frac{\max[B(E),0]}{\tau(E)}}\Big].\]</div>
+<p>Energies with <span class="math notranslate nohighlight">\(B(E)&lt;0\)</span> impose no positive heating threshold. The maximum
+marks the onset of the criterion; a field strictly above it satisfies the
+strict inequality wherever the model rates are finite and
+<span class="math notranslate nohighlight">\(0&lt;\tau(E)&lt;\infty\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Constant-energy averages are defined only where <span class="math notranslate nohighlight">\(D(E)&gt;0\)</span>. In
+practice, <strong>QTrans</strong> evaluates them on a broadened energy grid and excludes
+nonfinite field estimates and negative scattering-rate–energy-loss-rate
+products from the maximum. If no valid points remain, the code reports
+zero; this fallback does not establish a physical zero breakdown field.
+The result should be checked for convergence with respect to the
+electronic and phonon meshes, broadening, and energy-grid spacing.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The code measures electron energies relative to the conduction-band
+minimum and restricts the final maximum using <code class="docutils literal notranslate"><span class="pre">fbd_exp_bandgap</span></code>. The
+sampled <code class="docutils literal notranslate"><span class="pre">fbd_erange</span></code> should cover the interval from zero to that gap.
+The input <code class="docutils literal notranslate"><span class="pre">fbd_effective_mass</span></code> is the effective mass in units of the
+free-electron mass, and the reported breakdown field is in MV/m.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="superconductivity.html" class="btn btn-neutral float-left" title="Superconductivity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="smear_method.html" class="btn btn-neutral float-right" title="Smearing Methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

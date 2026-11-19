@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="_static/html_mini.ico"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=2709fde1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="tutorials.html" />
+    <link rel="prev" title="Smearing Methods" href="theory/smear_method.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            QTrans
+              <img src="_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theory</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Workflow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#preparation">Preparation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-reference-cell-and-electronic-data">1. Prepare the reference cell and electronic data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generate-displaced-supercells">2. Generate displaced supercells</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#construct-the-epc-gradients">3. Construct the EPC gradients</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-phonon-data">4. Prepare phonon data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-passed-to-calculation">Data passed to calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calculation">Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Workflow</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/workflow.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="workflow">
+<span id="id1"></span><h1>Workflow<a class="headerlink" href="#workflow" title="Link to this heading"></a></h1>
+<p><strong>QTrans</strong> connects electronic-structure and phonon data to electron-phonon
+coupling (EPC) and transport properties through two stages: <strong>preparation</strong>
+(<code class="docutils literal notranslate"><span class="pre">QTrans_prep</span></code>) and <strong>calculation</strong> (<code class="docutils literal notranslate"><span class="pre">QTrans_run</span></code>). Preparation produces
+reusable real-space datasets; calculation evaluates the selected property
+using these datasets and the requested sampling meshes.</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/intro.png"><img alt="QTrans workflow from atomic displacements and electronic Hamiltonians to phonons, EPC matrix elements, and transport properties." src="_images/intro.png" style="width: 75%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Figure 1. Overview of the <strong>QTrans</strong> workflow. Electronic Hamiltonians are obtained
+from first-principles calculations or machine learning predictions.
+Together with phonon data and real-space gradients, they provide the
+ingredients for EPC and transport calculations.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<section id="preparation">
+<h2>Preparation<a class="headerlink" href="#preparation" title="Link to this heading"></a></h2>
+<section id="prepare-the-reference-cell-and-electronic-data">
+<h3>1. Prepare the reference cell and electronic data<a class="headerlink" href="#prepare-the-reference-cell-and-electronic-data" title="Link to this heading"></a></h3>
+<p>Choose a unit cell and obtain its Hamiltonian and overlap matrices using a
+supported electronic-structure interface. Run <code class="docutils literal notranslate"><span class="pre">QTrans_prep</span></code> with
+<code class="docutils literal notranslate"><span class="pre">prep_mode:</span> <span class="pre">graph-pack</span></code> to convert the outputs into
+<code class="docutils literal notranslate"><span class="pre">graph_data_QTrans.npz</span></code>. This unit-cell dataset supplies the electronic
+structure for the calculation stage. HamGNN predictions can supply the
+Hamiltonians together with graph data containing the corresponding structure,
+basis, and overlap information. See <a class="reference internal" href="tutorials/obtain_hs.html#tutorial-obtain-hs"><span class="std std-ref">Generation of Hamiltonian and Overlap Matrices</span></a> for examples.</p>
+<p>Use a consistent reference cell, atom ordering, orbital basis, magnetic
+setting, and spin-orbit coupling setting throughout the workflow.</p>
+</section>
+<section id="generate-displaced-supercells">
+<h3>2. Generate displaced supercells<a class="headerlink" href="#generate-displaced-supercells" title="Link to this heading"></a></h3>
+<p>Run <code class="docutils literal notranslate"><span class="pre">prep_mode:</span> <span class="pre">grad-epc</span></code> without <code class="docutils literal notranslate"><span class="pre">grad_epc.graph_data_sc_path</span></code> to
+generate the structures needed for finite differences. QTrans writes the
+reference cell as <code class="docutils literal notranslate"><span class="pre">QT.UNITCELL</span></code> and creates a <code class="docutils literal notranslate"><span class="pre">perturb</span></code> directory
+containing the unperturbed and displaced supercell inputs and
+<code class="docutils literal notranslate"><span class="pre">mat_info_sc.npy</span></code>. This mapping file connects the supercell to the unit cell.</p>
+<p>The supercell size and displacement amplitude are controlled by
+<a class="reference internal" href="keywords/preparer.html#prep-epc-sc-matrix"><span class="std std-ref">epc_sc_matrix</span></a> and
+<a class="reference internal" href="keywords/preparer.html#prep-epc-sc-disp"><span class="std std-ref">epc_sc_disp</span></a>. Choose a supercell large enough to
+capture the real-space coupling and check convergence for the target property.</p>
+</section>
+<section id="construct-the-epc-gradients">
+<h3>3. Construct the EPC gradients<a class="headerlink" href="#construct-the-epc-gradients" title="Link to this heading"></a></h3>
+<p>Obtain Hamiltonian and overlap data for the generated supercells through DFT
+calculations followed by <code class="docutils literal notranslate"><span class="pre">graph-pack</span></code>, or through the prediction workflow.
+Preserve the structure ordering from the displacement generation step.</p>
+<p>Run <code class="docutils literal notranslate"><span class="pre">grad-epc</span></code> again, providing <code class="docutils literal notranslate"><span class="pre">graph_data_sc_path</span></code> and
+<code class="docutils literal notranslate"><span class="pre">mat_info_sc_path</span></code> in the <code class="docutils literal notranslate"><span class="pre">grad_epc</span></code> block. For predicted Hamiltonians,
+also set <code class="docutils literal notranslate"><span class="pre">use_prediction:</span> <span class="pre">True</span></code> and supply <code class="docutils literal notranslate"><span class="pre">pred_H_sc_path</span></code>.
+<strong>QTrans</strong> constructs the real-space EPC gradients, including the overlap
+contributions required by the atomic-orbital basis, and writes
+<code class="docutils literal notranslate"><span class="pre">grad_mat.npy</span></code> and <code class="docutils literal notranslate"><span class="pre">grad_mat_sparse.npy</span></code> to <code class="docutils literal notranslate"><span class="pre">outdir</span></code>.
+See <a class="reference internal" href="tutorials/epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">EPC Gradient Matrix Preparation</span></a> for the complete procedure.</p>
+</section>
+<section id="prepare-phonon-data">
+<h3>4. Prepare phonon data<a class="headerlink" href="#prepare-phonon-data" title="Link to this heading"></a></h3>
+<p>Prepare harmonic force data compatible with Phonopy. The calculator accepts
+force sets, force constants, or a Phonopy YAML file through
+<a class="reference internal" href="keywords/calculator.html#cal-force-infos-filename"><span class="std std-ref">force_infos_filename</span></a>. For force-set and
+force-constant inputs, specify the corresponding unit cell and phonon
+supercell matrix as well. The phonon supercell can differ from the EPC
+supercell, provided both describe the same reference crystal.</p>
+<p>The optional <code class="docutils literal notranslate"><span class="pre">prep_mode:</span> <span class="pre">vasp-ph</span></code> provides a VASP-based route for preparing
+phonon force sets. Existing compatible phonon data can be used directly.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Phonopy uses different physical units for different calculator interfaces.
+<strong>QTrans</strong> loads <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> using Phonopy’s default VASP convention:
+displacements in angstroms and forces in eV/angstrom. When using
+<code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> generated through a non-VASP interface, convert its values
+to these units before supplying it to <strong>QTrans</strong>. The file format alone does
+not identify the unit convention.</p>
+</div>
+<p>The relevant
+<a class="reference external" href="https://phonopy.github.io/phonopy/interfaces.html">Phonopy interface conventions</a>
+are summarized below. These are interface conventions, rather than
+alternative unit systems selected automatically by <strong>QTrans</strong>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16.0%" />
+<col style="width: 20.0%" />
+<col style="width: 16.0%" />
+<col style="width: 22.0%" />
+<col style="width: 26.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Interface</p></th>
+<th class="head"><p>Length</p></th>
+<th class="head"><p>Atomic mass</p></th>
+<th class="head"><p>Force</p></th>
+<th class="head"><p>Force constants</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>VASP</p></td>
+<td><p>angstrom</p></td>
+<td><p>amu</p></td>
+<td><p>eV/angstrom</p></td>
+<td><p>eV/angstrom<sup>2</sup></p></td>
+</tr>
+<tr class="row-odd"><td><p>SIESTA</p></td>
+<td><p>bohr</p></td>
+<td><p>amu</p></td>
+<td><p>eV/angstrom</p></td>
+<td><p>eV/(angstrom bohr)</p></td>
+</tr>
+<tr class="row-even"><td><p>ABACUS</p></td>
+<td><p>bohr</p></td>
+<td><p>amu</p></td>
+<td><p>eV/angstrom</p></td>
+<td><p>eV/(angstrom bohr)</p></td>
+</tr>
+</tbody>
+</table>
+<p>For example, in <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> generated through Phonopy’s ABACUS interface,
+multiply the displacement vectors in bohr by approximately <code class="docutils literal notranslate"><span class="pre">0.529177</span></code> to
+convert them to angstroms. Forces already expressed in eV/angstrom remain
+unchanged. If converting force constants instead, divide values in
+eV/(angstrom bohr) by the same factor to obtain eV/angstrom<sup>2</sup>.
+Always check the units of the actual source data before conversion.
+For a step-by-step Al example using VASP or ABACUS, see
+<a class="reference internal" href="tutorials/phonon_prep.html#tutorial-phonon-prep"><span class="std std-ref">Phonon Force Data Preparation</span></a>.</p>
+</section>
+</section>
+<section id="data-passed-to-calculation">
+<h2>Data passed to calculation<a class="headerlink" href="#data-passed-to-calculation" title="Link to this heading"></a></h2>
+<p>The following configuration keys in the <code class="docutils literal notranslate"><span class="pre">QTrans_run</span></code> YAML file connect
+the prepared datasets to the calculator.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 40.0%" />
+<col style="width: 32.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Dataset</p></th>
+<th class="head"><p>Input key</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Unit-cell graph data</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">basic.graph_data_path_uc</span></code></p></td>
+<td><p>Electronic Hamiltonian, overlap, and structure</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reference cell and phonon force data</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">phonon.unitcell_filename</span></code>, <code class="docutils literal notranslate"><span class="pre">phonon.force_infos_filename</span></code>,
+<code class="docutils literal notranslate"><span class="pre">phonon.supercell_matrix</span></code></p></td>
+<td><p>Phonon frequencies and eigenvectors</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grad_mat.npy</span></code> or <code class="docutils literal notranslate"><span class="pre">grad_mat_sparse.npy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">epc.grad_mat_path</span></code></p></td>
+<td><p>Real-space EPC gradients</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mat_info_sc.npy</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">epc.mat_info_sc_path</span></code></p></td>
+<td><p>Supercell-to-unit-cell mapping for the gradients</p></td>
+</tr>
+</tbody>
+</table>
+<p>For <code class="docutils literal notranslate"><span class="pre">grad_mat_sparse.npy</span></code>, set <code class="docutils literal notranslate"><span class="pre">advanced.read_sparse_grad_mat:</span> <span class="pre">True</span></code>;
+for <code class="docutils literal notranslate"><span class="pre">grad_mat.npy</span></code>, set it to <code class="docutils literal notranslate"><span class="pre">False</span></code>. The gradient matrix and mapping
+must come from the same preparation. Each calculation loads the datasets
+it requires; a bare electronic band calculation does not need EPC gradients.</p>
+</section>
+<section id="calculation">
+<h2>Calculation<a class="headerlink" href="#calculation" title="Link to this heading"></a></h2>
+<p>Select the target property with <code class="docutils literal notranslate"><span class="pre">basic.cal_mode</span></code>, supply the prepared data
+paths, and configure sampling, temperature, and property-specific settings.
+Both command-line programs read YAML configuration files:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>QTrans_prep<span class="w"> </span>--config<span class="w"> </span>input_prep.yaml<span class="w"> </span>&gt;<span class="w"> </span>preparation.out
+QTrans_run<span class="w"> </span>--config<span class="w"> </span>input_calc.yaml<span class="w"> </span>&gt;<span class="w"> </span>calculation.out
+</pre></div>
+</div>
+<p>These commands illustrate the two entry points. The preparation sequence
+above uses separate configurations for structure generation, graph packing,
+and gradient construction. To run the calculator with MPI, use, for example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>QTrans_run<span class="w"> </span>--config<span class="w"> </span>input_calc.yaml<span class="w"> </span>&gt;<span class="w"> </span>calculation.out
+</pre></div>
+</div>
+<p>Internally, <strong>QTrans</strong> reads the configuration, loads the required electronic,
+phonon, and gradient data, and dispatches the selected calculation. For EPC
+calculations, it combines electronic states, phonon modes, and real-space
+gradients to obtain coupling matrix elements at the requested k and q points.
+The selected workflow evaluates the observable and writes results to
+<code class="docutils literal notranslate"><span class="pre">basic.outdir</span></code>.</p>
+<p>Typical choices are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">band</span></code>, <code class="docutils literal notranslate"><span class="pre">phonon</span></code>, and <code class="docutils literal notranslate"><span class="pre">dos</span></code> for inspecting dispersions and densities
+of states; see <a class="reference internal" href="tutorials/qp_disp.html#tutorial-dispersion"><span class="std std-ref">Dispersion of Quasiparticle</span></a> and <a class="reference internal" href="tutorials/qp_dos.html#tutorial-dos"><span class="std std-ref">DOS of Quasiparticle</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epc</span></code> for coupling matrix elements along a path;
+see <a class="reference internal" href="tutorials/epc_path.html#tutorial-epc-path"><span class="std std-ref">EPC Path Calculation</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conductivity</span></code> for conductivity and mobility;
+see <a class="reference internal" href="tutorials/conduct.html#tutorial-conductivity"><span class="std std-ref">Conductivity Calculation</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resistivity</span></code> and <code class="docutils literal notranslate"><span class="pre">superconductivity</span></code> for metallic transport and
+superconducting properties; see <a class="reference internal" href="tutorials/resist.html"><span class="doc">Resistivity Calculation</span></a> and
+<a class="reference internal" href="tutorials/superconduct.html#tutorial-superconductivity"><span class="std std-ref">Superconductivity Calculation</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">breakdown</span></code> for intrinsic dielectric breakdown;
+see <a class="reference internal" href="tutorials/breakdown.html"><span class="doc">Intrinsic Dielectric Breakdown</span></a>.</p></li>
+</ul>
+<p>These modes are separate calculations using shared prepared data. An EPC
+path calculation is useful for inspection but is not a required preliminary
+run for transport calculations.</p>
+<p>Before interpreting transport results, check the electronic and phonon
+dispersions and converge supercell sizes, k- and q-point sampling, energy
+windows, and smearing parameters as appropriate. Once the underlying
+datasets are converged, reuse them for different temperatures, carrier
+concentrations, and calculation modes. See <a class="reference internal" href="input_keywords.html"><span class="doc">Input Keywords</span></a> for input
+details and <a class="reference internal" href="tutorials.html"><span class="doc">Tutorials</span></a> for complete examples.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="theory/smear_method.html" class="btn btn-neutral float-left" title="Smearing Methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

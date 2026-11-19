@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electron-Phonon Coupling &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Conductivity" href="conductivity.html" />
+    <link rel="prev" title="Electronic Velocity" href="velocity.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="velocity.html">Electronic Velocity</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Electron-Phonon Coupling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#matrix-element-and-phonon-convention">Matrix Element and Phonon Convention</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#real-space-interpolation">Real-Space Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#moving-basis-corrections">Moving-Basis Corrections</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#finite-displacement-preparation">Finite-Displacement Preparation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#long-range-electrostatic-correction">Long-Range Electrostatic Correction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#three-dimensional-correction">Three-Dimensional Correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#two-dimensional-correction">Two-Dimensional Correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#numerical-settings-and-output">Numerical Settings and Output</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="conductivity.html">Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resistivity.html">Resistivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconductivity.html">Superconductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="smear_method.html">Smearing Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Electron-Phonon Coupling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/epc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="electron-phonon-coupling">
+<span id="theory-epc"></span><h1>Electron-Phonon Coupling<a class="headerlink" href="#electron-phonon-coupling" title="Link to this heading"></a></h1>
+<p><strong>QTrans</strong> evaluates electron-phonon coupling (EPC) by combining real-space
+Hamiltonian derivatives, atomic orbital expansion coefficients, and phonon
+eigenvectors. The formulation accounts for the motion and nonorthogonality
+of the atomic orbital basis <span id="id1">[<a class="reference internal" href="../intro/refers.html#id2" title="Yang Zhong, Shixu Liu, Binhua Zhang, Zhiguo Tao, Yuting Sun, Weibin Chu, Xin-Gao Gong, Ji-Hui Yang, and Hongjun Xiang. Accelerating the calculation of electron–phonon coupling strength with machine learning. Nature Computational Science, 4(8):615–625, August 2024. doi:10.1038/s43588-024-00668-7.">1</a>]</span>.
+Long-range electrostatic contributions can be added for polar and
+quadrupolar interactions.</p>
+<section id="matrix-element-and-phonon-convention">
+<h2>Matrix Element and Phonon Convention<a class="headerlink" href="#matrix-element-and-phonon-convention" title="Link to this heading"></a></h2>
+<p>The EPC matrix element connects an initial Bloch state
+<span class="math notranslate nohighlight">\(|\nu\mathbf{k}\rangle\)</span> to a final state
+<span class="math notranslate nohighlight">\(|\mu\mathbf{k+q}\rangle\)</span> through phonon branch <span class="math notranslate nohighlight">\(b\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[g_{\mu\nu b}(\mathbf{k},\mathbf{q})
+= \langle\mu\mathbf{k+q}|\Delta_{\mathbf{q}b}\hat{\mathcal{H}}
+|\nu\mathbf{k}\rangle.\]</div>
+<p>We use the electronic Bloch convention of <a class="reference internal" href="ham_ao.html"><span class="doc">Hamiltonian in an Atomic Orbital Basis</span></a>. For a phonon with
+angular frequency <span class="math notranslate nohighlight">\(\omega_{\mathbf{q}b}&gt;0\)</span>, define</p>
+<div class="math notranslate nohighlight">
+\[\ell_{\kappa,\mathbf{q}b}
+= \sqrt{\frac{\hbar}{2M_\kappa\omega_{\mathbf{q}b}}},
+\qquad
+\widetilde{e}_{\kappa\sigma}^{\mathbf{q}b}
+= \mathrm{e}^{\mathrm{i}\mathbf{q}\cdot\boldsymbol{\tau}_\kappa}
+e_{\kappa\sigma}^{\mathbf{q}b},\]</div>
+<p>where <span class="math notranslate nohighlight">\(M_\kappa\)</span> and <span class="math notranslate nohighlight">\(\boldsymbol{\tau}_\kappa\)</span> are the mass and
+unit-cell position of atom <span class="math notranslate nohighlight">\(\kappa\)</span>, and <span class="math notranslate nohighlight">\(\sigma\)</span> is a Cartesian
+direction. The vectors <span class="math notranslate nohighlight">\(e^{\mathbf{q}b}\)</span> are the normalized eigenvectors
+of the mass-weighted dynamical matrix returned by Phonopy, with
+<span class="math notranslate nohighlight">\(\sum_{\kappa\sigma}|e_{\kappa\sigma}^{\mathbf{q}b}|^2=1\)</span>. The explicit
+atomic phase in <span class="math notranslate nohighlight">\(\widetilde{e}\)</span> matches the code’s phonon convention.</p>
+<p>Let <span class="math notranslate nohighlight">\(u_{p\kappa\sigma}\)</span> denote the displacement of atom <span class="math notranslate nohighlight">\(\kappa\)</span>
+in cell <span class="math notranslate nohighlight">\(p\)</span>. The phonon perturbation is</p>
+<div class="math notranslate nohighlight">
+\[\Delta_{\mathbf{q}b}\hat{\mathcal{H}}
+= \sum_{p\kappa\sigma}
+\ell_{\kappa,\mathbf{q}b}
+\widetilde{e}_{\kappa\sigma}^{\mathbf{q}b}
+\mathrm{e}^{\mathrm{i}\mathbf{q}\cdot\mathbf{R}_p}
+\frac{\partial\hat{\mathcal{H}}}{\partial u_{p\kappa\sigma}}.\]</div>
+<p>This definition gives <span class="math notranslate nohighlight">\(g\)</span> units of energy. With Bloch states normalized
+over <span class="math notranslate nohighlight">\(N\)</span> cells, the corresponding second-quantized interaction contains
+the conventional overall factor <span class="math notranslate nohighlight">\(1/\sqrt{N}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\hat{\mathcal{H}}_{\mathrm{ep}}
+= \frac{1}{\sqrt{N}}\sum_{\mathbf{kq}\mu\nu b}
+g_{\mu\nu b}(\mathbf{k},\mathbf{q})
+\hat{c}_{\mu\mathbf{k+q}}^\dagger\hat{c}_{\nu\mathbf{k}}
+(\hat{b}_{\mathbf{q}b}+\hat{b}_{-\mathbf{q}b}^\dagger).\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\hat c\)</span> and <span class="math notranslate nohighlight">\(\hat b\)</span> are electron and phonon annihilation
+operators, respectively, with consistent phases for the modes at
+<span class="math notranslate nohighlight">\(\mathbf{q}\)</span> and <span class="math notranslate nohighlight">\(-\mathbf{q}\)</span>.</p>
+</section>
+<section id="real-space-interpolation">
+<h2>Real-Space Interpolation<a class="headerlink" href="#real-space-interpolation" title="Link to this heading"></a></h2>
+<p>Translational symmetry allows all displacement derivatives to be referred
+to atoms in the central unit cell. Define</p>
+<div class="math notranslate nohighlight">
+\[G^{\kappa\sigma}_{mi\alpha,nj\beta}
+= \left\langle\phi_{mi\alpha}\left|
+\frac{\partial\hat{\mathcal{H}}}{\partial u_{0\kappa\sigma}}
+\right|\phi_{nj\beta}\right\rangle,\]</div>
+<p>where <span class="math notranslate nohighlight">\(m,n\)</span> label lattice cells, <span class="math notranslate nohighlight">\(i,j\)</span> label atoms, and
+<span class="math notranslate nohighlight">\(\alpha,\beta\)</span> label orbitals. The EPC is then</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}g_{\mu\nu b}(\mathbf{k},\mathbf{q})
+={}&amp; \sum_{mn}\sum_{i\alpha,j\beta}\sum_{\kappa\sigma}
+\ell_{\kappa,\mathbf{q}b}
+\widetilde{e}_{\kappa\sigma}^{\mathbf{q}b}
+\mathrm{e}^{-\mathrm{i}(\mathbf{k+q})\cdot\mathbf{R}_m}
+\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n} \\
+&amp;\times(C_{i\alpha}^{\mathbf{k+q},\mu})^*
+G^{\kappa\sigma}_{mi\alpha,nj\beta}
+C_{j\beta}^{\mathbf{k},\nu}.\end{split}\]</div>
+<p>The conjugated coefficient and negative Bloch phase belong to the final
+state, while the unconjugated coefficient and positive phase belong to the
+initial state. Both cell indices are retained because displacing one atom
+breaks translational symmetry locally.</p>
+<p>Unlike the <a class="reference internal" href="velocity.html"><span class="doc">band velocity</span></a>, which uses analytic wave-vector
+derivatives, EPC requires derivatives with respect to atomic displacements.
+Once the real-space gradient tensor is prepared, the interpolation above
+can be evaluated at arbitrary electronic and phonon wave vectors.</p>
+</section>
+<section id="moving-basis-corrections">
+<h2>Moving-Basis Corrections<a class="headerlink" href="#moving-basis-corrections" title="Link to this heading"></a></h2>
+<p>The derivative of an atomic orbital Hamiltonian matrix element is not equal
+to the matrix element of the derivative operator, because the orbitals move
+with their parent atoms. For compact notation, use composite orbital indices
+<span class="math notranslate nohighlight">\(I=(m,i,\alpha)\)</span> and <span class="math notranslate nohighlight">\(J=(n,j,\beta)\)</span>, and write
+<span class="math notranslate nohighlight">\(\partial_{\kappa\sigma}=\partial/\partial u_{0\kappa\sigma}\)</span>. Then</p>
+<div class="math notranslate nohighlight">
+\[\partial_{\kappa\sigma}H_{IJ}
+= \langle\partial_{\kappa\sigma}\phi_I|
+\hat{\mathcal{H}}|\phi_J\rangle
++G^{\kappa\sigma}_{IJ}
++\langle\phi_I|\hat{\mathcal{H}}|
+\partial_{\kappa\sigma}\phi_J\rangle.\]</div>
+<p>Define the one-sided overlap derivative and auxiliary matrices by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}D^{\kappa\sigma}_{IJ}
+&amp;= \langle\phi_I|\partial_{\kappa\sigma}\phi_J\rangle, \\
+A^{\kappa\sigma}
+&amp;= D^{\kappa\sigma}-\partial_{\kappa\sigma}S
+= -(D^{\kappa\sigma})^\dagger, \\
+B^{\kappa\sigma}
+&amp;= (A^{\kappa\sigma})^\dagger=-D^{\kappa\sigma},\end{split}\]</div>
+<p>where
+<span class="math notranslate nohighlight">\(\partial_{\kappa\sigma}S=D^{\kappa\sigma}+(D^{\kappa\sigma})^\dagger\)</span>.
+Using the inverse overlap matrix within the finite atomic orbital space gives</p>
+<div class="math notranslate nohighlight">
+\[G^{\kappa\sigma}
+= \partial_{\kappa\sigma}H
++ A^{\kappa\sigma}S^{-1}H
++ HS^{-1}(A^{\kappa\sigma})^\dagger.\]</div>
+<p>The matrices in this expression act on the full set of supercell orbitals.
+The overlap matrix must be invertible. This is the moving-basis correction
+implemented when constructing the gradient tensor; using
+<span class="math notranslate nohighlight">\(\partial_{\kappa\sigma}H\)</span> alone omits the two basis-response terms.</p>
+<p>For clarity, the matrix element of <span class="math notranslate nohighlight">\(B\)</span> has the ordered indices</p>
+<div class="math notranslate nohighlight">
+\[B^{\kappa\sigma}_{IJ}
+= (A^{\kappa\sigma}_{JI})^*,
+\qquad
+\langle\partial_{\kappa\sigma}\phi_I|\phi_J\rangle
+= \partial_{\kappa\sigma}S_{IJ}+B^{\kappa\sigma}_{IJ}.\]</div>
+<p>The overlap on the right has the same bra and ket ordering as the left-hand
+side. For real matrices, the adjoint reduces to a transpose; complex spinor
+matrices require the conjugate transpose.</p>
+<section id="finite-displacement-preparation">
+<h3>Finite-Displacement Preparation<a class="headerlink" href="#finite-displacement-preparation" title="Link to this heading"></a></h3>
+<p>The preparation workflow obtains <span class="math notranslate nohighlight">\(\partial H\)</span> and <span class="math notranslate nohighlight">\(\partial S\)</span>
+from displaced supercells, using either forward differences,</p>
+<div class="math notranslate nohighlight">
+\[\partial_{\kappa\sigma}H
+\simeq\frac{H(+\Delta u_{\kappa\sigma})-H(0)}{\Delta u},\]</div>
+<p>or central differences,</p>
+<div class="math notranslate nohighlight">
+\[\partial_{\kappa\sigma}H
+\simeq\frac{H(+\Delta u_{\kappa\sigma})
+-H(-\Delta u_{\kappa\sigma})}{2\Delta u},\]</div>
+<p>with analogous expressions for <span class="math notranslate nohighlight">\(\partial S\)</span>. The input <code class="docutils literal notranslate"><span class="pre">fd_method</span></code>
+selects <code class="docutils literal notranslate"><span class="pre">forward</span></code> or <code class="docutils literal notranslate"><span class="pre">central</span></code>, and
+<a class="reference internal" href="../keywords/preparer.html#prep-epc-sc-disp"><span class="std std-ref">epc_sc_disp</span></a> sets the displacement in angstrom.
+Forward differences are first-order accurate in <span class="math notranslate nohighlight">\(\Delta u\)</span>; central
+differences are second-order accurate for smooth matrix elements.</p>
+<p>The auxiliary matrix <span class="math notranslate nohighlight">\(A\)</span> is assembled from overlap derivatives and
+additional on-site orbital derivative overlaps. On-site terms require
+separate treatment because moving both orbitals together leaves their
+overlap unchanged even when a one-sided derivative is nonzero. The corrected
+<span class="math notranslate nohighlight">\(G\)</span> tensor is stored for subsequent EPC calculations. Its units are
+energy per length, internally Hartree per Bohr. Dense and sparse storage
+represent the same contraction; sparse thresholding introduces an additional
+numerical approximation.</p>
+</section>
+</section>
+<section id="long-range-electrostatic-correction">
+<h2>Long-Range Electrostatic Correction<a class="headerlink" href="#long-range-electrostatic-correction" title="Link to this heading"></a></h2>
+<p>A finite real-space interpolation does not reproduce the nonanalytic
+long-wavelength field of a polar displacement. <strong>QTrans</strong> can add analytic
+long-range terms to the local EPC:</p>
+<div class="math notranslate nohighlight">
+\[g_{\mu\nu b}=g^{\mathrm{local}}_{\mu\nu b}
++g^{\mathrm{LR}}_{\mu\nu b}.\]</div>
+<p>The contributions are added as complex amplitudes before taking
+<span class="math notranslate nohighlight">\(|g|^2\)</span>, so their interference is retained. This decomposition assumes
+that the supplied local gradient and the analytic correction use a
+consistent separation of local and long-range contributions.</p>
+<section id="three-dimensional-correction">
+<h3>Three-Dimensional Correction<a class="headerlink" href="#three-dimensional-correction" title="Link to this heading"></a></h3>
+<p>In atomic units, the implemented three-dimensional dipole and quadrupole
+correction can be expressed as</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}g^{\mathrm{LR}}_{\mu\nu b}
+={}&amp; \frac{4\pi}{V_{\mathrm{uc}}}
+\sum_{\kappa\sigma}\ell_{\kappa,\mathbf{q}b}
+\widetilde e_{\kappa\sigma}^{\mathbf{q}b}
+\sum_{\mathbf G}^{\mathbf Q\ne0}
+\frac{\exp[-d(\mathbf Q)/\eta_{\mathrm E}]}{d(\mathbf Q)}
+\mathrm{e}^{-\mathrm{i}\mathbf Q\cdot\boldsymbol\tau_\kappa}
+\mathcal{M}^{(t)}_{\mu\nu}(\mathbf{k},\mathbf Q) \\
+&amp;\times\left[
+\mathrm{i}\sum_a Q_a Z^*_{\kappa,a\sigma}
++\frac{1}{2}\sum_{ac}Q_a
+\mathcal Q_{\kappa,\sigma ac}Q_c\right],\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf Q=\mathbf q+\mathbf G\)</span> contains the physical
+<span class="math notranslate nohighlight">\(2\pi\)</span> factor, <span class="math notranslate nohighlight">\(V_{\mathrm{uc}}\)</span> is the unit-cell volume,
+<span class="math notranslate nohighlight">\(Z^*\)</span> is the Born effective charge tensor, and <span class="math notranslate nohighlight">\(\mathcal Q\)</span> is the
+dynamical quadrupole tensor in the code’s convention. The screened
+denominator is</p>
+<div class="math notranslate nohighlight">
+\[d(\mathbf Q)=\mathbf Q\cdot\boldsymbol\epsilon_\infty\cdot\mathbf Q,\]</div>
+<p>with the electronic dielectric tensor <span class="math notranslate nohighlight">\(\boldsymbol\epsilon_\infty\)</span>.
+The positive parameter <span class="math notranslate nohighlight">\(\eta_{\mathrm E}\)</span> controls the Ewald damping;
+its units match <span class="math notranslate nohighlight">\(d(\mathbf Q)\)</span>. The dipole and quadrupole terms are
+included only when their respective correction flags are enabled. With
+<span class="math notranslate nohighlight">\(\mathcal Q=0\)</span>, the expression reduces to the dipole correction.</p>
+<p>The electronic factor uses a Taylor approximation of the plane-wave
+operator in the atomic orbital basis. At order zero,</p>
+<div class="math notranslate nohighlight">
+\[\mathcal M^{(0)}_{\mu\nu}
+= \mathbf C_{\mu\mathbf{k+q}}^\dagger
+S^{\mathbf k}\mathbf C_{\nu\mathbf k}.\]</div>
+<p>At order one, the code includes the position-matrix contribution:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal M^{(1)}_{\mu\nu}
+= \mathbf C_{\mu\mathbf{k+q}}^\dagger
+\left[\sum_n\mathrm{e}^{\mathrm{i}\mathbf k\cdot\mathbf R_n}
+\left(S_{0,n}+\mathrm{i}\sum_aQ_a P^a_{0,n}\right)\right]
+\mathbf C_{\nu\mathbf k},\]</div>
+<p>where <span class="math notranslate nohighlight">\(P^a_{0,n}\)</span> denotes the supplied atomic orbital position matrix.
+Orbital indices are suppressed in this expression. The parameter
+<a class="reference internal" href="../keywords/calculator.html#cal-lrc-taylor-order"><span class="std std-ref">LRC_taylor_order</span></a> selects order zero or one.
+The current three-dimensional order-one path supports only nonmagnetic
+calculations without spin-orbit coupling.</p>
+</section>
+<section id="two-dimensional-correction">
+<h3>Two-Dimensional Correction<a class="headerlink" href="#two-dimensional-correction" title="Link to this heading"></a></h3>
+<p>For <code class="docutils literal notranslate"><span class="pre">system_2D</span></code>, the code uses a separate screened two-dimensional
+interaction with <span class="math notranslate nohighlight">\(q_z=0\)</span>. Its range-separation function is</p>
+<div class="math notranslate nohighlight">
+\[f_L(Q)=1-\tanh(QL/2),\]</div>
+<p>where <span class="math notranslate nohighlight">\(L\)</span> is set by
+<a class="reference internal" href="../keywords/calculator.html#cal-range-separation-length-l"><span class="std std-ref">range_separation_length_L</span></a>. The
+in-plane and out-of-plane screening functions are</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\epsilon_\parallel(\mathbf Q)
+&amp;=1+\frac{2\pi f_L(Q)}{Q}
+\mathbf Q_\parallel\cdot\boldsymbol\alpha_\parallel
+\cdot\mathbf Q_\parallel, \\
+\epsilon_\perp(Q)
+&amp;=1-2\pi Qf_L(Q)\alpha_\perp,\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\boldsymbol\alpha_\parallel\)</span> and <span class="math notranslate nohighlight">\(\alpha_\perp\)</span> are the
+macroscopic sheet polarizabilities derived from the dielectric tensor and
+the specified supercell vacuum length. The two-dimensional Coulomb factor
+scales as <span class="math notranslate nohighlight">\(2\pi f_L(Q)/(\mathcal A Q)\)</span>, with in-plane cell area
+<span class="math notranslate nohighlight">\(\mathcal A\)</span>, instead of the three-dimensional
+<span class="math notranslate nohighlight">\(4\pi/[V_{\mathrm{uc}}d(\mathbf Q)]\)</span>. The combined dipole/quadrupole
+implementation also uses an out-of-plane position-matrix contribution.
+It should not be replaced by the three-dimensional bulk expression for a
+slab separated by vacuum.</p>
+</section>
+</section>
+<section id="numerical-settings-and-output">
+<h2>Numerical Settings and Output<a class="headerlink" href="#numerical-settings-and-output" title="Link to this heading"></a></h2>
+<p>The calculator reads the prepared gradient tensor from
+<a class="reference internal" href="../keywords/calculator.html#cal-grad-mat-path"><span class="std std-ref">grad_mat_path</span></a>. The real-space range is selected by
+<a class="reference internal" href="../keywords/calculator.html#cal-cell-range-cut"><span class="std std-ref">cell_range_cut</span></a>, and
+<a class="reference internal" href="../keywords/calculator.html#cal-read-sparse-grad-mat"><span class="std std-ref">read_sparse_grad_mat</span></a> chooses its storage
+format. Convergence should be checked with respect to the displacement,
+preparation supercell, retained real-space range, and sparse threshold.</p>
+<p>The dipole and quadrupole corrections are controlled by
+<a class="reference internal" href="../keywords/calculator.html#cal-apply-correction"><span class="std std-ref">apply_correction</span></a> and
+<a class="reference internal" href="../keywords/calculator.html#cal-quadrupole-correction"><span class="std std-ref">quadrupole_correction</span></a>. They require the
+corresponding Born charge, dielectric, and quadrupole data. The
+<a class="reference internal" href="../keywords/calculator.html#cal-q-cut"><span class="std std-ref">q_cut</span></a> parameter limits where corrections are applied in
+the calling workflows.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Phonon frequencies enter the factor
+<span class="math notranslate nohighlight">\(\sqrt{\hbar/(2M_\kappa\omega_{\mathbf qb})}\)</span>. The code stores the
+phonon energy <span class="math notranslate nohighlight">\(\hbar\omega\)</span> in Hartree and masses in atomic units,
+giving the internal prefactor <span class="math notranslate nohighlight">\(1/\sqrt{2M_\kappa E_{\mathbf qb}}\)</span>.
+Low-frequency branches are filtered using
+<a class="reference internal" href="../keywords/calculator.html#cal-phonon-frequency-cutoff"><span class="std std-ref">phonon_frequency_cutoff</span></a>, entered in
+meV. Imaginary phonon modes require a structural-stability assessment;
+taking their absolute frequencies does not establish physical stability.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The EPC path routine returns magnitudes <span class="math notranslate nohighlight">\(|g|\)</span> in Hartree. Its
+current small-wave-vector guard returns zero when the norm of the
+internal Cartesian wave vector is below <span class="math notranslate nohighlight">\(10^{-6}\)</span>. This is a
+numerical convention, not the physical long-wavelength limit of a polar
+coupling. If path symmetrization is requested, the current implementation
+averages <span class="math notranslate nohighlight">\(|g|^2\)</span> over nearly degenerate phonon branches and returns
+its square root; it does not average over electronic degeneracies.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="velocity.html" class="btn btn-neutral float-left" title="Electronic Velocity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conductivity.html" class="btn btn-neutral float-right" title="Conductivity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

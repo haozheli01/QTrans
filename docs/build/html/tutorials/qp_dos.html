@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOS of Quasiparticle &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="EPC Path Calculation" href="epc_path.html" />
+    <link rel="prev" title="Dispersion of Quasiparticle" href="qp_disp.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="obtain_hs.html">Generation of Hamiltonian and Overlap Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="phonon_prep.html">Phonon Force Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">DOS of Quasiparticle</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#electronic-dos-of-gaas">Electronic DOS of GaAs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#smearing-method">1. Smearing method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tetrahedron-method">2. Tetrahedron method</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#phonon-dos-of-al">Phonon DOS of Al</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">1. Smearing method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">2. Tetrahedron method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="epc_path.html">EPC Path Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resist.html">Resistivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconduct.html">Superconductivity Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">DOS of Quasiparticle</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/qp_dos.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dos-of-quasiparticle">
+<span id="tutorial-dos"></span><h1>DOS of Quasiparticle<a class="headerlink" href="#dos-of-quasiparticle" title="Link to this heading"></a></h1>
+<p>This tutorial uses <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">dos</span></code> in <strong>QTrans</strong> to calculate electronic
+and phonon densities of states (DOS).</p>
+<section id="electronic-dos-of-gaas">
+<h2>Electronic DOS of GaAs<a class="headerlink" href="#electronic-dos-of-gaas" title="Link to this heading"></a></h2>
+<p>This tutorial illustrates the calculation of the electronic density of states (DOS) for the semiconductor
+GaAs using two approaches: the default smearing method and the tetrahedron method.</p>
+<p>The GaAs tutorial is located in <code class="docutils literal notranslate"><span class="pre">tutorials/GaAs/openmx/ele-dos/</span></code>.
+All necessary data files are available in <code class="docutils literal notranslate"><span class="pre">tutorials/GaAs/openmx/data/</span></code>.
+The directory contains separate examples for the two integration methods:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd tutorials/GaAs/openmx/ele-dos/ &amp;&amp; ls
+smearing/ tetrahedron/
+</pre></div>
+</div>
+<section id="smearing-method">
+<h3>1. Smearing method<a class="headerlink" href="#smearing-method" title="Link to this heading"></a></h3>
+<p>We begin by performing the calculation with the default smearing method.
+Enter <code class="docutils literal notranslate"><span class="pre">smearing/</span></code>, where you will find the input file <code class="docutils literal notranslate"><span class="pre">input-smearing.yaml</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">ref/</span></code> folder containing reference outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd smearing/ &amp;&amp; ls
+input-smearing.yaml ref/
+</pre></div>
+</div>
+<p>In the input file <code class="docutils literal notranslate"><span class="pre">input-smearing.yaml</span></code>, we choose a smearing of 50 meV
+(<code class="docutils literal notranslate"><span class="pre">dos_smear:</span> <span class="pre">50.0</span></code>) and use a 20x20x20 k-point grid (<code class="docutils literal notranslate"><span class="pre">dos_mesh_size:</span> <span class="pre">[20,20,20]</span></code>).
+A Gaussian kernel (<code class="docutils literal notranslate"><span class="pre">dos_gauss_type:</span> <span class="pre">0</span></code>) approximates the delta function.
+Set <code class="docutils literal notranslate"><span class="pre">dos_qp:</span> <span class="pre">electron</span></code> to select the electronic DOS.
+The energy range for the DOS calculation is set from -10 eV to 10 eV via
+<code class="docutils literal notranslate"><span class="pre">dos_erange:</span> <span class="pre">[-10,10]</span></code>.
+Note that this energy range is defined relative to the calculated Fermi level.</p>
+<p>The complete input file is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dos&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">19</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">dos</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dos_qp</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;electron&#39;</span>
+<span class="w">  </span><span class="nt">dos_npoints</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">dos_mesh_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">dos_smear</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50.0</span>
+<span class="w">  </span><span class="nt">dos_gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">dos_erange</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">-10</span><span class="p p-Indicator">,</span><span class="nv">10</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Run <strong>QTrans</strong> from this directory:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-smearing.yaml &gt; k20_smearing50.out
+</pre></div>
+</div>
+<p>At the end of the run, you should see output like this:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>######################################### DOS Calculation ##########################################
+Calculate density of states for electron.
+The system is an insulator, the VBM energy of -4.7764 eV is chosen as the reference energy.
+</pre></div>
+</div>
+<p><strong>QTrans</strong> automatically calculates the Fermi level when <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">'dos'</span></code> is set. For metals,
+it outputs the actual Fermi level, while for insulators and semiconductors, it returns the energy of the
+valence band maximum (VBM).
+In this case, the calculated VBM energy is -4.7764 eV.</p>
+<p>The resulting DOS is saved in a file named <code class="docutils literal notranslate"><span class="pre">electron_dos.dat</span></code> in the current directory,
+with the following format:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Energy(eV)    DOS(1/eV)
+-1.00000000e+01 1.89442710e-11
+-9.95991984e+00 5.58089977e-15
+-9.91983968e+00 4.64104623e-19
+...
+...
+</pre></div>
+</div>
+<p>The first column in the file represents the energy, and the second column contains the calculated DOS.
+For collinear magnetic materials, the file includes three columns: the energy, spin-up DOS, and spin-down DOS.
+The calculated DOS is shown in Figure 1. As can be observed, a larger smearing value results in a smoother DOS
+curve, but it also leads to a loss of fine spectral details.</p>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/dos_GaAs.png"><img alt="dos_GaAs.png" src="../_images/dos_GaAs.png" style="width: 600.0px; height: 480.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1:</strong>  Calculated electronic DOS of GaAs using a 20x20x20 k-point grid. The Fermi level is aligned
+with the valence band maximum (VBM).</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="tetrahedron-method">
+<h3>2. Tetrahedron method<a class="headerlink" href="#tetrahedron-method" title="Link to this heading"></a></h3>
+<p>The tetrahedron method divides the Brillouin zone into small tetrahedra and performs analytical integration within each.
+It enables accurate DOS calculation without relying on smearing parameters and is especially useful for capturing fine
+features near the Fermi level in metallic systems.
+However, the tetrahedron method requires more computational effort and is sensitive to the density and uniformity of the k-point mesh.</p>
+<p>Next, calculate the DOS using the tetrahedron method.
+Enter <code class="docutils literal notranslate"><span class="pre">tetrahedron/</span></code>, where you will find the input file <code class="docutils literal notranslate"><span class="pre">input-tetra.yaml</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">ref/</span></code> folder containing reference outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd ..
+cd tetrahedron/ &amp;&amp; ls
+input-tetra.yaml ref/
+</pre></div>
+</div>
+<p>To activate this method, set <code class="docutils literal notranslate"><span class="pre">tetra_integral</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> in the <code class="docutils literal notranslate"><span class="pre">advanced</span></code> block.
+The DOS integration itself does not use a smearing kernel. For electronic DOS,
+smearing settings can still affect the reference Fermi-level calculation.
+The complete input file is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dos&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">19</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tetra_integral</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">dos</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dos_qp</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;electron&#39;</span>
+<span class="w">  </span><span class="nt">dos_npoints</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">dos_mesh_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">dos_erange</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">-10</span><span class="p p-Indicator">,</span><span class="nv">10</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Run <strong>QTrans</strong> from this directory:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-tetra.yaml &gt; k20_tetra.out 2&gt;&amp;1
+</pre></div>
+</div>
+<p>The DOS data will be saved in a file named <code class="docutils literal notranslate"><span class="pre">electron_dos.dat</span></code>.
+The resulting DOS is plotted in Figure 1.</p>
+<p>The DOS curve calculated using the tetrahedron method is generally smoother than raw discrete data
+but differs fundamentally from smearing methods. It retains sharp features near band edges and Van Hove
+singularities without the artificial broadening of a smearing kernel. Converge the mesh
+for either method before comparing fine spectral features.</p>
+</section>
+</section>
+<section id="phonon-dos-of-al">
+<h2>Phonon DOS of Al<a class="headerlink" href="#phonon-dos-of-al" title="Link to this heading"></a></h2>
+<p>This tutorial illustrates the calculation of the phonon density of states (DOS) for the metal aluminum
+using two approaches: the default smearing method and the tetrahedron method.</p>
+<p>The Al tutorial is located in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/ph-dos/</span></code>.
+All necessary data files are available in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/data/</span></code>.
+The directory contains separate examples for the two integration methods:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd tutorials/Al/openmx/ph-dos/ &amp;&amp; ls
+smearing/ tetrahedron/
+</pre></div>
+</div>
+<section id="id1">
+<h3>1. Smearing method<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>We begin by performing the calculation with the default smearing method.
+Enter <code class="docutils literal notranslate"><span class="pre">smearing/</span></code>, where you will find the input file <code class="docutils literal notranslate"><span class="pre">input-smearing.yaml</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">ref/</span></code> folder containing reference outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd smearing/ &amp;&amp; ls
+input-smearing.yaml ref/
+</pre></div>
+</div>
+<p>Set <code class="docutils literal notranslate"><span class="pre">dos_qp:</span> <span class="pre">phonon</span></code> in <code class="docutils literal notranslate"><span class="pre">input-smearing.yaml</span></code> to select the phonon DOS.
+You must also add a <code class="docutils literal notranslate"><span class="pre">phonon</span></code> block with the necessary settings to compute the dynamical matrix.
+Since the phonon energy range is typically on the order of tens of meV—much smaller than that of electrons—we
+need to use a smaller smearing value. We choose a smearing of 0.5 meV
+(<code class="docutils literal notranslate"><span class="pre">dos_smear:</span> <span class="pre">0.5</span></code>) and use a 20x20x20 q-point grid (<code class="docutils literal notranslate"><span class="pre">dos_mesh_size:</span> <span class="pre">[20,20,20]</span></code>) in this tutorial.
+The energy range for the DOS calculation is set from 0 to 0.050 eV via
+<code class="docutils literal notranslate"><span class="pre">dos_erange:</span> <span class="pre">[0,0.050]</span></code>. This input range is in eV, whereas the phonon
+DOS output uses meV and 1/meV for the energy and DOS, respectively.</p>
+<p>The complete input file is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dos&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/Al-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/FORCE_SETS</span>
+
+<span class="nt">dos</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dos_qp</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;phonon&#39;</span>
+<span class="w">  </span><span class="nt">dos_npoints</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">dos_mesh_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">dos_smear</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">  </span><span class="nt">dos_gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">dos_erange</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nv">0.050</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Run <strong>QTrans</strong> from this directory:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-smearing.yaml &gt; q20_smearing0.5.out
+</pre></div>
+</div>
+<p>The resulting DOS is saved in a file named <code class="docutils literal notranslate"><span class="pre">phonon_dos.dat</span></code> in the current directory,
+with the following format:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span># Energy(meV)    DOS(1/meV)
+0.00000000e+00 4.23142188e-04
+1.00200401e-01 4.06485344e-04
+2.00400802e-01 3.60346664e-04
+...
+...
+</pre></div>
+</div>
+<p>The first column in the file represents the phonon energy, and the second column contains the calculated DOS.
+The calculated DOS is shown in Figure 2.</p>
+<figure class="align-default" id="id4">
+<a class="reference internal image-reference" href="../_images/dos_Al.png"><img alt="dos_Al.png" src="../_images/dos_Al.png" style="width: 600.0px; height: 480.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 2:</strong>  Calculated phonon DOS of Al using a 20x20x20 q-point grid.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id2">
+<h3>2. Tetrahedron method<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Next, calculate the DOS using the tetrahedron method.
+Enter <code class="docutils literal notranslate"><span class="pre">tetrahedron/</span></code>, where you will find the input file <code class="docutils literal notranslate"><span class="pre">input-tetra.yaml</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">ref/</span></code> folder containing reference outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd ..
+cd tetrahedron/ &amp;&amp; ls
+input-tetra.yaml ref/
+</pre></div>
+</div>
+<p>To activate this method, set <code class="docutils literal notranslate"><span class="pre">tetra_integral</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> in the <code class="docutils literal notranslate"><span class="pre">advanced</span></code> block.
+The phonon DOS is integrated without a smearing kernel.
+The complete input file is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;dos&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/Al-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/FORCE_SETS</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">tetra_integral</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">dos</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dos_qp</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;phonon&#39;</span>
+<span class="w">  </span><span class="nt">dos_npoints</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">dos_mesh_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="nv">20</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">dos_erange</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="nv">0.050</span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>Run <strong>QTrans</strong> from this directory:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-tetra.yaml &gt; q20_tetra.out 2&gt;&amp;1
+</pre></div>
+</div>
+<p>The DOS data will also be saved in a file named <code class="docutils literal notranslate"><span class="pre">phonon_dos.dat</span></code>.
+The resulting DOS is plotted in Figure 2.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qp_disp.html" class="btn btn-neutral float-left" title="Dispersion of Quasiparticle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="epc_path.html" class="btn btn-neutral float-right" title="EPC Path Calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

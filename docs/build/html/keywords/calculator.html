@@ -1,0 +1,1376 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keywords of QTrans_run &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Atomic Orbital Basis Definition" href="ao_define.html" />
+    <link rel="prev" title="Keywords of QTrans_prep" href="preparer.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../input_keywords.html">Input Keywords</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="preparer.html">Keywords of QTrans_prep</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Keywords of QTrans_run</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#structure-of-the-input-data">Structure of the input data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keywords">Keywords</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blocks">Blocks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basic-block">basic block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-block">advanced block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dos-block">dos block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dispersion-block">dispersion block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#phonon-block">phonon block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#epc-block">epc block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#transport-block">transport block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#conductivity-block">conductivity block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#superconductivity-block">superconductivity block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pomega-block">pomega block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#breakdown-block">breakdown block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resistivity-block">resistivity block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#boltzmann-block">boltzmann block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#self-energy-block">self-energy block</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ao_define.html">Atomic Orbital Basis Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="valence_electrons.html">Valence Electron Counts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../input_keywords.html">Input Keywords</a></li>
+      <li class="breadcrumb-item active">Keywords of QTrans_run</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/keywords/calculator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="keywords-of-qtrans-run">
+<h1>Keywords of QTrans_run<a class="headerlink" href="#keywords-of-qtrans-run" title="Link to this heading"></a></h1>
+<section id="structure-of-the-input-data">
+<h2>Structure of the input data<a class="headerlink" href="#structure-of-the-input-data" title="Link to this heading"></a></h2>
+<p>We use a <code class="docutils literal notranslate"><span class="pre">yaml</span></code> file as the input configuration.
+For different <code class="docutils literal notranslate"><span class="pre">cal_mode</span></code> values, the program requires different input blocks.
+However, the parameters in <strong>basic</strong> block must always be defined in the input file.
+The format is as follows:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>basic:
+    cal_mode: &lt;cal_mode&gt;
+    graph_data_path_uc: &lt;graph_data_path_uc&gt;
+    nao_max: &lt;nao_max&gt;
+    Ham_type: &lt;Ham_type&gt;
+    outdir: &lt;outdir&gt;
+
+block_name1:
+    key1: value1
+    key2: value2
+
+block_name2:
+    key3: value3
+    key4: value4
+</pre></div>
+</div>
+</section>
+<section id="keywords">
+<h2>Keywords<a class="headerlink" href="#keywords" title="Link to this heading"></a></h2>
+<section id="blocks">
+<span id="cal-title-keywords"></span><h3>Blocks<a class="headerlink" href="#blocks" title="Link to this heading"></a></h3>
+<blockquote>
+<div><div class="left-align-text docutils container">
+<p><strong>Block &lt;basic&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-cal-mode"><span class="std std-ref">cal_mode</span></a>,
+<a class="reference internal" href="#cal-graph-data-path-uc"><span class="std std-ref">graph_data_path_uc</span></a>,
+<a class="reference internal" href="#cal-nao-max"><span class="std std-ref">nao_max</span></a>,
+<a class="reference internal" href="#cal-ham-type"><span class="std std-ref">Ham_type</span></a>,
+<a class="reference internal" href="#cal-outdir"><span class="std std-ref">outdir</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;advanced&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-read-sparse-grad-mat"><span class="std std-ref">read_sparse_grad_mat</span></a>,
+<a class="reference internal" href="#cal-soc-switch"><span class="std std-ref">soc_switch</span></a>,
+<a class="reference internal" href="#cal-magnetic-type"><span class="std std-ref">magnetic_type</span></a>,
+<a class="reference internal" href="#cal-magnetic-tolerance"><span class="std std-ref">magnetic_tolerance</span></a>,
+<a class="reference internal" href="#cal-moment-similar-tolerence"><span class="std std-ref">moment_similar_tolerence</span></a>,
+<a class="reference internal" href="#cal-doping-charge"><span class="std std-ref">doping_charge</span></a>,
+<a class="reference internal" href="#cal-system-2d"><span class="std std-ref">system_2D</span></a>,
+<a class="reference internal" href="#cal-tetra-integral"><span class="std std-ref">tetra_integral</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;dos&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-dos-qp"><span class="std std-ref">dos_qp</span></a>,
+<a class="reference internal" href="#cal-dos-npoints"><span class="std std-ref">dos_npoints</span></a>,
+<a class="reference internal" href="#cal-dos-erange"><span class="std std-ref">dos_erange</span></a>,
+<a class="reference internal" href="#cal-dos-mesh-size"><span class="std std-ref">dos_mesh_size</span></a>,
+<a class="reference internal" href="#cal-dos-smear"><span class="std std-ref">dos_smear</span></a>,
+<a class="reference internal" href="#cal-dos-gauss-type"><span class="std std-ref">dos_gauss_type</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;dispersion&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-disp-renormalize"><span class="std std-ref">disp_renormalize</span></a>,
+<a class="reference internal" href="#cal-disp-lambda"><span class="std std-ref">disp_lambda</span></a>,
+<a class="reference internal" href="#cal-high-symmetry-points"><span class="std std-ref">high_symmetry_points</span></a>,
+<a class="reference internal" href="#cal-high-symmetry-labels"><span class="std std-ref">high_symmetry_labels</span></a>,
+<a class="reference internal" href="#cal-nks-path"><span class="std std-ref">nks_path</span></a>,
+<a class="reference internal" href="#cal-dispersion-select-index"><span class="std std-ref">dispersion_select_index</span></a>,
+<a class="reference internal" href="#cal-epc-path-fix-k"><span class="std std-ref">epc_path_fix_k</span></a>,
+<a class="reference internal" href="#cal-save-eigen-vectors"><span class="std std-ref">save_eigen_vectors</span></a>,</p>
+</div></blockquote>
+<p><strong>Block &lt;phonon&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-supercell-matrix"><span class="std std-ref">supercell_matrix</span></a>,
+<a class="reference internal" href="#cal-unitcell-filename"><span class="std std-ref">unitcell_filename</span></a>,
+<a class="reference internal" href="#cal-force-infos-filename"><span class="std std-ref">force_infos_filename</span></a>,
+<a class="reference internal" href="#cal-apply-correction"><span class="std std-ref">apply_correction</span></a>,
+<a class="reference internal" href="#cal-quadrupole-correction"><span class="std std-ref">quadrupole_correction</span></a>,
+<a class="reference internal" href="#cal-q-file"><span class="std std-ref">Q_file</span></a>,
+<a class="reference internal" href="#cal-becs"><span class="std std-ref">BECs</span></a>,
+<a class="reference internal" href="#cal-dl"><span class="std std-ref">DL</span></a>,
+<a class="reference internal" href="#cal-thickness"><span class="std std-ref">thickness</span></a>,
+<a class="reference internal" href="#cal-chiral-projection"><span class="std std-ref">chiral_projection</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;epc&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-grad-mat-path"><span class="std std-ref">grad_mat_path</span></a>,
+<a class="reference internal" href="#cal-mat-info-sc-path"><span class="std std-ref">mat_info_sc_path</span></a>,
+<a class="reference internal" href="#cal-cell-range-cut"><span class="std std-ref">cell_range_cut</span></a>,
+<a class="reference internal" href="#cal-phonon-frequency-cutoff"><span class="std std-ref">phonon_frequency_cutoff</span></a>,
+<a class="reference internal" href="#cal-lrc-taylor-order"><span class="std std-ref">LRC_taylor_order</span></a>,
+<a class="reference internal" href="#cal-q-cut"><span class="std std-ref">q_cut</span></a>,
+<a class="reference internal" href="#cal-range-separation-length-l"><span class="std std-ref">range_separation_length_L</span></a>,
+<a class="reference internal" href="#cal-vaccum-length"><span class="std std-ref">vaccum_length</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;transport&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-k-size"><span class="std std-ref">k_size</span></a>,
+<a class="reference internal" href="#cal-q-size"><span class="std std-ref">q_size</span></a>,
+<a class="reference internal" href="#cal-bands-indices"><span class="std std-ref">bands_indices</span></a>,
+<a class="reference internal" href="#cal-fermi-maxiter"><span class="std std-ref">fermi_maxiter</span></a>,
+<a class="reference internal" href="#cal-fermi-shift"><span class="std std-ref">fermi_shift</span></a>,
+<a class="reference internal" href="#cal-temperature"><span class="std std-ref">temperature</span></a>,
+<a class="reference internal" href="#cal-smeark"><span class="std std-ref">smeark</span></a>,
+<a class="reference internal" href="#cal-smearq"><span class="std std-ref">smearq</span></a>,
+<a class="reference internal" href="#cal-gauss-type"><span class="std std-ref">gauss_type</span></a>,
+<a class="reference internal" href="#cal-e-thr"><span class="std std-ref">e_thr</span></a>,
+<a class="reference internal" href="#cal-is-hole"><span class="std std-ref">is_hole</span></a>,
+<a class="reference internal" href="#cal-mode-resolved"><span class="std std-ref">mode_resolved</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;conductivity&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-over-band-edge-conductivity"><span class="std std-ref">over_band_edge</span></a>,
+<a class="reference internal" href="#cal-mc-sampling"><span class="std std-ref">MC_sampling</span></a>,
+<a class="reference internal" href="#cal-polar-split"><span class="std std-ref">polar_split</span></a>,
+<a class="reference internal" href="#cal-cauchy-scale"><span class="std std-ref">cauchy_scale</span></a>,
+<a class="reference internal" href="#cal-sampling-seed"><span class="std std-ref">sampling_seed</span></a>,
+<a class="reference internal" href="#cal-nsamples"><span class="std std-ref">nsamples</span></a>,
+<a class="reference internal" href="#cal-ncarrier-conductivity"><span class="std std-ref">ncarrier</span></a>,
+<a class="reference internal" href="#cal-mob-level"><span class="std std-ref">mob_level</span></a>,
+<a class="reference internal" href="#cal-polar-rate-path"><span class="std std-ref">polar_rate_path</span></a>,
+<a class="reference internal" href="#cal-rmp-rate-path"><span class="std std-ref">rmp_rate_path</span></a>,
+<a class="reference internal" href="#cal-epc-rate-path"><span class="std std-ref">epc_rate_path</span></a>,
+<a class="reference internal" href="#cal-scattering-channel-dir"><span class="std std-ref">scattering_channel_dir</span></a>,
+<a class="reference internal" href="#cal-ibte-error"><span class="std std-ref">ibte_error</span></a>,
+<a class="reference internal" href="#cal-ibte-cycle"><span class="std std-ref">ibte_cycle</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;superconductivity&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-sc-method"><span class="std std-ref">sc_method</span></a>,
+<a class="reference internal" href="#cal-mus"><span class="std std-ref">mus</span></a>,
+<a class="reference internal" href="#cal-omega-range-sc"><span class="std std-ref">omega_range</span></a>,
+<a class="reference internal" href="#cal-omega-step-sc"><span class="std std-ref">omega_step</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;pomega&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-omega-range-sc"><span class="std std-ref">omega_range</span></a>,
+<a class="reference internal" href="#cal-omega-step-sc"><span class="std std-ref">omega_step</span></a>,
+<a class="reference internal" href="#cal-pomega-restart"><span class="std std-ref">pomega_restart</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;breakdown&gt;</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-fbd-erange"><span class="std std-ref">fbd_erange</span></a>,
+<a class="reference internal" href="#cal-fbd-rate-file"><span class="std std-ref">fbd_rate_file</span></a>,
+<a class="reference internal" href="#cal-fbd-effective-mass"><span class="std std-ref">fbd_effective_mass</span></a>,
+<a class="reference internal" href="#cal-fbd-exp-bandgap"><span class="std std-ref">fbd_exp_bandgap</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;resistivity&gt;</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-ziman-nc"><span class="std std-ref">ziman_nc</span></a>,
+<a class="reference internal" href="#cal-omega-range-resistivity"><span class="std std-ref">omega_range</span></a>,
+<a class="reference internal" href="#cal-omega-step-resistivity"><span class="std std-ref">omega_step</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;boltzmann&gt;</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-over-band-edge-boltzmann"><span class="std std-ref">over_band_edge</span></a>,
+<a class="reference internal" href="#cal-ncarrier-boltzmann"><span class="std std-ref">ncarrier</span></a>,
+<a class="reference internal" href="#cal-temperature-lat"><span class="std std-ref">temperature_lat</span></a>,
+<a class="reference internal" href="#cal-time-step"><span class="std std-ref">time_step</span></a>,
+<a class="reference internal" href="#cal-energy-step"><span class="std std-ref">energy_step</span></a>,
+<a class="reference internal" href="#cal-num-step"><span class="std std-ref">num_step</span></a>,
+<a class="reference internal" href="#cal-norm-dist"><span class="std std-ref">norm_dist</span></a>,
+<a class="reference internal" href="#cal-boltz-solver"><span class="std std-ref">boltz_solver</span></a>,
+<a class="reference internal" href="#cal-output-step"><span class="std std-ref">output_step</span></a>,
+<a class="reference internal" href="#cal-efield"><span class="std std-ref">efield</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;self-energy&gt;</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#cal-se-type"><span class="std std-ref">SE_type</span></a>,
+<a class="reference internal" href="#cal-se-mode-resolved"><span class="std std-ref">SE_mode_resolved</span></a>,
+<a class="reference internal" href="#cal-se-erange"><span class="std std-ref">SE_erange</span></a>,
+<a class="reference internal" href="#cal-over-band-edge-self-energy"><span class="std std-ref">over_band_edge</span></a>,
+<a class="reference internal" href="#cal-ncarrier-self-energy"><span class="std std-ref">ncarrier</span></a></p>
+</div></blockquote>
+</div>
+</div></blockquote>
+</section>
+<section id="basic-block">
+<h3>basic block<a class="headerlink" href="#basic-block" title="Link to this heading"></a></h3>
+<div class="param-card basic docutils container" id="cal-cal-mode">
+<div class="param-header">cal_mode</div><div class="param-meta">Options: <code>'band' | 'phonon' | 'dos' | 'epc' | 'superconductivity' | 'pomega' | 'conductivity' | </br>
+'breakdown' | 'resistivity' | 'boltzmann'</code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Calculation mode.</p>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card basic docutils container" id="cal-graph-data-path-uc">
+<div class="param-header">graph_data_path_uc</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the graph data of the unit cell.</p>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card basic docutils container" id="cal-nao-max">
+<div class="param-header">nao_max</div><div class="param-meta">Options: <code>13 | 14 | 15 | 19 | 26 | 27 | 40</code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Determines which predefined atomic orbital basis set to use,
+based on the specified integer value and <a class="reference internal" href="#cal-ham-type"><span class="std std-ref">Ham_type</span></a>.
+The basis set is specified as {<strong>Ham_type</strong>}_{<strong>nao_max</strong>}.
+More details can be found in <a class="reference internal" href="ao_define.html#ao-define-title"><span class="std std-ref">Input Keywords/Atomic Orbital Basis Definition</span></a>.</p>
+<table class="custom-table center-align-text docutils align-default" id="cal-orbit-basis-table">
+<caption><span class="caption-text">Atomic Orbital Basis</span><a class="headerlink" href="#cal-orbit-basis-table" title="Link to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>openmx_14</p></td>
+<td><p><strong>OpenMX</strong> basis set specifying a maximum of <strong>14</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>openmx_19</p></td>
+<td><p><strong>OpenMX</strong> basis set specifying a maximum of <strong>19</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>openmx_26</p></td>
+<td><p><strong>OpenMX</strong> basis set specifying a maximum of <strong>26</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>siesta_13</p></td>
+<td><p><strong>SIESTA</strong> basis set specifying a maximum of <strong>13</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>siesta_19</p></td>
+<td><p><strong>SIESTA</strong> basis set specifying a maximum of <strong>19</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>abacus_13</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>13</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>abacus_15</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>15</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>abacus_27</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>27</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>abacus_40</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>40</strong> orbitals per element</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card basic docutils container" id="cal-ham-type">
+<div class="param-header">Ham_type</div><div class="param-meta">Options: <code>'openmx' | 'siesta' | 'abacus'</code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The DFT software used to prepare input data for <strong>QTrans</strong>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card basic docutils container" id="cal-outdir">
+<div class="param-header">outdir</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The output directory.</p>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="advanced-block">
+<h3>advanced block<a class="headerlink" href="#advanced-block" title="Link to this heading"></a></h3>
+<div class="param-card advanced docutils container" id="cal-read-sparse-grad-mat">
+<div class="param-header">read_sparse_grad_mat</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the program will read the sparse gradient matrix.</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-soc-switch">
+<div class="param-header">soc_switch</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the system will be treated with spin-orbit coupling (SOC).</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-magnetic-type">
+<div class="param-header">magnetic_type</div><div class="param-meta">Options: <code>'none' | 'collinear' | 'nc'</code><br>Default: <code>'none'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the magnetic configuration of the system.</p>
+<table class="custom-table center-align-text docutils align-default" id="cal-magnetic-conf-table">
+<caption><span class="caption-text">Magnetic Configuration</span><a class="headerlink" href="#cal-magnetic-conf-table" title="Link to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>‘none’
+- Non-magnetic</p></td>
+</tr>
+<tr class="row-even"><td><p>‘collinear’
+- Collinear spin configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘nc’
+- Non-collinear spin configuration</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-magnetic-tolerance">
+<div class="param-header">magnetic_tolerance</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.01</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Threshold (in Bohr magneton) for identifying magnetic atoms.</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-moment-similar-tolerence">
+<div class="param-header">moment_similar_tolerence</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>-1.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Threshold (in Bohr magneton) to judge if two atomic magnetic moments
+are similar enough to be considered identical.</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-doping-charge">
+<div class="param-header">doping_charge</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The extra charge (in elementary charge) in the system.
+Negative values indicate electron doping.
+The Fermi level is adjusted accordingly using the rigid-band approximation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-system-2d">
+<div class="param-header">system_2D</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the system will be treated as 2D system.</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card advanced docutils container" id="cal-tetra-integral">
+<div class="param-header">tetra_integral</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the program uses the tetrahedron method for
+Brillouin zone integration. Currently, it is only supported
+when <a class="reference internal" href="#cal-cal-mode"><span class="std std-ref">cal_mode</span></a> is set to <strong>‘dos’</strong>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">advanced</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="dos-block">
+<h3>dos block<a class="headerlink" href="#dos-block" title="Link to this heading"></a></h3>
+<div class="param-card dos docutils container" id="cal-dos-qp">
+<div class="param-header">dos_qp</div><div class="param-meta">Options: <code>'electron' | 'phonon'</code><br>Default: <code>'electron'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the particle whose density of states (DOS) is to be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dos</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dos docutils container" id="cal-dos-npoints">
+<div class="param-header">dos_npoints</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>1000</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the number of energy sampling points
+used in the density of states (DOS) calculation.
+The energy range defined in <a class="reference internal" href="#cal-dos-erange"><span class="std std-ref">dos_erange</span></a>
+is sampled uniformly at this number of points, including both endpoints
+(giving <code class="docutils literal notranslate"><span class="pre">dos_npoints</span> <span class="pre">-</span> <span class="pre">1</span></code> intervals).</p>
+</div></blockquote>
+</div>
+<div class="param-block">dos</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dos docutils container" id="cal-dos-erange">
+<div class="param-header">dos_erange</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT, FLOAT]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy range (in eV), given as <strong>[min, max]</strong>,
+over which the density of states (DOS) is calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dos</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dos docutils container" id="cal-dos-mesh-size">
+<div class="param-header">dos_mesh_size</div><div class="param-meta">Options: <code><b><i>*LIST[INT, INT, INT]*</i></b></code><br>Default: <code>[32, 32, 32]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the size of the reciprocal-space <strong>k</strong>-point sampling grid
+used for density of states (DOS) calculations.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dos</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dos docutils container" id="cal-dos-smear">
+<div class="param-header">dos_smear</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>10.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the smearing parameter for density of states (DOS) calculations.
+Read <a class="reference internal" href="../theory/smear_method.html#tutorial-smearing"><span class="std std-ref">tutorials/smearing method</span></a> for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dos</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dos docutils container" id="cal-dos-gauss-type">
+<div class="param-header">dos_gauss_type</div><div class="param-meta">Options: <code>-99 | -1 | <b><i>*UNSIGNED INT*</i></b></code><br>Default: <code>0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the smearing method for density of states (DOS) calculations.
+Read <a class="reference internal" href="../theory/smear_method.html#tutorial-smearing"><span class="std std-ref">tutorials/smearing method</span></a> for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dos</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="dispersion-block">
+<h3>dispersion block<a class="headerlink" href="#dispersion-block" title="Link to this heading"></a></h3>
+<div class="param-card dispersion docutils container" id="cal-disp-renormalize">
+<div class="param-header">disp_renormalize</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the electron spectral functional along the electron dispersion will be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-disp-lambda">
+<div class="param-header">disp_lambda</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the electron-phonon coupling strength along the phonon dispersion will be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-high-symmetry-points">
+<div class="param-header">high_symmetry_points</div><div class="param-meta">Options: <code><b><i>*LIST[LIST[FLOAT, FLOAT, FLOAT]]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The high-symmetry points used to calculate the dispersion relation.
+Formatted as: <strong>[[0.0, 0.0, 0.0], [0.5, 0.5, 0.5]]</strong>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-high-symmetry-labels">
+<div class="param-header">high_symmetry_labels</div><div class="param-meta">Options: <code><b><i>*LIST[STRINGS]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The  labels of the high-symmetry points
+used to calculate the dispersion relation.
+Formatted as: [’<strong>G</strong>’, ‘<strong>L</strong>’].</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-nks-path">
+<div class="param-header">nks_path</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>200</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the number of <strong>k</strong>-points sampled
+along the path for the dispersion relation calculation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-dispersion-select-index">
+<div class="param-header">dispersion_select_index</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b> | <b><i>LIST[INTS]</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the band or branch indices
+for the dispersion relation calculation.
+Read <a class="reference internal" href="../tutorials/qp_disp.html#tutorial-dispersion"><span class="std std-ref">tutorials/Dispersion of Quasiparticle</span></a>
+and <a class="reference internal" href="../tutorials/epc_path.html#tutorial-epc-path"><span class="std std-ref">tutorials/EPC Path</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-epc-path-fix-k">
+<div class="param-header">epc_path_fix_k</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT, FLOAT, FLOAT]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the fixed <strong>k</strong>-point for the EPC path calculation.
+Read <a class="reference internal" href="../tutorials/epc_path.html#tutorial-epc-path"><span class="std std-ref">tutorials/EPC Path</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card dispersion docutils container" id="cal-save-eigen-vectors">
+<div class="param-header">save_eigen_vectors</div><div class="param-meta">Options: <code>'none' | 'ascii'</code><br>Default: <code>'none'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the format used to save eigenvectors
+after solving the quasiparticle eigenproblem.</p>
+</div></blockquote>
+<table class="custom-table center-align-text docutils align-default" id="cal-eigenvec-save-table">
+<caption><span class="caption-text">Eigenvectors Saving Format</span><a class="headerlink" href="#cal-eigenvec-save-table" title="Link to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>‘none’</p></td>
+<td><p>Do not save the eigenvectors.</p></td>
+</tr>
+<tr class="row-even"><td><p>‘ascii’</p></td>
+<td><p>Save eigenvectors in ASCII format.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="param-block">dispersion</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="phonon-block">
+<h3>phonon block<a class="headerlink" href="#phonon-block" title="Link to this heading"></a></h3>
+<div class="param-card phonon docutils container" id="cal-supercell-matrix">
+<div class="param-header">supercell_matrix</div><div class="param-meta">Options: <code><b><i>*LIST[LISTS[FLOAT, FLOAT, FLOAT]]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the <span class="math notranslate nohighlight">\(3 \times 3\)</span> matrix used to construct the supercell
+from the unit cell for phonon calculations with the Phonopy package.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-unitcell-filename">
+<div class="param-header">unitcell_filename</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>'./POSCAR'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The unit cell POSCAR file used for phonon calculations with the Phonopy package.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-force-infos-filename">
+<div class="param-header">force_infos_filename</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>'./FORCE_SETS'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the phonon force data loaded by Phonopy. Supported inputs are
+extensionless text <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> or <code class="docutils literal notranslate"><span class="pre">FORCE_CONSTANTS</span></code> files,
+force-constant files ending in <code class="docutils literal notranslate"><span class="pre">.h5</span></code> or <code class="docutils literal notranslate"><span class="pre">.hdf5</span></code>, and Phonopy
+<code class="docutils literal notranslate"><span class="pre">.yaml</span></code> files containing the required structure and force data.</p>
+<p>For text inputs, the first line distinguishes <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> (one field)
+from <code class="docutils literal notranslate"><span class="pre">FORCE_CONSTANTS</span></code> (two fields). These files are read using the
+default VASP unit convention: displacements in angstrom, forces in
+eV/angstrom, and force constants in eV/angstrom squared. A filename
+does not identify or convert units. See
+<a class="reference internal" href="../tutorials/phonon_prep.html#tutorial-phonon-prep"><span class="std std-ref">Phonon Force Data Preparation</span></a> for the
+workflow and the conversion required for ABACUS-generated force sets.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-apply-correction">
+<div class="param-header">apply_correction</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the system is treated as polar,
+and the non-analytic correction to the phonon frequencies is included.
+In addition, the dipole contribution to the long-range electron-phonon
+coupling matrix elements is included.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-quadrupole-correction">
+<div class="param-header">quadrupole_correction</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p><em>bjr</em></p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-q-file">
+<div class="param-header">Q_file</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>'./quadrupole.fmt'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p><em>bjr</em></p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-becs">
+<div class="param-header">BECs</div><div class="param-meta">Options: <code><b><i>*LIST[LISTS[LISTS[FLOAT, FLOAT, FLOAT]]]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The Born effective charge used for long-range corrections in polar system.
+Should be a <span class="math notranslate nohighlight">\(\text{number_of_atoms} \times 3 \times 3\)</span> tensor.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-dl">
+<div class="param-header">DL</div><div class="param-meta">Options: <code><b><i>*LIST[LISTS[FLOAT, FLOAT, FLOAT]]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The dielectric constant matrix used for long-range corrections in polar system.
+Should be a <span class="math notranslate nohighlight">\(3 \times 3\)</span> matrix.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-thickness">
+<div class="param-header">thickness</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The effective thickness used for long-range corrections in 2D polar system.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card phonon docutils container" id="cal-chiral-projection">
+<div class="param-header">chiral_projection</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the phonon eigenvectors will be projected onto
+XY-chiral phonon modes.</p>
+</div></blockquote>
+</div>
+<div class="param-block">phonon</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="epc-block">
+<h3>epc block<a class="headerlink" href="#epc-block" title="Link to this heading"></a></h3>
+<div class="param-card epc docutils container" id="cal-grad-mat-path">
+<div class="param-header">grad_mat_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>'./grad_mat.npy'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the Hamiltonian gradient matrix generated by <strong>QTrans</strong>.
+Read <a class="reference internal" href="../tutorials/epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">tutorials/EPC Gradient Matrix Preparation</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-mat-info-sc-path">
+<div class="param-header">mat_info_sc_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>'./mat_info_sc.npy'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the file containing the mappings
+between supercells and the unit cell, generated by <strong>QTrans</strong>.
+Read <a class="reference internal" href="../tutorials/epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">tutorials/EPC Gradient Matrix Preparation</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-cell-range-cut">
+<div class="param-header">cell_range_cut</div><div class="param-meta">Options: <code><b><i>*LIST[INT, INT, INT]*</i></b></code><br>Default: <code>[2, 2, 2]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the range of supercell lattice vectors to be
+included in the summation when calculating the electron phonon coupling matrix.
+The supercell with lattice vector which is beyond this value will be neglected.</p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-phonon-frequency-cutoff">
+<div class="param-header">phonon_frequency_cutoff</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.5</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Phonon energy cutoff (in meV).
+Phonon modes with energies below this threshold will be ignored in the related calculation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-lrc-taylor-order">
+<div class="param-header">LRC_taylor_order</div><div class="param-meta">Options: <code>0 | 1</code><br>Default: <code>0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The taylor expansion order used in
+long-range correction of electron phonon coupling matrix
+in polar system.
+Read <a class="reference internal" href="../theory/epc.html#theory-epc"><span class="std std-ref">Theory/Electron Phonon Coupling</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-q-cut">
+<div class="param-header">q_cut</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>100.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the cutoff for applying long-range corrections:
+only q-points with magnitudes smaller than this value will be included.
+The unit is the length of the first reciprocal lattice vector.</p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-range-separation-length-l">
+<div class="param-header">range_separation_length_L</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>100.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p><em>bjr</em></p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card epc docutils container" id="cal-vaccum-length">
+<div class="param-header">vaccum_length</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>30.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p><em>bjr</em></p>
+</div></blockquote>
+</div>
+<div class="param-block">epc</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="transport-block">
+<h3>transport block<a class="headerlink" href="#transport-block" title="Link to this heading"></a></h3>
+<div class="param-card transport docutils container" id="cal-k-size">
+<div class="param-header">k_size</div><div class="param-meta">Options: <code><b><i>*LIST[INT, INT, INT]*</i></b></code><br>Default: <code>[32, 32, 32]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The size of <strong>k</strong> grid for integral over Brillouin Zone (BZ).</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-q-size">
+<div class="param-header">q_size</div><div class="param-meta">Options: <code><b><i>*LIST[INT, INT, INT]*</i></b></code><br>Default: <code>[32, 32, 32]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The size of <strong>q</strong> grid for integral over Brillouin Zone (BZ).</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-bands-indices">
+<div class="param-header">bands_indices</div><div class="param-meta">Options: <code><b><i>*STRING* or LIST[INT]*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the band indices relevant to transport property calculations.
+Band indices start from 1.</p>
+<p>This parameter accepts either:</p>
+<ul class="simple">
+<li><p>A string defining ranges, e.g. <code class="docutils literal notranslate"><span class="pre">'1-6'</span></code> or <code class="docutils literal notranslate"><span class="pre">'1-3,5,7-8'</span></code></p></li>
+<li><p>A list of integers, e.g. <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></code> or <code class="docutils literal notranslate"><span class="pre">[5]</span></code></p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-fermi-maxiter">
+<div class="param-header">fermi_maxiter</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>100</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Maximum number of iterations for the bisection method used in Fermi level calculation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-fermi-shift">
+<div class="param-header">fermi_shift</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Manual shift of the Fermi level (in eV).</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-temperature">
+<div class="param-header">temperature</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>300.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Temperature of the system, in Kelvin.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-smeark">
+<div class="param-header">smeark</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>25</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Smearing width (in meV) applied to the delta function in the summation over electronic states.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-smearq">
+<div class="param-header">smearq</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>25</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Energy broadening (in meV). In scattering-rate calculations, it broadens
+the energy-conservation delta function involving the electronic energy
+difference and phonon absorption or emission. In superconductivity and
+resistivity spectra, it broadens the phonon-energy delta function on the
+spectral energy grid. It is a numerical width, not a phonon temperature.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-gauss-type">
+<div class="param-header">gauss_type</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The type of gaussian function. Read <a class="reference internal" href="../theory/smear_method.html#tutorial-smearing"><span class="std std-ref">tutorials/Smearing method</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-e-thr">
+<div class="param-header">e_thr</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>75</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Energy threshold for the match table (in meV). Typically three times of the smearing width applied to the delta function.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-is-hole">
+<div class="param-header">is_hole</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If True, the carriers are assumed to be holes in transport calculations.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card transport docutils container" id="cal-mode-resolved">
+<div class="param-header">mode_resolved</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the mode-resolved scattering rate will be saved.</p>
+</div></blockquote>
+</div>
+<div class="param-block">transport</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="conductivity-block">
+<h3>conductivity block<a class="headerlink" href="#conductivity-block" title="Link to this heading"></a></h3>
+<div class="param-card conductivity docutils container" id="cal-over-band-edge-conductivity">
+<div class="param-header">over_band_edge</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.2</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy cutoff (in eV) for selecting electronic states.
+For metals, it is the half-width of the window around the Fermi level.
+For semiconductors, it is the energy extent into the conduction band
+from the CBM, or into the valence band from the VBM.
+This selection limits the states included in transport-related calculations.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-mc-sampling">
+<div class="param-header">MC_sampling</div><div class="param-meta">Options: <code>'none' | 'uniform' | 'Cauchy'</code><br>Default: <code>'none'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the type of importance sampling used in Monte Carlo integration.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: No importance sampling.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uniform</span></code>: Uniform random sampling.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Cauchy</span></code>: Cauchy-distributed sampling, which emphasizes sampling near singularities.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-polar-split">
+<div class="param-header">polar_split</div><div class="param-meta">Options: <code>'none' | 'polar' | 'rmp'</code><br>Default: <code>'none'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies whether to separate the polar and non-polar contributions to the scattering rate.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code>: No splitting is applied.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">polar</span></code>: Computes only the polar (long-range) part of the scattering rate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rmp</span></code>: Computes only the remainder (non-polar) part.</p></li>
+</ul>
+<p>See <a class="reference internal" href="../theory/epc.html#theory-epc"><span class="std std-ref">theory/Electron Phonon Coupling</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-cauchy-scale">
+<div class="param-header">cauchy_scale</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.035</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The scale parameter <span class="math notranslate nohighlight">\(\gamma\)</span> of the Cauchy distribution used for importance sampling.
+This is only effective when <code class="docutils literal notranslate"><span class="pre">MC_sampling:</span> <span class="pre">cauchy</span></code>.</p>
+<p>The probability density function is given by:</p>
+<div class="math notranslate nohighlight">
+\[f(x) = \frac{1}{\pi} \cdot \frac{\gamma}{x^2 + \gamma^2}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\gamma\)</span> is the scale parameter.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-sampling-seed">
+<div class="param-header">sampling_seed</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>1</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Random seed used for Monte Carlo sampling to ensure reproducibility.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-nsamples">
+<div class="param-header">nsamples</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>1000000</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The number of sampling <strong>q</strong> points in the Monte Carlo integration.
+This is effective for both <code class="docutils literal notranslate"><span class="pre">MC_sampling:</span> <span class="pre">cauchy</span></code> and
+<code class="docutils literal notranslate"><span class="pre">MC_sampling:</span> <span class="pre">uniform</span></code>; it is unused for regular-grid sampling.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-ncarrier-conductivity">
+<div class="param-header">ncarrier</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>10000000000000000.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The carrier concentration in <span class="math notranslate nohighlight">\(\mathrm{cm}^{-3}\)</span> for a three-dimensional
+system, or <span class="math notranslate nohighlight">\(\mathrm{cm}^{-2}\)</span> when <code class="docutils literal notranslate"><span class="pre">advanced.system_2D:</span> <span class="pre">True</span></code>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-mob-level">
+<div class="param-header">mob_level</div><div class="param-meta">Options: <code>'erta' | 'ibte'</code><br>Default: <code>'erta'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the method used for electrical conductivity calculation.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">erta</span></code>: Self-energy relaxation time approximation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ibte</span></code>: Iterative Boltzmann Transport Equation approach.</p></li>
+</ul>
+<p>See <a class="reference internal" href="../tutorials/conduct.html#tutorial-conductivity"><span class="std std-ref">theory/Conductivity Calculation</span></a>
+for more details.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-polar-rate-path">
+<div class="param-header">polar_rate_path</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the precomputed scattering rate file for the polar part of the interaction.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-rmp-rate-path">
+<div class="param-header">rmp_rate_path</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the precomputed scattering rate file for the remainder (non-polar) part of the interaction.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-epc-rate-path">
+<div class="param-header">epc_rate_path</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the precomputed total scattering rate file.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<div class="param-card conductivity docutils container" id="cal-scattering-channel-dir">
+<div class="param-header">scattering_channel_dir</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the folder containing the precomputed scattering channels required for iterative Boltzmann transport equation calculations.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-ibte-error">
+<div class="param-header">ibte_error</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.00001</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Absolute convergence threshold for the iterative Boltzmann Transport
+Equation (IBTE). The maximum change in tensor components between
+consecutive iterations is compared with this value: conductivity in
+S/m for metals, or mobility in <span class="math notranslate nohighlight">\(\mathrm{cm}^2/(\mathrm{V}\,\mathrm{s})\)</span>
+for semiconductors. This parameter is only effective when
+<code class="docutils literal notranslate"><span class="pre">mob_level:</span> <span class="pre">ibte</span></code>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card conductivity docutils container" id="cal-ibte-cycle">
+<div class="param-header">ibte_cycle</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>200</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Maximum number of iterations allowed in the IBTE calculation loop.</p>
+</div></blockquote>
+</div>
+<div class="param-block">conductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="superconductivity-block">
+<h3>superconductivity block<a class="headerlink" href="#superconductivity-block" title="Link to this heading"></a></h3>
+<div class="param-card superconductivity docutils container" id="cal-sc-method">
+<div class="param-header">sc_method</div><div class="param-meta">Options: <code>'allen_dynes'</code><br>Default: <code>'allen_dynes'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the method used for superconductivity calculation.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">allen_dynes</span></code>: Allen-Dynes modified McMillan equation</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="param-block">superconductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card superconductivity docutils container" id="cal-mus">
+<div class="param-header">mus</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT, FLOAT, FLOAT]*</i></b></code><br>Default: <code>[0.05, 0.25, 0.01]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The effective Coulomb potentials in Allen-Dynes formula.
+Should be given as <strong>[min, max, step]</strong>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">superconductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card superconductivity docutils container" id="cal-omega-range-sc">
+<div class="param-header">omega_range</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT, FLOAT]*</i></b></code><br>Default: <code>[0, 100]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy range (in meV),
+given as <strong>[min, max]</strong>,
+over which the Eliashberg spectrum function will be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">superconductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card superconductivity docutils container" id="cal-omega-step-sc">
+<div class="param-header">omega_step</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.01</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy step (in meV)
+used for the Eliashberg spectral function.</p>
+</div></blockquote>
+</div>
+<div class="param-block">superconductivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="pomega-block">
+<h3>pomega block<a class="headerlink" href="#pomega-block" title="Link to this heading"></a></h3>
+<div class="param-card pomega docutils container" id="cal-omega-range-po">
+<div class="param-header">omega_range</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT, FLOAT]*</i></b></code><br>Default: <code>[0.0, 100.0]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy range (in meV),
+given as <strong>[min, max]</strong>,
+over which the frequency-dependent nesting function will be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">pomega</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card pomega docutils container" id="cal-omega-step-po">
+<div class="param-header">omega_step</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.01</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy step (in meV)
+used for the frequency-dependent nesting function.</p>
+</div></blockquote>
+</div>
+<div class="param-block">pomega</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card pomega docutils container" id="cal-pomega-restart">
+<div class="param-header">pomega_restart</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If True, the Pomega calculation will be restarted from ‘{self.outdir}/Pomega_restart.npz’.</p>
+</div></blockquote>
+</div>
+<div class="param-block">pomega</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="breakdown-block">
+<h3>breakdown block<a class="headerlink" href="#breakdown-block" title="Link to this heading"></a></h3>
+<div class="param-card breakdown docutils container" id="cal-fbd-erange">
+<div class="param-header">fbd_erange</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT, FLOAT, FLOAT]*</i></b></code><br>Default: <code>[0.0, 1.0, 0.01]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy range and step (in eV),
+given as <strong>[min, max, step]</strong>,
+over which the breakdown properties will be calculated.
+The energy is referenced to the conduction band minimum.</p>
+</div></blockquote>
+</div>
+<div class="param-block">breakdown</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card breakdown docutils container" id="cal-fbd-rate-file">
+<div class="param-header">fbd_rate_file</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to a previously generated <strong>QTrans</strong> breakdown rate file. If not
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, the scattering and energy-loss rates are read from this file
+instead of being recomputed.</p>
+<p>The file must have six whitespace-separated columns:
+<code class="docutils literal notranslate"><span class="pre">ik_ibz</span></code>, <code class="docutils literal notranslate"><span class="pre">ibnd</span></code>, <code class="docutils literal notranslate"><span class="pre">weight_k</span></code>, <code class="docutils literal notranslate"><span class="pre">enk</span></code>, <code class="docutils literal notranslate"><span class="pre">scattering_rate</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">energy_loss_rate</span></code>. Indices are zero-based and must match the current
+irreducible k-point ordering and band selection. Energy and rates use
+internal atomic units: Hartree, Hartree, and Hartree squared,
+respectively (with atomic time and hbar = 1). Comment lines start with
+<code class="docutils literal notranslate"><span class="pre">#</span></code>. Duplicate index pairs are rejected; omitted states remain unavailable.</p>
+<p>Reuse a file only with compatible structures, bands, k-point grids,
+temperature, phonon data, and broadening settings. Older files expressed
+in eV, 1/ps, and eV/ps require unit conversion before reuse.</p>
+</div></blockquote>
+</div>
+<div class="param-block">breakdown</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card breakdown docutils container" id="cal-fbd-effective-mass">
+<div class="param-header">fbd_effective_mass</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>1.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The electron effective mass (in <span class="math notranslate nohighlight">\(m_\text{e}\)</span>)
+in intrinsic breakdown field strength formula.</p>
+</div></blockquote>
+</div>
+<div class="param-block">breakdown</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card breakdown docutils container" id="cal-fbd-exp-bandgap">
+<div class="param-header">fbd_exp_bandgap</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The band gap value (in eV)
+in intrinsic breakdown field strength formula.</p>
+</div></blockquote>
+</div>
+<div class="param-block">breakdown</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="resistivity-block">
+<h3>resistivity block<a class="headerlink" href="#resistivity-block" title="Link to this heading"></a></h3>
+<div class="param-card resistivity docutils container" id="cal-ziman-nc">
+<div class="param-header">ziman_nc</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>-9999.9</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Number of charge carriers per unit cell used in Ziman’s resistivity formula.
+If set to a negative value, <strong>QTrans</strong> will automatically estimate it based
+on the number of band crossings at the Fermi level. This is a heuristic
+estimate, not a carrier-density integral. Zero is invalid because this
+quantity enters the denominator of the resistivity formula.</p>
+</div></blockquote>
+</div>
+<div class="param-block">resistivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card resistivity docutils container" id="cal-omega-range-resistivity">
+<div class="param-header">omega_range</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT,FLOAT]*</i></b></code><br>Default: <code>[0, 100]</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy range (in meV),
+given as <strong>[min, max]</strong>,
+over which the Eliashberg spectral function <span class="math notranslate nohighlight">\(\alpha^2 F(\omega)\)</span> and
+the Eliashberg transport spectral function <span class="math notranslate nohighlight">\(\alpha_{tr}^2 F(\omega)\)</span>
+will be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">resistivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card resistivity docutils container" id="cal-omega-step-resistivity">
+<div class="param-header">omega_step</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>200</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy step (in meV)
+used for calculating the Eliashberg spectral function <span class="math notranslate nohighlight">\(\alpha^2 F(\omega)\)</span>
+or the Eliashberg transport spectral function <span class="math notranslate nohighlight">\(\alpha_{tr}^2 F(\omega)\)</span>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">resistivity</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="boltzmann-block">
+<h3>boltzmann block<a class="headerlink" href="#boltzmann-block" title="Link to this heading"></a></h3>
+<div class="param-card boltzmann docutils container" id="cal-over-band-edge-boltzmann">
+<div class="param-header">over_band_edge</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.2</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the energy cutoff (in eV) for selecting electronic states.
+For metals, it is the half-width of the window around the Fermi level.
+For semiconductors, it is the energy extent into the conduction band
+from the CBM, or into the valence band from the VBM.
+This selection limits the states included in Boltzmann calculations.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-ncarrier-boltzmann">
+<div class="param-header">ncarrier</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>10000000000000000.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The carrier concentration in <span class="math notranslate nohighlight">\(\mathrm{cm}^{-3}\)</span> for a three-dimensional
+system, or <span class="math notranslate nohighlight">\(\mathrm{cm}^{-2}\)</span> when <code class="docutils literal notranslate"><span class="pre">advanced.system_2D:</span> <span class="pre">True</span></code>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-temperature-lat">
+<div class="param-header">temperature_lat</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>300.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Temperature of the lattice system, in Kelvin.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-time-step">
+<div class="param-header">time_step</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>1.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Time step for solving the real-time Boltzmann equation, in femtosecond.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-energy-step">
+<div class="param-header">energy_step</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>1.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Energy step for solving the real-time Boltzmann equation, in meV.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-num-step">
+<div class="param-header">num_step</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>100</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Number of steps for solving the real-time Boltzmann equation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-norm-dist">
+<div class="param-header">norm_dist</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If True, the distribution will be normalized after each iteration when solving the real-time Boltzmann transport equation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-boltz-solver">
+<div class="param-header">boltz_solver</div><div class="param-meta">Options: <code>'euler' | 'rk4'</code><br>Default: <code>'euler'</code></div><div class="param-desc docutils container">
+<p>Solution method for the real-time Boltzmann transport equation.</p>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-output-step">
+<div class="param-header">output_step</div><div class="param-meta">Options: <code><b><i>*INT*</i></b></code><br>Default: <code>1</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Number of steps between outputs when solving the real-time Boltzmann equation.</p>
+</div></blockquote>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card boltzmann docutils container" id="cal-efield">
+<div class="param-header">efield</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT,FLOAT,FLOAT]*</i></b></code><br>Default: <code>[0.0,0.0,0.0]</code></div><div class="param-desc docutils container">
+<p>The external electric field strength used when solving the real-time Boltzmann equation, in V/cm.</p>
+</div>
+<div class="param-block">boltzmann</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="self-energy-block">
+<h3>self-energy block<a class="headerlink" href="#self-energy-block" title="Link to this heading"></a></h3>
+<div class="param-card self-energy docutils container" id="cal-se-type">
+<div class="param-header">SE_type</div><div class="param-meta">Options: <code>'electron'</code><br>Default: <code>'electron'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the quasiparticle type of which the self-energy will be calculated.</p>
+</div></blockquote>
+</div>
+<div class="param-block">self-energy</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card self-energy docutils container" id="cal-se-mode-resolved">
+<div class="param-header">SE_mode_resolved</div><div class="param-meta">Options: <code>True, False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Added 2026-10-23. Save the complex electron self-energy contribution from
+every phonon branch in <code class="docutils literal notranslate"><span class="pre">&lt;outdir&gt;/self_energy/electron_self_energy_modes.npz</span></code>.
+This option is independent of <code class="docutils literal notranslate"><span class="pre">transport.mode_resolved</span></code>.</p>
+<p>Requires <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">band</span></code>, <code class="docutils literal notranslate"><span class="pre">disp_renormalize:</span> <span class="pre">True</span></code>,
+<code class="docutils literal notranslate"><span class="pre">band_grid_mode:</span> <span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">SE_type:</span> <span class="pre">electron</span></code>, sparse gradients,
+<code class="docutils literal notranslate"><span class="pre">magnetic_type:</span> <span class="pre">none</span></code>, <code class="docutils literal notranslate"><span class="pre">soc_switch:</span> <span class="pre">False</span></code>, and both phonon long-range
+correction flags set to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Unsupported combinations are rejected
+from the original input, before workflow-specific overrides.</p>
+<p>All <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">*</span> <span class="pre">natoms</span></code> branches are saved after the q sum and electronic
+degeneracy average. Existing total self-energy and spectrum formats are
+preserved. The NPZ is created exclusively; use a new output directory for
+each run.</p>
+</div></blockquote>
+</div>
+<div class="param-block">self-energy</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card self-energy docutils container" id="cal-se-erange">
+<div class="param-header">SE_erange</div><div class="param-meta">Options: <code><b><i>*LIST[FLOAT,FLOAT,FLOAT]*</i></b></code><br>Default: <code>[0.0,0.0,0.0]</code></div><div class="param-desc docutils container">
+<p>Specifies the energy range (in eV), given as <strong>[min, max, step]</strong>, over which the spectral function will be calculated.</p>
+</div>
+<div class="param-block">self-energy</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card self-energy docutils container" id="cal-over-band-edge-self-energy">
+<div class="param-header">over_band_edge</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.2</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the width (in eV) of the energy window centered around
+the Fermi level or band edge. This window determines the range of
+electronic states included in self-energy calculations.</p>
+</div></blockquote>
+</div>
+<div class="param-block">self-energy</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card self-energy docutils container" id="cal-ncarrier-self-energy">
+<div class="param-header">ncarrier</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>10000000000000000.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The carrier concentration in <span class="math notranslate nohighlight">\(\text{cm}^{-3}\)</span>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">self-energy</div></div>
+<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="preparer.html" class="btn btn-neutral float-left" title="Keywords of QTrans_prep" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ao_define.html" class="btn btn-neutral float-right" title="Atomic Orbital Basis Definition" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

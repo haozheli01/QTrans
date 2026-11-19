@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resistivity Calculation &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Intrinsic Dielectric Breakdown" href="breakdown.html" />
+    <link rel="prev" title="Conductivity Calculation" href="conduct.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="obtain_hs.html">Generation of Hamiltonian and Overlap Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="phonon_prep.html">Phonon Force Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_dos.html">DOS of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_path.html">EPC Path Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Resistivity Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bulk-fcc-al">Bulk fcc Al</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconduct.html">Superconductivity Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Resistivity Calculation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/resist.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="resistivity-calculation">
+<h1>Resistivity Calculation<a class="headerlink" href="#resistivity-calculation" title="Link to this heading"></a></h1>
+<p>In this tutorial, we will show how to compute the phonon-limited electrical resistivity
+within the momentum relaxation time approximation (MRTA)
+by using the <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">'resistivity'</span></code> of <strong>QTrans</strong>.
+The relevant theories are briefly introduced in the <a class="reference internal" href="../theory/resistivity.html#theory-resistivity"><span class="std std-ref">Resistivity</span></a> section.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The following tutorials are designed for instructional purposes.
+To save computation time, the parameter settings are simplified and the results are not fully converged.</p>
+</div>
+<section id="bulk-fcc-al">
+<h2>Bulk fcc Al<a class="headerlink" href="#bulk-fcc-al" title="Link to this heading"></a></h2>
+<p>In this tutorial, we use isotropic metal aluminum to introduce the calculation of electrical resistivity.
+The bulk fcc aluminum tutorial is located in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/resistivity/</span></code>.
+All necessary data files are available in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/data/</span></code>.
+Reference outputs are provided in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/resistivity/ref/</span></code> ,
+which can be used to compare with your own results to verify that <strong>QTrans</strong> is running correctly.</p>
+<p>The directory contains <code class="docutils literal notranslate"><span class="pre">input-dense.yaml</span></code>, <code class="docutils literal notranslate"><span class="pre">input-sparse.yaml</span></code>, and
+the reference outputs in <code class="docutils literal notranslate"><span class="pre">ref/</span></code>.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd tutorials/Al/openmx/resistivity/ &amp;&amp; ls
+input-dense.yaml  input-sparse.yaml ref/
+</pre></div>
+</div>
+<p>We first use the dense gradient matrix to perform the calculation on a 16x16x16 k/q-point grid.
+The smearings for both k-point and q-point integrations are set to 40 meV using <code class="docutils literal notranslate"><span class="pre">smeark:</span> <span class="pre">40</span></code> and
+<code class="docutils literal notranslate"><span class="pre">smearq:</span> <span class="pre">40</span></code>. The smearing type is set to the derivative of the Fermi-Dirac function via <code class="docutils literal notranslate"><span class="pre">gauss_type:</span> <span class="pre">-99</span></code>.
+Here <code class="docutils literal notranslate"><span class="pre">smeark</span></code> sets the electronic kernel width; it is independent of
+<code class="docutils literal notranslate"><span class="pre">temperature</span></code>. The transport spectrum uses Gaussian broadening for delta functions.
+The temperature is set to the room temperature with <code class="docutils literal notranslate"><span class="pre">temperature:</span> <span class="pre">300.0</span></code>.
+Other necessary settings for the resistivity calculation are specified in the <code class="docutils literal notranslate"><span class="pre">resistivity</span></code> block.
+The parameter <code class="docutils literal notranslate"><span class="pre">ziman_nc</span></code> represents the number of carriers per unit cell in the Ziman’s resistivity formula.
+It can be set manually.
+If not set, <strong>QTrans</strong> will automatically estimate it based on the number of band crossings at the Fermi level,
+which usually yields a good approximation.
+In this case, we use the value estimated by <strong>QTrans</strong> by leaving it unset; both reference runs report 2.0 carriers per unit cell.</p>
+<p>The complete <code class="docutils literal notranslate"><span class="pre">input-dense.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;resistivity&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/Al-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/FORCE_SETS</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/grad_mat.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">phonon_frequency_cutoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+
+<span class="nt">transport</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">k_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">bands_indices</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1-6&#39;</span>
+<span class="w">  </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300.0</span>
+<span class="w">  </span><span class="nt">smeark</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">smearq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-99</span>
+<span class="w">  </span><span class="nt">e_thr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+
+<span class="nt">resistivity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">omega_range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">omega_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+</pre></div>
+</div>
+<p>Launch the <strong>QTrans</strong> calculation with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-dense.yaml &gt; dense_kq16.out
+</pre></div>
+</div>
+<p>Runtime depends on the hardware and parallel configuration.
+At the end of the run, you should see output like this:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Ziman&#39;s resistance(micro-Ohm*cm) =   9.0476e-01
+Allen&#39;s resistance(micro-Ohm*cm) =   2.8562e+00
+</pre></div>
+</div>
+<p>After the calculation, <strong>QTrans</strong> generates a file named <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code>, which contains
+the isotropic Eliashberg spectral function
+<span class="math notranslate nohighlight">\(\alpha^2 F(\omega)\)</span>
+and the isotropic Eliashberg transport spectral function
+<span class="math notranslate nohighlight">\(\alpha_{tr}^2 F(\omega)\)</span>, evaluated within the phonon energy range specified by <code class="docutils literal notranslate"><span class="pre">omega_range</span></code>,
+using a step size of <code class="docutils literal notranslate"><span class="pre">omega_step</span></code>. Here, the range is 0–50 meV and
+the step is 0.05 meV. The columns are phonon energy (meV),
+<span class="math notranslate nohighlight">\(\alpha_{tr}^2F(\omega)\)</span>, and <span class="math notranslate nohighlight">\(\alpha^2F(\omega)\)</span>, respectively.
+Preserve the dense-run spectrum before starting the sparse calculation:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>a2f.dat<span class="w"> </span>a2f_dense.dat
+</pre></div>
+</div>
+<p>Next, we use the sparse gradient matrix to calculate the electrical resistivity.
+The complete <code class="docutils literal notranslate"><span class="pre">input-sparse.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;resistivity&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">read_sparse_grad_mat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/Al-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/FORCE_SETS</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/grad_mat_sparse.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">phonon_frequency_cutoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+
+<span class="nt">transport</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">k_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">bands_indices</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1-6&#39;</span>
+<span class="w">  </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300.0</span>
+<span class="w">  </span><span class="nt">smeark</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">smearq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-99</span>
+<span class="w">  </span><span class="nt">e_thr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+
+<span class="nt">resistivity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">omega_range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">omega_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span>
+</pre></div>
+</div>
+<p>The same calculation can be performed using:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-sparse.yaml &gt; sparse_kq16.out
+</pre></div>
+</div>
+<p>At the end of the run, you should see output similar to the following:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Ziman&#39;s resistance(micro-Ohm*cm) =   9.0455e-01
+Allen&#39;s resistance(micro-Ohm*cm) =   2.8555e+00
+</pre></div>
+</div>
+<p>The sparse configuration enables <code class="docutils literal notranslate"><span class="pre">advanced.read_sparse_grad_mat:</span> <span class="pre">True</span></code>
+and reads <code class="docutils literal notranslate"><span class="pre">grad_mat_sparse.npy</span></code>. It yields results within approximately
+0.03% of the dense calculation for both formulas. After this run, preserve
+the spectrum with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>a2f.dat<span class="w"> </span>a2f_sparse.dat
+</pre></div>
+</div>
+<p>The reference spectra are provided as <code class="docutils literal notranslate"><span class="pre">ref/a2f_dense.dat</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ref/a2f_sparse.dat</span></code>. Both configurations write to the current directory,
+so the second run replaces <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> unless it is copied first.
+As shown in our coarse test, Allen’s formula produces resistivity values that are in better agreement with the
+experimental result (2.73 <span class="math notranslate nohighlight">\(\mu\Omega\cdot\text{cm}\)</span>).
+The agreement of the dense and sparse calculations does not establish
+convergence with respect to sampling or smearing.</p>
+<p>We can further plot the Eliashberg spectral functions and extract the electron-phonon coupling strengths
+(<span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\lambda_{tr}\)</span>) using the <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> file.
+The converged results are shown in Figure 1.</p>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/a2f_Al.png"><img alt="a2f_Al.png" src="../_images/a2f_Al.png" style="width: 450.0px; height: 450.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1:</strong> The converged Eliashberg and transport spectral functions of Al.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both Allen’s and Ziman’s formulas are derived under the assumption of isotropy, and
+are therefore generally suitable only for isotropic metals.</p>
+</div>
+<p>Because <span class="math notranslate nohighlight">\(\rho = \sigma^{-1}\)</span>, one can also obtain the resistivity by computing the conductivity using either the IBTE or ERTA method,
+as introduced in the <a class="reference internal" href="conduct.html#tutorial-conductivity"><span class="std std-ref">Conductivity Calculation</span></a> section.
+This approach is not limited to isotropic metals and is applicable to all metallic systems.</p>
+<p>At convergence, the calculated electrical resistivity results comparing with the
+experimental results <span id="id1">[<a class="reference internal" href="../intro/refers.html#id11" title="P. D. Desai, H. M. James, and C. Y. Ho. Electrical resistivity of aluminum and manganese. Journal of Physical and Chemical Reference Data, 13(4):1131-1172, 10 1984. URL: https://doi.org/10.1063/1.555725, doi:10.1063/1.555725.">10</a>]</span> at different temperatures, are shown in Figure 2.</p>
+<figure class="align-default" id="id4">
+<a class="reference internal image-reference" href="../_images/resistivity_Al.png"><img alt="resistivity_Al.png" src="../_images/resistivity_Al.png" style="width: 450.0px; height: 450.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 2:</strong> The converged resistivities of Al calculated with MRTA and derived from IBTE
+conductivity results using <strong>QTrans</strong>.
+The experimental data are taken from ref <span id="id2">[<a class="reference internal" href="../intro/refers.html#id11" title="P. D. Desai, H. M. James, and C. Y. Ho. Electrical resistivity of aluminum and manganese. Journal of Physical and Chemical Reference Data, 13(4):1131-1172, 10 1984. URL: https://doi.org/10.1063/1.555725, doi:10.1063/1.555725.">10</a>]</span>.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="conduct.html" class="btn btn-neutral float-left" title="Conductivity Calculation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="breakdown.html" class="btn btn-neutral float-right" title="Intrinsic Dielectric Breakdown" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

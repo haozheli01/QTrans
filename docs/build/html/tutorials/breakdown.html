@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intrinsic Dielectric Breakdown &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Superconductivity Calculation" href="superconduct.html" />
+    <link rel="prev" title="Resistivity Calculation" href="resist.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="obtain_hs.html">Generation of Hamiltonian and Overlap Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="phonon_prep.html">Phonon Force Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_dos.html">DOS of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_path.html">EPC Path Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resist.html">Resistivity Calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Intrinsic Dielectric Breakdown</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bulk-si">Bulk Si</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="superconduct.html">Superconductivity Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Intrinsic Dielectric Breakdown</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/breakdown.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="intrinsic-dielectric-breakdown">
+<h1>Intrinsic Dielectric Breakdown<a class="headerlink" href="#intrinsic-dielectric-breakdown" title="Link to this heading"></a></h1>
+<p>This tutorial uses <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">breakdown</span></code> in <strong>QTrans</strong> to calculate
+the intrinsic dielectric breakdown field of bulk silicon (Si).
+The relevant theories are briefly introduced in the
+<a class="reference internal" href="../theory/breakdown.html#theory-breakdown"><span class="std std-ref">Theory/Intrinsic Dielectric Breakdown</span></a> section.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The following tutorials are designed for instructional purposes.
+To save computation time, the parameter settings are simplified and the results are not fully converged.</p>
+</div>
+<section id="bulk-si">
+<h2>Bulk Si<a class="headerlink" href="#bulk-si" title="Link to this heading"></a></h2>
+<p>The bulk Si tutorial is located in
+<code class="docutils literal notranslate"><span class="pre">tutorials/Si/openmx/breakdown/</span></code>.
+All necessary data files are available in <code class="docutils literal notranslate"><span class="pre">tutorials/Si/openmx/data</span></code>.
+Reference outputs are provided in <code class="docutils literal notranslate"><span class="pre">tutorials/Si/openmx/breakdown/ref/</span></code>,
+which can be used to compare with your own results to verify that <strong>QTrans</strong> is running correctly.</p>
+<p>The directory contains <code class="docutils literal notranslate"><span class="pre">input-sparse.yaml</span></code> and reference outputs in
+<code class="docutils literal notranslate"><span class="pre">ref/</span></code>. The input enables <a class="reference internal" href="../keywords/calculator.html#cal-read-sparse-grad-mat"><span class="std std-ref">read_sparse_grad_mat</span></a>
+to read the sparse EPC gradients.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Si/openmx/breakdown/
+</pre></div>
+</div>
+<p>Activate the Conda environment in which <strong>QTrans</strong> is installed:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda activate QTrans
+</pre></div>
+</div>
+<figure class="align-default" id="id1">
+<span id="fig-band-si-breakdown"></span><a class="reference internal image-reference" href="../_images/band_Si_breakdown.png"><img alt="band_Si_breakdown.png" src="../_images/band_Si_breakdown.png" style="width: 450.0px; height: 450.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1:</strong>  The calculated band structures of silicon.
+The red dashed line denotes the energy level of <span class="math notranslate nohighlight">\(\mathrm{CBM} + E_g\)</span> .
+The yellow region indicates the energy window considered in the calculation.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Use the sparse input to calculate the intrinsic breakdown field of Si.
+We use <span class="math notranslate nohighlight">\(16 \times 16 \times 16\)</span> <strong>k</strong>-point and <strong>q</strong>-point meshes.</p>
+<p>We consider the first to fourth conduction bands by setting
+<a class="reference internal" href="../keywords/calculator.html#cal-bands-indices"><span class="std std-ref">bands_indices</span></a> to <code class="docutils literal notranslate"><span class="pre">'5-8'</span></code>.
+Set <a class="reference internal" href="../keywords/calculator.html#cal-fbd-erange"><span class="std std-ref">fbd_erange</span></a> to <code class="docutils literal notranslate"><span class="pre">[0.0,</span> <span class="pre">2.0,</span> <span class="pre">0.01]</span></code>
+to include electron states within the energy range
+<span class="math notranslate nohighlight">\(\left[\text{CBM}, \text{CBM} + 2.0\;\text{eV}\right]\)</span>,
+where CBM denotes the conduction band minimum.
+This energy window is highlighted in yellow in <a class="reference internal" href="#fig-band-si-breakdown"><span class="std std-ref">Figure 1</span></a>.
+The parameter <a class="reference internal" href="../keywords/calculator.html#cal-fbd-effective-mass"><span class="std std-ref">fbd_effective_mass</span></a> is set to <code class="docutils literal notranslate"><span class="pre">0.96</span></code>,
+in units of the free-electron mass,
+and <a class="reference internal" href="../keywords/calculator.html#cal-fbd-exp-bandgap"><span class="std std-ref">fbd_exp_bandgap</span></a> is set to <code class="docutils literal notranslate"><span class="pre">1.17</span></code>.
+The temperature is set to room temperature via <a class="reference internal" href="../keywords/calculator.html#cal-temperature"><span class="std std-ref">temperature</span></a> with a value of <code class="docutils literal notranslate"><span class="pre">300</span></code>.</p>
+<p>Both <code class="docutils literal notranslate"><span class="pre">smeark</span></code> and <code class="docutils literal notranslate"><span class="pre">smearq</span></code> are set to 50 meV, with Gaussian broadening
+(<code class="docutils literal notranslate"><span class="pre">gauss_type:</span> <span class="pre">0</span></code>) and <code class="docutils literal notranslate"><span class="pre">e_thr:</span> <span class="pre">150.0</span></code> meV. The phonon data use a
+<code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">x</span> <span class="pre">4</span> <span class="pre">x</span> <span class="pre">4</span></code> supercell, and <code class="docutils literal notranslate"><span class="pre">epc.phonon_frequency_cutoff:</span> <span class="pre">2.0</span></code> excludes
+phonon modes below 2 meV. The final field is obtained by taking the maximum
+over electron energies up to <code class="docutils literal notranslate"><span class="pre">fbd_exp_bandgap</span></code> relative to the CBM;
+<code class="docutils literal notranslate"><span class="pre">fbd_erange</span></code> defines the wider energy grid used for the rate output.</p>
+<p>The complete <code class="docutils literal notranslate"><span class="pre">input-sparse.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;breakdown&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">read_sparse_grad_mat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/Si-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/FORCE_SETS</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/grad_mat_sparse.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">phonon_frequency_cutoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2.0</span>
+
+<span class="nt">transport</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">k_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">,</span><span class="nv">16</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">bands_indices</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;5-8&#39;</span>
+<span class="w">  </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300.0</span>
+<span class="w">  </span><span class="nt">smeark</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50.0</span>
+<span class="w">  </span><span class="nt">smearq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50.0</span>
+<span class="w">  </span><span class="nt">gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">e_thr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150.0</span>
+
+<span class="nt">breakdown</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">fbd_erange</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.01</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">fbd_effective_mass</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.96</span>
+<span class="w">  </span><span class="nt">fbd_exp_bandgap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.17</span>
+</pre></div>
+</div>
+<p>You can launch the <strong>QTrans</strong> calculation with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-sparse.yaml &gt; sparse_kq16_breakdown.out
+</pre></div>
+</div>
+<p>The current <code class="docutils literal notranslate"><span class="pre">ref/sparse_kq16_breakdown.out</span></code> contains the following summary:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Smear of Summation (meV)    Max DOS (1/eV)       Breakdown Field (MV/m)
+               50.00              0.8222              100.1808
+              100.00              0.7294               89.2444
+              150.00              0.6573               81.9472
+              200.00              0.6727               85.1180
+              250.00              0.7184               91.1207
+              300.00              0.7482               95.3838
+              350.00              0.7700               98.8835
+              400.00              0.7875              102.0965
+              450.00              0.8017              105.0633
+              500.00              0.8128              107.6512
+</pre></div>
+</div>
+<p>For the input energy-averaging width of 50 meV, the breakdown field is
+<strong>100.1808 MV/m</strong>. The remaining rows vary the energy-averaging width from
+100 to 500 meV while retaining the same state-resolved rates, computed with
+<code class="docutils literal notranslate"><span class="pre">smearq:</span> <span class="pre">50.0</span></code>. They help assess sensitivity to energy averaging and do
+not replace convergence tests of the k/q meshes and scattering broadening.
+The reference run ends with <code class="docutils literal notranslate"><span class="pre">QTRANS</span> <span class="pre">JOB</span> <span class="pre">SUCCESS</span></code> and reports no skipped
+energy points at the smallest averaging width.</p>
+<p>The program will generate a file named <code class="docutils literal notranslate"><span class="pre">fbd_rate_nk.dat</span></code>,
+which contains state-resolved scattering rates and energy loss rates.</p>
+<p>The file <code class="docutils literal notranslate"><span class="pre">fbd_rate_ene.dat</span></code> contains energy-resolved quantities. For
+readability, the excerpt below shows only the energy column and the first
+DOS/scattering-rate/energy-loss-rate group (50 meV smearing):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>energy(eV)  DOS(1/eV)      scatt-rate(1/ps)  eloss-rate(eV/ps)
+0.0000   5.54693678e-02   3.13931463e+00   8.89718357e-02
+0.0100   5.94034869e-02   3.26463224e+00   9.67313269e-02
+0.0200   5.96615466e-02   3.39928570e+00   1.04728565e-01
+</pre></div>
+</div>
+<p>The full file has three header rows, followed by numerical data.
+The first two rows contain the column titles and their corresponding units.
+The third row lists the smearing parameters used for each column when integrating over electron states.
+These smearing parameters range from one to ten times the value of <a class="reference internal" href="../keywords/calculator.html#cal-smeark"><span class="std std-ref">smeark</span></a>,
+which helps verify the convergence of the integration.
+Each row of the log summary gives the maximum DOS and breakdown field for
+one of these energy-averaging widths. Use the first row for the width
+specified by <a class="reference internal" href="../keywords/calculator.html#cal-smeark"><span class="std std-ref">smeark</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="resist.html" class="btn btn-neutral float-left" title="Resistivity Calculation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="superconduct.html" class="btn btn-neutral float-right" title="Superconductivity Calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

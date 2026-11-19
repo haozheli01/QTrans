@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smearing Methods &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Workflow" href="../workflow.html" />
+    <link rel="prev" title="Intrinsic Dielectric Breakdown" href="breakdown.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="velocity.html">Electronic Velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc.html">Electron-Phonon Coupling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conductivity.html">Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resistivity.html">Resistivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconductivity.html">Superconductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Smearing Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#broadened-delta-functions">Broadened Delta Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gaussian-smearing">Gaussian Smearing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fermi-dirac-smearing">Fermi-Dirac Smearing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cold-smearing">Cold Smearing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#methfessel-paxton-smearing">Methfessel-Paxton Smearing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smearing-parameters-in-qtrans">Smearing Parameters in QTrans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#convergence-with-mesh-and-width">Convergence with Mesh and Width</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Smearing Methods</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/smear_method.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="smearing-methods">
+<span id="theory-smearing"></span><span id="tutorial-smearing"></span><h1>Smearing Methods<a class="headerlink" href="#smearing-methods" title="Link to this heading"></a></h1>
+<p>Brillouin-zone integrals contain Dirac delta functions that select electronic
+states or enforce energy conservation. On a finite reciprocal-space mesh,
+<strong>QTrans</strong> replaces these delta functions with finite-width kernels. The
+choice of kernel and width controls the balance between mesh-sampling noise
+and numerical broadening.</p>
+<section id="broadened-delta-functions">
+<h2>Broadened Delta Functions<a class="headerlink" href="#broadened-delta-functions" title="Link to this heading"></a></h2>
+<p>For an energy difference <span class="math notranslate nohighlight">\(\Delta E\)</span> and a positive energy width
+<span class="math notranslate nohighlight">\(\eta\)</span>, the broadened delta function is</p>
+<div class="math notranslate nohighlight">
+\[\delta_\eta(\Delta E)
+= \frac{1}{\eta}K\left(\frac{\Delta E}{\eta}\right),
+\qquad
+\int_{-\infty}^{\infty}K(x)\,dx=1.\]</div>
+<p>The prefactor <span class="math notranslate nohighlight">\(1/\eta\)</span> preserves the normalization and gives
+<span class="math notranslate nohighlight">\(\delta_\eta\)</span> units of inverse energy. For example, the broadened
+electronic density of states is</p>
+<div class="math notranslate nohighlight">
+\[D_\eta(E)
+= \sum_\nu\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+\delta_\eta(\varepsilon_{\nu\mathbf{k}}-E).\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\nu\)</span> is the band index and <span class="math notranslate nohighlight">\(\Omega_{\mathrm{BZ}}\)</span> is the
+Brillouin-zone volume. Spin degeneracy is included separately through the
+state counting or integration weights; smearing does not introduce a spin
+factor.</p>
+<p>The numerical helper <code class="docutils literal notranslate"><span class="pre">w0gauss(x,</span> <span class="pre">ngauss)</span></code> evaluates the dimensionless kernel
+<span class="math notranslate nohighlight">\(K(x)\)</span>. The following expressions describe its analytic kernels; the
+implementation limits exponential arguments for numerical stability.</p>
+</section>
+<section id="gaussian-smearing">
+<h2>Gaussian Smearing<a class="headerlink" href="#gaussian-smearing" title="Link to this heading"></a></h2>
+<p>For <code class="docutils literal notranslate"><span class="pre">ngauss</span> <span class="pre">=</span> <span class="pre">0</span></code>, the kernel is a simple Gaussian:</p>
+<div class="math notranslate nohighlight">
+\[K_{\mathrm{G}}(x)=\frac{1}{\sqrt{\pi}}\exp(-x^2),
+\qquad
+\delta_\eta^{\mathrm{G}}(\Delta E)
+= \frac{1}{\eta\sqrt{\pi}}
+\exp\left[-\left(\frac{\Delta E}{\eta}\right)^2\right].\]</div>
+<p>This positive, symmetric kernel is the default. Its standard deviation is
+<span class="math notranslate nohighlight">\(\eta/\sqrt{2}\)</span>, and its full width at half maximum is
+<span class="math notranslate nohighlight">\(2\sqrt{\ln2}\,\eta\)</span>. Thus the input width <span class="math notranslate nohighlight">\(\eta\)</span> is neither the
+standard deviation nor the full width at half maximum.</p>
+</section>
+<section id="fermi-dirac-smearing">
+<h2>Fermi-Dirac Smearing<a class="headerlink" href="#fermi-dirac-smearing" title="Link to this heading"></a></h2>
+<p>For <code class="docutils literal notranslate"><span class="pre">ngauss</span> <span class="pre">=</span> <span class="pre">-99</span></code>, the kernel is the derivative of a Fermi-Dirac occupation:</p>
+<div class="math notranslate nohighlight">
+\[K_{\mathrm{FD}}(x)
+= \frac{\exp(x)}{[1+\exp(x)]^2}
+= \frac{1}{4\cosh^2(x/2)}.\]</div>
+<p>This kernel is positive and symmetric. With <span class="math notranslate nohighlight">\(\eta=k_{\mathrm{B}}T\)</span>, it
+coincides with the physical thermal window</p>
+<div class="math notranslate nohighlight">
+\[-\frac{\partial f^0(\varepsilon)}{\partial\varepsilon}
+= \frac{1}{4k_{\mathrm{B}}T}
+\operatorname{sech}^2\left(
+\frac{\varepsilon-\mu}{2k_{\mathrm{B}}T}\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mu\)</span> is the chemical potential. However, selecting this numerical
+kernel does not automatically set its width equal to the physical thermal
+energy. The <code class="docutils literal notranslate"><span class="pre">temperature</span></code> input controls the physical Fermi-Dirac and
+Bose-Einstein occupations independently of the numerical smearing widths.</p>
+</section>
+<section id="cold-smearing">
+<h2>Cold Smearing<a class="headerlink" href="#cold-smearing" title="Link to this heading"></a></h2>
+<p>For <code class="docutils literal notranslate"><span class="pre">ngauss</span> <span class="pre">=</span> <span class="pre">-1</span></code>, the Marzari–Vanderbilt cold-smearing kernel is</p>
+<div class="math notranslate nohighlight">
+\[K_{\mathrm{cold}}(x)
+= \frac{1}{\sqrt{\pi}}
+\exp\left[-\left(x-\frac{1}{\sqrt{2}}\right)^2\right]
+(2-\sqrt{2}\,x).\]</div>
+<p>This kernel is asymmetric and can take negative values. Its argument must
+therefore follow the code’s sign convention: in DOS calculations,
+<span class="math notranslate nohighlight">\(x=(\varepsilon_{\nu\mathbf{k}}-E)/\eta\)</span>. Reversing that argument changes
+the broadened spectrum.</p>
+</section>
+<section id="methfessel-paxton-smearing">
+<h2>Methfessel-Paxton Smearing<a class="headerlink" href="#methfessel-paxton-smearing" title="Link to this heading"></a></h2>
+<p>For integer orders <span class="math notranslate nohighlight">\(1\leq p\leq10\)</span>, selected by <code class="docutils literal notranslate"><span class="pre">ngauss</span> <span class="pre">=</span> <span class="pre">p</span></code>, the
+Methfessel-Paxton kernel is</p>
+<div class="math notranslate nohighlight">
+\[K_p(x)=\frac{\exp(-x^2)}{\sqrt{\pi}}
+\sum_{m=0}^{p}\frac{(-1)^m}{4^m m!}H_{2m}(x),\]</div>
+<p>where <span class="math notranslate nohighlight">\(H_n(x)\)</span> denotes the physicists’ Hermite polynomial. Order zero
+reduces to the simple Gaussian. For example,</p>
+<div class="math notranslate nohighlight">
+\[K_1(x)=\frac{\exp(-x^2)}{\sqrt{\pi}}\left(\frac{3}{2}-x^2\right).\]</div>
+<p>The higher-order terms cancel low-order moment errors, which can improve
+integration of sufficiently smooth quantities. These kernels have negative
+lobes and can produce oscillations or negative contributions to a broadened
+DOS. They should not be interpreted as probability densities.</p>
+</section>
+<section id="smearing-parameters-in-qtrans">
+<h2>Smearing Parameters in QTrans<a class="headerlink" href="#smearing-parameters-in-qtrans" title="Link to this heading"></a></h2>
+<p>All widths in the following table are entered in meV and converted internally
+to Hartree. They are energy widths, including <code class="docutils literal notranslate"><span class="pre">smearq</span></code>; none is a width in
+reciprocal-space coordinates.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 15.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../keywords/calculator.html#cal-dos-smear"><span class="std std-ref">dos_smear</span></a></p></td>
+<td><p>10.0 meV</p></td>
+<td><p>Width of the delta functions in broadened electronic or phonon DOS.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../keywords/calculator.html#cal-dos-gauss-type"><span class="std std-ref">dos_gauss_type</span></a></p></td>
+<td><p>0</p></td>
+<td><p>Kernel selector for broadened DOS calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../keywords/calculator.html#cal-smeark"><span class="std std-ref">smeark</span></a></p></td>
+<td><p>25.0 meV</p></td>
+<td><p>Electronic energy width used in metallic Fermi-level calculations,
+Fermi-surface delta functions, and energy-resolved averages.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../keywords/calculator.html#cal-smearq"><span class="std std-ref">smearq</span></a></p></td>
+<td><p>25.0 meV</p></td>
+<td><p>Width of energy-conservation delta functions in scattering rates and
+of phonon-energy delta functions in Eliashberg spectra.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../keywords/calculator.html#cal-gauss-type"><span class="std std-ref">gauss_type</span></a></p></td>
+<td><p>0</p></td>
+<td><p>Kernel selector for metallic Fermi-level calculations and selected
+electronic Fermi-surface integrations.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The delta-kernel helper implements <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">-99</span></code>, <code class="docutils literal notranslate"><span class="pre">-1</span></code>, and positive orders
+from <code class="docutils literal notranslate"><span class="pre">1</span></code> to <code class="docutils literal notranslate"><span class="pre">10</span></code>. Other selectors are not implemented as usable kernels.
+Availability in this helper does not imply support throughout every workflow.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The cumulative occupation helper <code class="docutils literal notranslate"><span class="pre">wgauss</span></code> currently implements only
+<code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">-99</span></code>. Metallic Fermi-level searches use this helper, including
+the reference-energy search in the electronic DOS workflow. Use these two
+selectors for such workflows. Cold and higher-order Methfessel-Paxton
+delta kernels can be evaluated by <code class="docutils literal notranslate"><span class="pre">w0gauss</span></code>, but their cumulative
+occupations are not implemented in the current code.</p>
+</div>
+<p>For the supported cumulative occupations, the metallic electron count uses</p>
+<div class="math notranslate nohighlight">
+\[N_e=\sum_{\nu\mathbf{k}}w_{\mathbf{k}}
+W\left(\frac{\varepsilon_F-\varepsilon_{\nu\mathbf{k}}}{\eta}\right),\]</div>
+<p>with the appropriate state-counting weights <span class="math notranslate nohighlight">\(w_{\mathbf{k}}\)</span> and</p>
+<div class="math notranslate nohighlight">
+\[W_{\mathrm{G}}(x)=\frac{1}{2}\operatorname{erfc}(-x),
+\qquad
+W_{\mathrm{FD}}(x)=\frac{1}{1+\exp(-x)}.\]</div>
+<p>Both satisfy <span class="math notranslate nohighlight">\(dW/dx=K(x)\)</span>. The electronic DOS workflow uses
+<code class="docutils literal notranslate"><span class="pre">dos_smear</span></code> and <code class="docutils literal notranslate"><span class="pre">dos_gauss_type</span></code> for this search; transport-related
+metallic searches use <code class="docutils literal notranslate"><span class="pre">smeark</span></code> and <code class="docutils literal notranslate"><span class="pre">gauss_type</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">gauss_type</span></code> is not a global switch for all delta functions. In the
+current implementation, electron-phonon scattering rates, breakdown
+energy averages, and the scalar transport spectra used for resistivity
+use Gaussian kernels. Superconducting pairing spectra apply <code class="docutils literal notranslate"><span class="pre">gauss_type</span></code>
+to the electronic Fermi-surface delta functions, while their
+phonon-energy broadening remains Gaussian. Changing <code class="docutils literal notranslate"><span class="pre">gauss_type</span></code> to
+<code class="docutils literal notranslate"><span class="pre">-99</span></code> therefore does not turn all transport integrations into
+Fermi-Dirac smearing.</p>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">tetra_integral</span></code> is enabled for DOS calculations, tetrahedron
+integration replaces the broadened DOS delta functions. The DOS integration
+then does not use <code class="docutils literal notranslate"><span class="pre">dos_smear</span></code> or <code class="docutils literal notranslate"><span class="pre">dos_gauss_type</span></code>; the electronic
+reference-energy search still uses those parameters in the current workflow.</p>
+</section>
+<section id="convergence-with-mesh-and-width">
+<h2>Convergence with Mesh and Width<a class="headerlink" href="#convergence-with-mesh-and-width" title="Link to this heading"></a></h2>
+<p>A finite width compensates for discrete reciprocal-space sampling, but also
+smooths genuine spectral structure. At fixed mesh density, an excessively
+small width can leave too few states near the energy shell and produce noisy
+or underestimated integrals. A large width can merge spectral features and
+admit transitions far from exact energy conservation.</p>
+<p>Converge the target observable by refining the electronic and phonon meshes
+and reducing the widths together. For scattering calculations, check the
+energy-conservation width <code class="docutils literal notranslate"><span class="pre">smearq</span></code> separately from the electronic width
+<code class="docutils literal notranslate"><span class="pre">smeark</span></code>. For spectra, also converge the output energy-grid spacing; a fine
+output grid alone does not improve the underlying Brillouin-zone sampling.
+The default widths are starting values rather than universal convergence
+settings.</p>
+<p>The transition preselection parameter <a class="reference internal" href="../keywords/calculator.html#cal-e-thr"><span class="std std-ref">e_thr</span></a> is an energy
+cutoff, not a smearing width. Its default is 75 meV, three times the default
+<code class="docutils literal notranslate"><span class="pre">smearq</span></code>. It is configured independently and is not automatically rescaled
+when <code class="docutils literal notranslate"><span class="pre">smearq</span></code> changes. Check that it retains the relevant kernel tails,
+particularly when increasing the width.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="breakdown.html" class="btn btn-neutral float-left" title="Intrinsic Dielectric Breakdown" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../workflow.html" class="btn btn-neutral float-right" title="Workflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

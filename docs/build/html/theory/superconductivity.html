@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Superconductivity &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Intrinsic Dielectric Breakdown" href="breakdown.html" />
+    <link rel="prev" title="Resistivity" href="resistivity.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="velocity.html">Electronic Velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc.html">Electron-Phonon Coupling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conductivity.html">Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resistivity.html">Resistivity</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Superconductivity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#eliashberg-spectral-function">Eliashberg Spectral Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#allen-dynes-critical-temperature">Allen-Dynes Critical Temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#anisotropic-superconductivity">Anisotropic Superconductivity</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="smear_method.html">Smearing Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Superconductivity</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/superconductivity.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="superconductivity">
+<span id="theory-superconductivity"></span><h1>Superconductivity<a class="headerlink" href="#superconductivity" title="Link to this heading"></a></h1>
+<p><strong>QTrans</strong> estimates the superconducting transition temperature using a
+simplified Allen-Dynes formula.
+The spectral definitions below use the isotropic, nonmagnetic,
+spin-degenerate case as the reference convention.</p>
+<section id="eliashberg-spectral-function">
+<h2>Eliashberg Spectral Function<a class="headerlink" href="#eliashberg-spectral-function" title="Link to this heading"></a></h2>
+<p>Let <span class="math notranslate nohighlight">\(N_F=N(\varepsilon_F)\)</span> denote the electronic density of states per
+unit cell, per unit energy, and per spin at the Fermi energy
+<span class="math notranslate nohighlight">\(\varepsilon_F\)</span>. The band sums below include one copy of each
+spin-degenerate band, and Brillouin-zone integrals are normalized by the
+Brillouin-zone volume <span class="math notranslate nohighlight">\(\Omega_{\mathrm{BZ}}\)</span>. The variable
+<span class="math notranslate nohighlight">\(\omega\)</span> denotes angular frequency, and the electron-phonon coupling
+matrix element <span class="math notranslate nohighlight">\(g_{\mu\nu b}(\mathbf{k},\mathbf{q})\)</span> has units of energy.</p>
+<p>In this convention, define the phonon linewidth parameter in angular-frequency
+units as</p>
+<div class="math notranslate nohighlight">
+\[\gamma_{\mathbf{q}b}
+= 2\pi\omega_{\mathbf{q}b}\sum_{\mu\nu}
+\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_F)
+\delta(\varepsilon_{\mu\mathbf{k+q}}-\varepsilon_F).\]</div>
+<p>The corresponding energy linewidth parameter is
+<span class="math notranslate nohighlight">\(\hbar\gamma_{\mathbf{q}b}\)</span>. The Eliashberg spectral function is</p>
+<div class="math notranslate nohighlight">
+\[\alpha^2F(\omega)
+= \frac{1}{2\pi\hbar N_F}\sum_b
+\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+\frac{\gamma_{\mathbf{q}b}}{\omega_{\mathbf{q}b}}
+\delta(\omega-\omega_{\mathbf{q}b}).\]</div>
+<p>This normalization agrees with the ordinary Eliashberg spectral function
+in <a class="reference internal" href="resistivity.html#theory-resistivity"><span class="std std-ref">Resistivity</span></a>. The dimensionless electron–phonon coupling
+constant is</p>
+<div class="math notranslate nohighlight">
+\[\lambda=2\int_0^\infty\frac{d\omega}{\omega}\alpha^2F(\omega).\]</div>
+<p>The factor of 2 in this frequency integral is part of the definition of
+<span class="math notranslate nohighlight">\(\lambda\)</span>; it is not an additional spin degeneracy factor. Spin counting
+must instead be consistent between the electronic band sums and <span class="math notranslate nohighlight">\(N_F\)</span>.</p>
+<p>For <span class="math notranslate nohighlight">\(\lambda&gt;0\)</span>, the logarithmic average phonon frequency is</p>
+<div class="math notranslate nohighlight">
+\[\omega_{\mathrm{log}}
+= \exp\left[
+\frac{2}{\lambda}\int_0^\infty\frac{d\omega}{\omega}
+\alpha^2F(\omega)\log\left(\omega\right)
+\right].\]</div>
+<p>These integrals assume a dynamically stable phonon spectrum with positive
+frequencies; imaginary modes require a separate assessment of structural
+stability.</p>
+</section>
+<section id="allen-dynes-critical-temperature">
+<h2>Allen-Dynes Critical Temperature<a class="headerlink" href="#allen-dynes-critical-temperature" title="Link to this heading"></a></h2>
+<p>The simplified Allen-Dynes expression implemented in <strong>QTrans</strong> is</p>
+<div class="math notranslate nohighlight">
+\[T_{\mathrm{c}}
+= \frac{\hbar\omega_{\mathrm{log}}}{1.2k_{\mathrm{B}}}
+\exp\left[-\frac{1.04(1+\lambda)}
+{\lambda-\mu^*(1+0.62\lambda)}\right],\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mu^*\)</span> is the dimensionless effective Coulomb pseudopotential.
+This semi-empirical estimate describes isotropic, phonon-mediated pairing.
+The full Allen-Dynes formula contains additional strong-coupling and
+spectral-shape correction factors <span class="math notranslate nohighlight">\(f_1f_2\)</span>; these factors are set to
+unity in the current implementation. The simplified estimate should therefore
+be used with care for strongly coupled or strongly anisotropic systems.</p>
+<p><strong>QTrans</strong> returns <span class="math notranslate nohighlight">\(T_{\mathrm{c}}=0\)</span> when
+<span class="math notranslate nohighlight">\(\lambda-\mu^*(1+0.62\lambda)\leq0\)</span>. This is an implementation convention
+outside the attractive regime of the estimate, rather than a general
+criterion for the absence of superconductivity. The exponential is evaluated
+only when the denominator is positive.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Internally, <strong>QTrans</strong> uses phonon energies in Hartree. The logarithmic
+average returned by the code is therefore the energy
+<span class="math notranslate nohighlight">\(E_{\mathrm{log}}=\hbar\omega_{\mathrm{log}}\)</span>. The code evaluates
+<span class="math notranslate nohighlight">\(k_{\mathrm{B}}T_{\mathrm{c}}\)</span> in Hartree and converts the result to
+kelvin for output. The spectral coordinate in <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> is an energy
+in meV, despite being labeled <code class="docutils literal notranslate"><span class="pre">omega</span></code>.</p>
+</div>
+</section>
+<section id="anisotropic-superconductivity">
+<h2>Anisotropic Superconductivity<a class="headerlink" href="#anisotropic-superconductivity" title="Link to this heading"></a></h2>
+<p>Under development.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="resistivity.html" class="btn btn-neutral float-left" title="Resistivity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="breakdown.html" class="btn btn-neutral float-right" title="Intrinsic Dielectric Breakdown" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

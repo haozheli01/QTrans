@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resistivity &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Superconductivity" href="superconductivity.html" />
+    <link rel="prev" title="Conductivity" href="conductivity.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="velocity.html">Electronic Velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc.html">Electron-Phonon Coupling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conductivity.html">Conductivity</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Resistivity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#transport-eliashberg-spectral-function">Transport Eliashberg Spectral Function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ziman-and-allen-estimates">Ziman and Allen Estimates</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#resistivity-from-the-conductivity-tensor">Resistivity from the Conductivity Tensor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="superconductivity.html">Superconductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="smear_method.html">Smearing Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Resistivity</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/resistivity.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="resistivity">
+<span id="theory-resistivity"></span><h1>Resistivity<a class="headerlink" href="#resistivity" title="Link to this heading"></a></h1>
+<p><strong>QTrans</strong> evaluates phonon-limited metallic resistivity using either a
+transport Eliashberg spectral function or the conductivity tensor obtained
+from the Boltzmann transport equation (BTE).</p>
+<section id="transport-eliashberg-spectral-function">
+<h2>Transport Eliashberg Spectral Function<a class="headerlink" href="#transport-eliashberg-spectral-function" title="Link to this heading"></a></h2>
+<p>The scalar spectral approach uses a Fermi-surface approximation and an
+isotropic description of transport. To fix the normalization, the formulas
+in this section refer to a nonmagnetic, spin-degenerate metal:
+<span class="math notranslate nohighlight">\(N_F=N(\varepsilon_F)\)</span> is the density of electronic states per unit cell,
+per unit energy, and per spin, and the band sums include one copy of each
+spin-degenerate band. The variable <span class="math notranslate nohighlight">\(\omega\)</span> denotes angular frequency,
+so the phonon energy is <span class="math notranslate nohighlight">\(\hbar\omega\)</span>.</p>
+<p>The Eliashberg spectral function is</p>
+<div class="math notranslate nohighlight">
+\[\alpha^2F(\omega)
+= \frac{1}{2}\sum_b\int_{\mathrm{BZ}}
+\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+\omega_{\mathbf{q}b}\lambda_{\mathbf{q}b}
+\delta(\omega-\omega_{\mathbf{q}b}),\]</div>
+<p>where the mode-resolved electron-phonon coupling constant is</p>
+<div class="math notranslate nohighlight">
+\[\lambda_{\mathbf{q}b}
+= \frac{2}{\hbar N_F\omega_{\mathbf{q}b}}
+\sum_{\mu\nu}\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_F)
+\delta(\varepsilon_{\mu\mathbf{k+q}}-\varepsilon_F).\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\varepsilon_F\)</span> is the Fermi energy,
+<span class="math notranslate nohighlight">\(g_{\mu\nu b}(\mathbf{k},\mathbf{q})\)</span> is an electron-phonon coupling
+matrix element with units of energy, and <span class="math notranslate nohighlight">\(\Omega_{\mathrm{BZ}}\)</span> is the
+Brillouin-zone volume. The factor of 2 accounts for spin degeneracy in a nonmagnetic system.
+For collinear spin-polarized calculations, each spin channel is treated separately,
+so this factor is 1. This distinction is handled explicitly in the code.
+These conventions give the dimensionless total coupling</p>
+<div class="math notranslate nohighlight">
+\[\lambda
+= \sum_b\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+\lambda_{\mathbf{q}b}
+= 2\int_0^\infty\frac{d\omega}{\omega}\alpha^2F(\omega).\]</div>
+<p>To describe current relaxation, <strong>QTrans</strong> uses the velocity factor associated
+with the momentum relaxation time approximation (MRTA):</p>
+<div class="math notranslate nohighlight">
+\[\eta_{\nu\mathbf{k},\mu\mathbf{k+q}}
+= 1-\frac{\mathbf{v}_{\nu\mathbf{k}}\cdot
+\mathbf{v}_{\mu\mathbf{k+q}}}{|\mathbf{v}_{\nu\mathbf{k}}|^2}.\]</div>
+<p>For equal initial and final speed, this factor reduces to
+<span class="math notranslate nohighlight">\(1-\cos\theta\)</span>, where <span class="math notranslate nohighlight">\(\theta\)</span> is the angle between the two
+velocities. It suppresses forward scattering and emphasizes processes that
+relax the current. Inserting this factor gives</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\lambda_{\mathrm{tr},\mathbf{q}b}
+={}&amp; \frac{2}{\hbar N_F\omega_{\mathbf{q}b}}
+\sum_{\mu\nu}\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2 \\
+&amp;\times\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_F)
+\delta(\varepsilon_{\mu\mathbf{k+q}}-\varepsilon_F)
+\eta_{\nu\mathbf{k},\mu\mathbf{k+q}},\end{split}\]</div>
+<p>and the transport spectral function is</p>
+<div class="math notranslate nohighlight">
+\[\alpha_{\mathrm{tr}}^2F(\omega)
+= \frac{1}{2}\sum_b\int_{\mathrm{BZ}}
+\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+\omega_{\mathbf{q}b}\lambda_{\mathrm{tr},\mathbf{q}b}
+\delta(\omega-\omega_{\mathbf{q}b}).\]</div>
+<section id="ziman-and-allen-estimates">
+<h3>Ziman and Allen Estimates<a class="headerlink" href="#ziman-and-allen-estimates" title="Link to this heading"></a></h3>
+<p>The Ziman-type estimate <span id="id1">[<a class="reference internal" href="../intro/refers.html#id10" title="J. M. Ziman. Electrons and Phonons: The Theory of Transport Phenomena in Solids. Oxford University Press, Oxford, 1960.">4</a>]</span> uses a free-electron
+Drude prefactor:</p>
+<div class="math notranslate nohighlight">
+\[\rho_{\mathrm{Ziman}}(T)
+= \frac{4\pi m_e}{n_c e^2 k_{\mathrm{B}}T}
+\int_0^\infty d\omega\,\hbar\omega\,
+\alpha_{\mathrm{tr}}^2F(\omega)
+n(\omega,T)[1+n(\omega,T)],\]</div>
+<p>where <span class="math notranslate nohighlight">\(m_e\)</span> is the free-electron mass, <span class="math notranslate nohighlight">\(e&gt;0\)</span> is the elementary
+charge, <span class="math notranslate nohighlight">\(n_c\)</span> is the total carrier number density per unit volume
+including both spins, and</p>
+<div class="math notranslate nohighlight">
+\[n(\omega,T)=\frac{1}{\exp[\hbar\omega/(k_{\mathrm{B}}T)]-1}.\]</div>
+<p>The Allen-type estimate <span id="id2">[<a class="reference internal" href="../intro/refers.html#id9" title="P. B. Allen. New method for solving Boltzmann's equation for electrons in metals. Physical Review B, 17(10):3725–3734, May 1978. URL: https://link.aps.org/doi/10.1103/PhysRevB.17.3725 (visited on 2025-05-08), doi:10.1103/PhysRevB.17.3725.">5</a>]</span> replaces the
+free-electron prefactor with a Fermi-surface velocity average:</p>
+<div class="math notranslate nohighlight">
+\[\rho_{\mathrm{Allen}}(T)
+= \frac{2\pi V_{\mathrm{uc}}}
+{e^2 N_F\langle v_z^2\rangle k_{\mathrm{B}}T}
+\int_0^\infty d\omega\,\hbar\omega\,
+\alpha_{\mathrm{tr}}^2F(\omega)
+n(\omega,T)[1+n(\omega,T)],\]</div>
+<p>where <span class="math notranslate nohighlight">\(V_{\mathrm{uc}}\)</span> is the unit-cell volume and</p>
+<div class="math notranslate nohighlight">
+\[\langle v_z^2\rangle
+= \frac{1}{N_F}\sum_\nu\int_{\mathrm{BZ}}
+\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+v_{\nu\mathbf{k}z}^2\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_F).\]</div>
+<p>For an isotropic metal, this average is independent of the chosen Cartesian
+direction. Using <span class="math notranslate nohighlight">\(x=\hbar\omega/(2k_{\mathrm{B}}T)\)</span> and
+<span class="math notranslate nohighlight">\(n(1+n)=1/(4\sinh^2x)\)</span>, an equivalent expression is</p>
+<div class="math notranslate nohighlight">
+\[\rho_{\mathrm{Allen}}(T)
+= \frac{2\pi V_{\mathrm{uc}}k_{\mathrm{B}}T}
+{e^2\hbar N_F\langle v_z^2\rangle}
+\int_0^\infty\frac{d\omega}{\omega}
+\frac{x^2}{\sinh^2x}\alpha_{\mathrm{tr}}^2F(\omega).\]</div>
+<p>For a three-dimensional parabolic free-electron band,
+<span class="math notranslate nohighlight">\(2N_F\langle v_z^2\rangle/V_{\mathrm{uc}}=n_c/m_e\)</span>, so the two
+prefactors agree.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These scalar estimates use an isotropic transport approximation. The MRTA
+velocity factor is also an approximation for general multiband Fermi
+surfaces. Anisotropic transport is better described using the BTE
+conductivity tensor below. Spin-resolved calculations require consistent
+spin counting in the spectral function, density of states, and carrier
+density; the prefactors above assume two equivalent spin channels.</p>
+</div>
+</section>
+</section>
+<section id="resistivity-from-the-conductivity-tensor">
+<h2>Resistivity from the Conductivity Tensor<a class="headerlink" href="#resistivity-from-the-conductivity-tensor" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="conductivity.html#theory-conductivity"><span class="std std-ref">BTE approach</span></a> gives the conductivity tensor as</p>
+<div class="math notranslate nohighlight">
+\[\sigma_{\alpha\beta}(T)
+= -\frac{e}{V_{\mathrm{uc}}}\sum_\nu
+\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+v_{\nu\mathbf{k}\alpha}\partial_{E_\beta}f_{\nu\mathbf{k}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\partial_{E_\beta}f_{\nu\mathbf{k}}\)</span> is the distribution response
+at zero electric field. The band sum must include all spin states, or the
+corresponding spin degeneracy factor must be included explicitly.</p>
+<p>The resistivity tensor is the matrix inverse of the conductivity tensor:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\rho}(T)=\boldsymbol{\sigma}(T)^{-1},
+\qquad
+\rho_{\alpha\beta}(T)=[\boldsymbol{\sigma}(T)^{-1}]_{\alpha\beta}.\]</div>
+<p>This relation applies when the conductivity matrix is invertible. Only when
+that matrix is diagonal does <span class="math notranslate nohighlight">\(\rho_{\alpha\alpha}=1/\sigma_{\alpha\alpha}\)</span>
+hold component by component. The tensor approach can describe anisotropic
+metals within the scattering mechanisms and approximations included in the
+BTE calculation.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="conductivity.html" class="btn btn-neutral float-left" title="Conductivity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="superconductivity.html" class="btn btn-neutral float-right" title="Superconductivity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+.param-card {
+  border: 1.5px solid var(--theme-color, #333);
+  background-color: var(--bg-color, #f9f9f9);
+  color: var(--font-color, #222);
+  border-radius: 10px;
+  padding: 1.2em;
+  margin: 1.5em 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+}
+
+.param-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.param-card .param-header {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: var(--theme-color, #333);
+}
+
+.param-card .param-meta {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: #007acc;
+  margin-bottom: 1em;
+}
+
+.param-card .param-desc {
+  margin-bottom: 0.8em;
+  /* font-size: 0.9em;
+  font-weight: 500;
+  color: #007acc; */
+}
+
+.param-card .param-block {
+  position: absolute;
+  bottom: 0.6em;
+  right: 1.2em;
+  font-size: 0.85em;
+  font-style: italic;
+  font-weight: bold;
+  color: var(--theme-color, #444);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+/* ------ Color Themes ------ */
+
+/* Common style groupings */
+/* .param-card.basic,
+.param-card.advanced,
+.param-card.software_path {
+  --theme-color: #2c3e50;
+  --bg-color: #f0f4f8;
+}
+
+.param-card.material,
+.param-card.dos,
+.param-card.grad_epc {
+  --theme-color: #16a085;
+  --bg-color: #e8f6f3;
+}
+
+.param-card.scf_params,
+.param-card.dispersion {
+  --theme-color: #9b59b6;
+  --bg-color: #f5ecfb;
+}
+
+.param-card.phonon,
+.param-card.transport {
+  --theme-color: #2980b9;
+  --bg-color: #eaf2fb;
+}
+
+.param-card.epc,
+.param-card.superconductivity {
+  --theme-color: #27ae60;
+  --bg-color: #ebf8ee;
+}
+
+.param-card.conductivity,
+.param-card.breakdown {
+  --theme-color: #e67e22;
+  --bg-color: #fff5e6;
+}
+
+.param-card.resistivity {
+  --theme-color: #8e44ad;
+  --bg-color: #f6efff;
+} */
+
+/* ------ Color Themes: Redesigned ------ */
+
+.param-card.basic,
+.param-card.advanced,
+.param-card.software_path {
+  --theme-color: #d35400;
+  --bg-color: #fff3e6;
+}
+
+.param-card.material,
+.param-card.dos,
+.param-card.grad_epc {
+  --theme-color: #16a085;
+  --bg-color: #e6f5f2;
+}
+
+.param-card.scf_params,
+.param-card.dispersion {
+  --theme-color: #8e44ad;
+  --bg-color: #f5e9ff;
+}
+
+.param-card.phonon,
+.param-card.transport {
+  --theme-color: #2980b9;
+  --bg-color: #eaf4fd;
+}
+
+.param-card.epc,
+.param-card.superconductivity {
+  --theme-color: #27ae60;
+  --bg-color: #e6faee;
+}
+
+.param-card.conductivity,
+.param-card.breakdown {
+  --theme-color: #e67e22;
+  --bg-color: #fff5e6;
+}
+
+.param-card.resistivity,
+.param-card.graph_pack {
+  --theme-color: #c0392b;
+  --bg-color: #ffecec;
+}

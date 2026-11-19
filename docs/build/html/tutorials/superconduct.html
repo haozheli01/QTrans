@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Superconductivity Calculation &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Input Keywords" href="../input_keywords.html" />
+    <link rel="prev" title="Intrinsic Dielectric Breakdown" href="breakdown.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="obtain_hs.html">Generation of Hamiltonian and Overlap Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="phonon_prep.html">Phonon Force Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_dos.html">DOS of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_path.html">EPC Path Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resist.html">Resistivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Superconductivity Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qtrans-openmx"><strong>QTrans</strong> + OpenMX</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#step-1-prepare-the-input-data">Step 1. Prepare the input data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-2-configure-the-calculation">Step 2. Configure the calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-3-run-and-inspect-the-results">Step 3. Run and inspect the results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-4-plot-the-eliashberg-spectrum">Step 4. Plot the Eliashberg spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#qtrans-abacus"><strong>QTrans</strong> + ABACUS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Superconductivity Calculation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/superconduct.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="superconductivity-calculation">
+<span id="tutorial-superconductivity"></span><h1>Superconductivity Calculation<a class="headerlink" href="#superconductivity-calculation" title="Link to this heading"></a></h1>
+<p>This tutorial uses <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">superconductivity</span></code> in <strong>QTrans</strong> to calculate
+the Eliashberg spectral function, electron-phonon coupling strength, and
+superconducting critical temperature <span class="math notranslate nohighlight">\(T_c\)</span> of bulk fcc aluminum.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This example is intended for learning the workflow. Its sampling and
+smearing settings are not fully converged. Converge these parameters
+before using the results for quantitative predictions.</p>
+</div>
+<section id="qtrans-openmx">
+<h2><strong>QTrans</strong> + OpenMX<a class="headerlink" href="#qtrans-openmx" title="Link to this heading"></a></h2>
+<section id="step-1-prepare-the-input-data">
+<h3>Step 1. Prepare the input data<a class="headerlink" href="#step-1-prepare-the-input-data" title="Link to this heading"></a></h3>
+<p>The example is located in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/superconductivity/</span></code>.
+Its <code class="docutils literal notranslate"><span class="pre">input-sc.yaml</span></code> reads the prepared data from <code class="docutils literal notranslate"><span class="pre">../data/</span></code>, namely
+<code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/data/</span></code>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>File</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">graph_data.npz</span></code></p></td>
+<td><p>Unit-cell electronic Hamiltonian and overlap data</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Al-pri.vasp</span></code> and <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code></p></td>
+<td><p>Reference structure and phonon force data</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grad_mat_sparse.npy</span></code> and <code class="docutils literal notranslate"><span class="pre">mat_info_sc.npy</span></code></p></td>
+<td><p>Sparse EPC gradients and the corresponding supercell mapping</p></td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="obtain_hs.html#tutorial-obtain-hs"><span class="std std-ref">Generation of Hamiltonian and Overlap Matrices</span></a> and <a class="reference internal" href="epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">EPC Gradient Matrix Preparation</span></a> for electronic
+and EPC data preparation. Reference outputs for this calculation are in
+<code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/superconductivity/ref/</span></code>.</p>
+</section>
+<section id="step-2-configure-the-calculation">
+<h3>Step 2. Configure the calculation<a class="headerlink" href="#step-2-configure-the-calculation" title="Link to this heading"></a></h3>
+<p>The supplied configuration uses the OpenMX 14-orbital definition and sparse
+EPC gradients. Keep <code class="docutils literal notranslate"><span class="pre">advanced.read_sparse_grad_mat:</span> <span class="pre">True</span></code> consistent with
+<code class="docutils literal notranslate"><span class="pre">epc.grad_mat_path:</span> <span class="pre">../data/grad_mat_sparse.npy</span></code>. Phonons are constructed
+using a <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">x</span> <span class="pre">3</span> <span class="pre">x</span> <span class="pre">3</span></code> supercell, and modes below 0.5 meV are excluded by
+<code class="docutils literal notranslate"><span class="pre">epc.phonon_frequency_cutoff</span></code>.</p>
+<p>The complete <code class="docutils literal notranslate"><span class="pre">input-sc.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;superconductivity&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">read_sparse_grad_mat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/Al-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/FORCE_SETS</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/grad_mat_sparse.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">phonon_frequency_cutoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+
+<span class="nt">transport</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">k_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">30</span><span class="p p-Indicator">,</span><span class="nv">30</span><span class="p p-Indicator">,</span><span class="nv">30</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">30</span><span class="p p-Indicator">,</span><span class="nv">30</span><span class="p p-Indicator">,</span><span class="nv">30</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">bands_indices</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;1-3&#39;</span>
+<span class="w">  </span><span class="nt">smeark</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">smearq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">  </span><span class="nt">gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-99</span>
+<span class="w">  </span><span class="nt">e_thr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+
+<span class="nt">superconductivity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mus</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.05</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.25</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.01</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">omega_range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">omega_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+</pre></div>
+</div>
+<p>Both the k- and q-point grids contain <code class="docutils literal notranslate"><span class="pre">30</span> <span class="pre">x</span> <span class="pre">30</span> <span class="pre">x</span> <span class="pre">30</span></code> points. The smearing
+widths <code class="docutils literal notranslate"><span class="pre">smeark</span></code> and <code class="docutils literal notranslate"><span class="pre">smearq</span></code> and the threshold <code class="docutils literal notranslate"><span class="pre">e_thr</span></code> are in meV.
+The optional <code class="docutils literal notranslate"><span class="pre">temperature</span></code> is in K and is omitted in this input. In this
+Allen-Dynes workflow, it belongs to the shared transport configuration but does not enter
+the pairing spectrum or the critical-temperature formula. It does not set
+the electronic smearing width, which is controlled by <code class="docutils literal notranslate"><span class="pre">smeark</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mus</span></code> specifies the effective Coulomb pseudopotential <span class="math notranslate nohighlight">\(\mu^*\)</span> as
+<code class="docutils literal notranslate"><span class="pre">[start,</span> <span class="pre">stop,</span> <span class="pre">step]</span></code>. The stop value is excluded, so this example evaluates
+0.05 through 0.24 in steps of 0.01. The phonon energy interval for
+<span class="math notranslate nohighlight">\(\alpha^2F(\omega)\)</span> is set by <code class="docutils literal notranslate"><span class="pre">omega_range</span></code> and <code class="docutils literal notranslate"><span class="pre">omega_step</span></code>, both
+in meV.</p>
+</section>
+<section id="step-3-run-and-inspect-the-results">
+<h3>Step 3. Run and inspect the results<a class="headerlink" href="#step-3-run-and-inspect-the-results" title="Link to this heading"></a></h3>
+<p>From the tutorial repository root, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/openmx/superconductivity/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>QTrans_run<span class="w"> </span>--config<span class="w"> </span>input-sc.yaml<span class="w"> </span>&gt;<span class="w"> </span>kq30_sc.out
+</pre></div>
+</div>
+<p>Run from this directory so that the relative data paths resolve correctly.
+The reference run uses eight MPI ranks. Runtime depends on the hardware and
+parallel configuration.</p>
+<p>The current <code class="docutils literal notranslate"><span class="pre">ref/kq30_sc.out</span></code> reports:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Lambda = 0.3599351875817346
+Omega log = 22.853746572761303 meV
+  mu        Tc (K)
+0.0500    1.943423e+00
+0.0600    1.587856e+00
+0.0700    1.274174e+00
+0.0800    1.001670e+00
+0.0900    7.691101e-01
+0.1000    5.746985e-01
+0.1100    4.160603e-01
+...
+0.2400    1.232024e-07
+</pre></div>
+</div>
+<p>The integrated coupling strength is <span class="math notranslate nohighlight">\(\lambda \approx 0.35994\)</span>, and the
+logarithmic average phonon energy is
+<span class="math notranslate nohighlight">\(\omega_{\mathrm{log}} \approx 22.85375\)</span> meV. The calculated
+<span class="math notranslate nohighlight">\(T_c\)</span> decreases with increasing <span class="math notranslate nohighlight">\(\mu^*\)</span>: it is approximately
+1.9434 K at 0.05, 1.2742 K at 0.07, and 0.57470 K at 0.10.
+The experimental transition temperature of Al is about 1.2 K
+<span id="id1">[<a class="reference internal" href="../intro/refers.html#id13" title="John F. Cochran and D. E. Mapother. Superconducting transition in aluminum. Phys. Rev., 111:132–142, Jul 1958. URL: https://link.aps.org/doi/10.1103/PhysRev.111.132, doi:10.1103/PhysRev.111.132.">12</a>]</span>; comparison with experiment requires converged
+numerical settings and a justified choice of <span class="math notranslate nohighlight">\(\mu^*\)</span>.</p>
+<p>Check that the log ends with <code class="docutils literal notranslate"><span class="pre">QTRANS</span> <span class="pre">JOB</span> <span class="pre">SUCCESS</span></code>. Results are written to
+<code class="docutils literal notranslate"><span class="pre">basic.outdir</span></code>, which is the current directory in this example:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">kq30_sc.out</span></code> is the redirected log and contains <span class="math notranslate nohighlight">\(\lambda\)</span>,
+<span class="math notranslate nohighlight">\(\omega_{\mathrm{log}}\)</span>, and the <span class="math notranslate nohighlight">\(T_c\)</span> table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> contains the Eliashberg spectral function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">epc_strengths_restart.npz</span></code> stores EPC strengths for restart; the reference
+log reports its creation, but this file is not included in <code class="docutils literal notranslate"><span class="pre">ref/</span></code>.</p></li>
+</ul>
+</section>
+<section id="step-4-plot-the-eliashberg-spectrum">
+<h3>Step 4. Plot the Eliashberg spectrum<a class="headerlink" href="#step-4-plot-the-eliashberg-spectrum" title="Link to this heading"></a></h3>
+<p>For this nonmagnetic example, <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> has two columns: phonon energy in
+meV and <span class="math notranslate nohighlight">\(\alpha^2F(\omega)\)</span>. An excerpt from <code class="docutils literal notranslate"><span class="pre">ref/a2f.dat</span></code> is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>#omega (meV)    a2f
+...
+24.1200        0.1761
+24.1300        0.1761
+24.1400        0.1761
+24.1500        0.1762
+...
+</pre></div>
+</div>
+<p>The supplied <code class="docutils literal notranslate"><span class="pre">ref/plot.py</span></code> plots the spectrum and cumulative coupling,</p>
+<div class="math notranslate nohighlight">
+\[\lambda(\omega) = 2\int_0^\omega
+\frac{\alpha^2F(\omega')}{\omega'}\,d\omega'.\]</div>
+<p>To plot the reference data, run from the calculation directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>ref/
+python<span class="w"> </span>plot.py
+</pre></div>
+</div>
+<p>This writes <code class="docutils literal notranslate"><span class="pre">a2f_lambda.png</span></code>. To plot your own result, run the same script
+from the calculation directory instead:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>ref/plot.py
+</pre></div>
+</div>
+<p>The script reads <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> from the current working directory. The
+cumulative coupling approaches the reported total <span class="math notranslate nohighlight">\(\lambda\)</span> at the
+upper end of the spectrum; small differences can arise from the rounded
+values saved in <code class="docutils literal notranslate"><span class="pre">a2f.dat</span></code> and the numerical integration.</p>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/sc_Al.png"><img alt="Eliashberg spectral function and cumulative electron-phonon coupling of aluminum." src="../_images/sc_Al.png" style="width: 450.0px; height: 450.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1:</strong>  Eliashberg spectral function <span class="math notranslate nohighlight">\(\alpha^2F(\omega)\)</span> of Al (blue solid
+line) and cumulative coupling <span class="math notranslate nohighlight">\(\lambda(\omega)\)</span> (black dashed line).</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="qtrans-abacus">
+<h2><strong>QTrans</strong> + ABACUS<a class="headerlink" href="#qtrans-abacus" title="Link to this heading"></a></h2>
+<p>The corresponding ABACUS example is in
+<code class="docutils literal notranslate"><span class="pre">tutorials/Al/abacus/superconductivity/</span></code>. It uses the ABACUS electronic
+and EPC data from <code class="docutils literal notranslate"><span class="pre">../data/</span></code>, <code class="docutils literal notranslate"><span class="pre">nao_max:</span> <span class="pre">40</span></code>, bands 5–7, and
+<code class="docutils literal notranslate"><span class="pre">32</span> <span class="pre">x</span> <span class="pre">32</span> <span class="pre">x</span> <span class="pre">32</span></code> k- and q-point meshes. Its complete input is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;superconductivity&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">abacus</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">read_sparse_grad_mat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/Al-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/FORCE_SETS</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/grad_mat_sparse.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">phonon_frequency_cutoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+
+<span class="nt">transport</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">k_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">32</span><span class="p p-Indicator">,</span><span class="nv">32</span><span class="p p-Indicator">,</span><span class="nv">32</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_size</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">32</span><span class="p p-Indicator">,</span><span class="nv">32</span><span class="p p-Indicator">,</span><span class="nv">32</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">bands_indices</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;5-7&#39;</span>
+<span class="w">  </span><span class="nt">smeark</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">smearq</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<span class="w">  </span><span class="nt">gauss_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-99</span>
+<span class="w">  </span><span class="nt">e_thr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+
+<span class="nt">superconductivity</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">mus</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.05</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.25</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.01</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">omega_range</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">50</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">omega_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+</pre></div>
+</div>
+<p>Run from the tutorial repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/abacus/superconductivity/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>QTrans_run<span class="w"> </span>--config<span class="w"> </span>input-sc.yaml<span class="w"> </span>&gt;<span class="w"> </span>kq32_sc.out
+</pre></div>
+</div>
+<p>The current <code class="docutils literal notranslate"><span class="pre">ref/kq32_sc.out</span></code> reports
+<span class="math notranslate nohighlight">\(\lambda = 0.30431\)</span> and
+<span class="math notranslate nohighlight">\(\omega_{\mathrm{log}} = 27.03710\)</span> meV, with
+<span class="math notranslate nohighlight">\(T_c = 1.02721\)</span> K at <span class="math notranslate nohighlight">\(\mu^* = 0.05\)</span>.
+The output files and plotting procedure follow the OpenMX example.
+The two examples use different electronic data and numerical settings;
+their difference alone is not a convergence test or a comparison of solver accuracy.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="breakdown.html" class="btn btn-neutral float-left" title="Intrinsic Dielectric Breakdown" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../input_keywords.html" class="btn btn-neutral float-right" title="Input Keywords" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

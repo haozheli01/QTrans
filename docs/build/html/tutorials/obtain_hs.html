@@ -1,0 +1,574 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generation of Hamiltonian and Overlap Matrices &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="EPC Gradient Matrix Preparation" href="epc_prep.html" />
+    <link rel="prev" title="Tutorials" href="../tutorials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Generation of Hamiltonian and Overlap Matrices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#based-on-dft-calculations">Based on DFT Calculations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#openmx-al-as-the-main-example">1. OpenMX: Al as the main example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#openmx-magnetic-fe">2. OpenMX: magnetic Fe</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#abacus-the-al-workflow">3. ABACUS: the Al workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#based-on-hamgnn-prediction-with-openmx">Based on HamGNN Prediction with OpenMX</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prepare-graph-data-for-prediction">Prepare graph data for prediction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#prediction-configuration">Prediction configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#passing-unit-cell-data-to-the-calculator">Passing unit-cell data to the calculator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="phonon_prep.html">Phonon Force Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_dos.html">DOS of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_path.html">EPC Path Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resist.html">Resistivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconduct.html">Superconductivity Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Generation of Hamiltonian and Overlap Matrices</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/obtain_hs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="generation-of-hamiltonian-and-overlap-matrices">
+<span id="tutorial-obtain-hs"></span><h1>Generation of Hamiltonian and Overlap Matrices<a class="headerlink" href="#generation-of-hamiltonian-and-overlap-matrices" title="Link to this heading"></a></h1>
+<p>This tutorial explains how to prepare electronic data for <strong>QTrans</strong> using the
+nonmagnetic aluminum (Al) and ferromagnetic iron (Fe) as examples.
+<strong>QTrans</strong> stores the structure, orbital basis, Hamiltonian,
+and overlap matrices in graph data, written as <code class="docutils literal notranslate"><span class="pre">graph_data_QTrans.npz</span></code>
+by <code class="docutils literal notranslate"><span class="pre">graph-pack</span></code>. Tutorial data directories may rename this file to
+<code class="docutils literal notranslate"><span class="pre">graph_data.npz</span></code>.</p>
+<p>Paths below are relative to the tutorial repository root. Run graph packing
+from the relevant graph-packing directory so that relative paths in the
+YAML configuration resolve correctly. Each example includes a <code class="docutils literal notranslate"><span class="pre">ref/</span></code>
+directory with previously generated inputs and outputs for comparison.
+The <strong>QTrans</strong> YAML configurations below are shown in full, with
+machine-specific paths replaced by <code class="docutils literal notranslate"><span class="pre">/path/to/...</span></code> placeholders.
+Omitted optional parameters use the program defaults.</p>
+<section id="based-on-dft-calculations">
+<h2>Based on DFT Calculations<a class="headerlink" href="#based-on-dft-calculations" title="Link to this heading"></a></h2>
+<section id="openmx-al-as-the-main-example">
+<h3>1. OpenMX: Al as the main example<a class="headerlink" href="#openmx-al-as-the-main-example" title="Link to this heading"></a></h3>
+<p>Install OpenMX and obtain the <code class="docutils literal notranslate"><span class="pre">read_openmx</span></code> matrix-export executable
+from the <a class="reference external" href="https://github.com/QuantumLab-ZY/HamGNN/">HamGNN repository</a>.
+<strong>QTrans</strong> invokes <code class="docutils literal notranslate"><span class="pre">read_openmx</span></code> to extract Hamiltonian and overlap matrices
+from OpenMX binary outputs into a temporary <code class="docutils literal notranslate"><span class="pre">HS.json</span></code> file. The separate
+<code class="docutils literal notranslate"><span class="pre">openmx_postprocess</span></code> executable is needed for the HamGNN preprocessing
+route described later; it is not required for packing the SCF matrices in these examples.</p>
+<p>For detailed DFT parameter settings and instructions on using OpenMX, refer
+to the manuals on the <a class="reference external" href="https://www.openmx-square.org/">official OpenMX website</a>.
+The steps below focus on generating and converting the outputs needed by
+<strong>QTrans</strong>.</p>
+<p>The example is located in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/graph-pack/</span></code>. Its <code class="docutils literal notranslate"><span class="pre">ref/</span></code>
+directory contains outputs for reference.</p>
+<section id="step-1-prepare-the-executables-and-input">
+<h4>Step 1. Prepare the executables and input<a class="headerlink" href="#step-1-prepare-the-executables-and-input" title="Link to this heading"></a></h4>
+<p>Before running the example:</p>
+<ul class="simple">
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">DATA.PATH</span></code> in <code class="docutils literal notranslate"><span class="pre">DFT/openmx_Al.dat</span></code> to your OpenMX pseudopotential
+and atomic-orbital data directory.</p></li>
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">software_path.openmx_read_path</span></code> in <code class="docutils literal notranslate"><span class="pre">input_graph.yaml</span></code> to an
+executable <code class="docutils literal notranslate"><span class="pre">read_openmx</span></code>.</p></li>
+<li><p>Make sure <code class="docutils literal notranslate"><span class="pre">openmx</span></code> is available in your shell, or use its full path in
+the command below.</p></li>
+</ul>
+<p>The supplied input uses the GGA-PBE functional, the <code class="docutils literal notranslate"><span class="pre">Al7.0-s2p2d1</span></code> orbital
+basis, and the <code class="docutils literal notranslate"><span class="pre">Al_PBE19</span></code> pseudopotential without spin polarization.
+It sets <code class="docutils literal notranslate"><span class="pre">scf.energycutoff</span></code> to 200 Ry, <code class="docutils literal notranslate"><span class="pre">scf.Kgrid</span></code> to <code class="docutils literal notranslate"><span class="pre">18</span> <span class="pre">18</span> <span class="pre">18</span></code>,
+<code class="docutils literal notranslate"><span class="pre">scf.ElectronicTemperature</span></code> to 300 K, and <code class="docutils literal notranslate"><span class="pre">scf.criterion</span></code> to
+<code class="docutils literal notranslate"><span class="pre">1.0e-12</span></code> Hartree. Keep <code class="docutils literal notranslate"><span class="pre">HS.fileout</span> <span class="pre">on</span></code> enabled to write the binary
+Hamiltonian and overlap data required by <strong>QTrans</strong>. Check convergence
+before applying these settings to another system.</p>
+</section>
+<section id="step-2-run-the-self-consistent-calculation">
+<h4>Step 2. Run the self-consistent calculation<a class="headerlink" href="#step-2-run-the-self-consistent-calculation" title="Link to this heading"></a></h4>
+<p>From the repository root, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/openmx/graph-pack/DFT/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>openmx<span class="w"> </span>openmx_Al.dat<span class="w"> </span>&gt;<span class="w"> </span>openmx_scf.out
+<span class="nb">cd</span><span class="w"> </span>..
+</pre></div>
+</div>
+<p>The input sets <code class="docutils literal notranslate"><span class="pre">System.Name</span></code> to <code class="docutils literal notranslate"><span class="pre">crystal</span></code>, so the files needed for graph
+packing are <code class="docutils literal notranslate"><span class="pre">DFT/crystal.scfout</span></code> and <code class="docutils literal notranslate"><span class="pre">DFT/crystal.out</span></code>.
+<code class="docutils literal notranslate"><span class="pre">openmx_scf.out</span></code> is the redirected terminal output; it is distinct from
+<code class="docutils literal notranslate"><span class="pre">crystal.out</span></code>, which <strong>QTrans</strong> reads for structure and convergence information.
+Check that the SCF calculation converged before continuing.</p>
+</section>
+<section id="step-3-configure-graph-packing">
+<h4>Step 3. Configure graph packing<a class="headerlink" href="#step-3-configure-graph-packing" title="Link to this heading"></a></h4>
+<p>The complete <code class="docutils literal notranslate"><span class="pre">input_graph.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">prep_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;graph-pack&#39;</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">software_path</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">openmx_read_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./read_openmx</span>
+
+<span class="nt">material</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">DFT_software</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+
+<span class="nt">graph_pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">HSout_filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;crystal.scfout&#39;</span>
+<span class="w">  </span><span class="nt">vbout_filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;crystal.out&#39;</span>
+<span class="w">  </span><span class="nt">data_folder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./DFT/</span>
+<span class="w">  </span><span class="nt">converge_step_ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span>
+</pre></div>
+</div>
+<p>Replace the executable path with your installation path.
+<a class="reference internal" href="../keywords/preparer.html#prep-nao-max"><span class="std std-ref">nao_max</span></a> selects the orbital definition used to pack the
+data and must match the electronic-structure setup. This DFT example uses
+<code class="docutils literal notranslate"><span class="pre">14</span></code> for the aluminum basis used here.
+A larger atomic-orbital basis can improve accuracy at a higher computational
+cost. Set <a class="reference internal" href="../keywords/preparer.html#prep-nao-max"><span class="std std-ref">nao_max</span></a> to match the basis used in the DFT
+calculation; increasing this parameter alone does not improve accuracy.</p>
+<p><a class="reference internal" href="../keywords/preparer.html#prep-hsout-filename"><span class="std std-ref">HSout_filename</span></a> identifies the binary matrix file,
+and <a class="reference internal" href="../keywords/preparer.html#prep-vbout-filename"><span class="std std-ref">vbout_filename</span></a> identifies the OpenMX text
+output. <a class="reference internal" href="../keywords/preparer.html#prep-data-folder"><span class="std std-ref">data_folder</span></a> selects the calculation folders.
+For multiple calculations, it can be a glob pattern such as <code class="docutils literal notranslate"><span class="pre">./DFT/*/</span></code>;
+folders missing required files are reported and skipped.</p>
+<p>The parameter <a class="reference internal" href="../keywords/preparer.html#prep-converge-step-ratio"><span class="std std-ref">converge_step_ratio</span></a> filters
+calculations using their SCF iteration count relative to <code class="docutils literal notranslate"><span class="pre">scf.maxIter</span></code>.
+The example uses <code class="docutils literal notranslate"><span class="pre">0.9</span></code>. This filter supplements checking the SCF convergence
+and does not set the convergence tolerance of OpenMX.</p>
+</section>
+<section id="step-4-pack-and-inspect-the-result">
+<h4>Step 4. Pack and inspect the result<a class="headerlink" href="#step-4-pack-and-inspect-the-result" title="Link to this heading"></a></h4>
+<p>From <code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/graph-pack/</span></code>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>QTrans_prep<span class="w"> </span>--config<span class="w"> </span>input_graph.yaml<span class="w"> </span>&gt;<span class="w"> </span>graph_pack.out
+</pre></div>
+</div>
+<p>The output is <code class="docutils literal notranslate"><span class="pre">graph_data_QTrans.npz</span></code> in <code class="docutils literal notranslate"><span class="pre">basic.outdir</span></code>. Check that
+<code class="docutils literal notranslate"><span class="pre">graph_pack.out</span></code> reports one useful folder and successful completion.
+Reference files are available at:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ref/
+  DFT/crystal.scfout
+  DFT/crystal.out
+  DFT/openmx_scf.out
+  graph_data_QTrans.npz
+  graph_pack.out
+</pre></div>
+</div>
+<p>Reference logs may contain paths from the original calculation environment;
+use the paths shown above for the current directory layout.</p>
+<p>For unit-cell calculations, provide the generated dataset through
+<code class="docutils literal notranslate"><span class="pre">basic.graph_data_path_uc</span></code> in the calculator configuration. To prepare EPC
+from displaced-supercell data, continue with <a class="reference internal" href="epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">EPC Gradient Matrix Preparation</span></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>QTrans</strong> creates and removes <code class="docutils literal notranslate"><span class="pre">HS.json</span></code> in each selected calculation
+folder during matrix extraction. Use folders without an existing
+<code class="docutils literal notranslate"><span class="pre">HS.json</span></code> and avoid concurrent graph-packing jobs in the same folders.</p>
+</div>
+</section>
+</section>
+<section id="openmx-magnetic-fe">
+<h3>2. OpenMX: magnetic Fe<a class="headerlink" href="#openmx-magnetic-fe" title="Link to this heading"></a></h3>
+<p>The bcc Fe example is located in <code class="docutils literal notranslate"><span class="pre">tutorials/Fe/openmx/graph-pack/</span></code>.
+Follow the same SCF and graph-packing sequence as for Al, with the changes
+below.</p>
+<section id="spin-polarized-dft-input">
+<h4>Spin-polarized DFT input<a class="headerlink" href="#spin-polarized-dft-input" title="Link to this heading"></a></h4>
+<p>Update <code class="docutils literal notranslate"><span class="pre">DATA.PATH</span></code> in <code class="docutils literal notranslate"><span class="pre">DFT/openmx_Fe.dat</span></code>. The supplied input uses
+<code class="docutils literal notranslate"><span class="pre">Fe5.5H-s3p2d1</span></code> and <code class="docutils literal notranslate"><span class="pre">Fe_PBE19H</span></code>, a 200 Ry cutoff, a
+<code class="docutils literal notranslate"><span class="pre">22</span> <span class="pre">x</span> <span class="pre">22</span> <span class="pre">x</span> <span class="pre">22</span></code> k-point mesh, and <code class="docutils literal notranslate"><span class="pre">scf.criterion:</span> <span class="pre">1.0e-10</span></code> Hartree.
+Its key magnetic settings are:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>scf.SpinPolarization    on
+HS.fileout             on
+
+&lt;Atoms.SpeciesAndCoordinates
+  1  Fe  0.0000000  0.0000000  0.0000000  10.00  6.00  on
+Atoms.SpeciesAndCoordinates&gt;
+</pre></div>
+</div>
+<p>The unequal initial spin populations seed a magnetic state; they do not
+specify the final converged magnetic moment. Check both SCF convergence
+and the resulting magnetic state in <code class="docutils literal notranslate"><span class="pre">crystal.out</span></code>. This example treats
+collinear magnetism without spin-orbit coupling.</p>
+</section>
+<section id="matching-graph-packing-settings">
+<h4>Matching graph-packing settings<a class="headerlink" href="#matching-graph-packing-settings" title="Link to this heading"></a></h4>
+<p>The complete Fe <code class="docutils literal notranslate"><span class="pre">input_graph.yaml</span></code> is shown below. Its magnetic setting
+is the main difference from the Al configuration:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">prep_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;graph-pack&#39;</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">software_path</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">openmx_read_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./read_openmx</span>
+
+<span class="nt">material</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">14</span>
+<span class="w">  </span><span class="nt">DFT_software</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">magnetic_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">collinear</span><span class="w"> </span><span class="c1"># Fe is ferromagnetic!</span>
+
+<span class="nt">graph_pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">HSout_filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;crystal.scfout&#39;</span>
+<span class="w">  </span><span class="nt">vbout_filename</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;crystal.out&#39;</span>
+<span class="w">  </span><span class="nt">data_folder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./DFT/</span>
+<span class="w">  </span><span class="nt">converge_step_ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.9</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">magnetic_type:</span> <span class="pre">collinear</span></code> tells <strong>QTrans</strong> to retain the two spin channels.
+It must match <code class="docutils literal notranslate"><span class="pre">scf.SpinPolarization</span> <span class="pre">on</span></code> in the DFT calculation; the default
+nonmagnetic setting used for Al is not appropriate for this Fe dataset.
+<code class="docutils literal notranslate"><span class="pre">nao_max:</span> <span class="pre">14</span></code> selects the OpenMX orbital definition, which includes the
+Fe basis used here. See <a class="reference internal" href="../keywords/ao_define.html#ao-define-title"><span class="std std-ref">Atomic Orbital Basis Definition</span></a> and
+<a class="reference internal" href="../keywords/valence_electrons.html#valence-electrons-title"><span class="std std-ref">Valence Electron Counts</span></a> for the orbital and electron-count definitions.</p>
+<p>From the tutorial repository root, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Fe/openmx/graph-pack/DFT/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>openmx<span class="w"> </span>openmx_Fe.dat<span class="w"> </span>&gt;<span class="w"> </span>openmx.out
+<span class="nb">cd</span><span class="w"> </span>..
+QTrans_prep<span class="w"> </span>--config<span class="w"> </span>input_graph.yaml<span class="w"> </span>&gt;<span class="w"> </span>graph.out
+</pre></div>
+</div>
+<p>Set <code class="docutils literal notranslate"><span class="pre">software_path.openmx_read_path</span></code> to your matrix-export executable
+before packing. The output is <code class="docutils literal notranslate"><span class="pre">graph_data_QTrans.npz</span></code>; compare it and
+<code class="docutils literal notranslate"><span class="pre">graph.out</span></code> with the corresponding files in <code class="docutils literal notranslate"><span class="pre">ref/</span></code>. The reference log
+reports <code class="docutils literal notranslate"><span class="pre">Dealing</span> <span class="pre">with</span> <span class="pre">a</span> <span class="pre">COLLINEAR</span> <span class="pre">magnetic</span> <span class="pre">system.</span></code> and one useful folder.
+For subsequent transport property calculations, keep <code class="docutils literal notranslate"><span class="pre">advanced.magnetic_type:</span> <span class="pre">collinear</span></code> and
+the no-SOC setting consistent with this prepared dataset.</p>
+</section>
+</section>
+<section id="abacus-the-al-workflow">
+<h3>3. ABACUS: the Al workflow<a class="headerlink" href="#abacus-the-al-workflow" title="Link to this heading"></a></h3>
+<p>For detailed DFT parameter settings and instructions on using ABACUS, refer
+to the <a class="reference external" href="https://abacus.deepmodeling.com/en/latest/">official ABACUS documentation</a>.
+The steps below focus on generating and converting the outputs needed by
+<strong>QTrans</strong>.</p>
+<p>The example is located in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/abacus/graph-pack/</span></code>. Reference
+outputs are provided in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/abacus/graph-pack/ref/</span></code>.</p>
+<section id="step-1-prepare-the-abacus-input">
+<h4>Step 1. Prepare the ABACUS input<a class="headerlink" href="#step-1-prepare-the-abacus-input" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">DFT/</span></code> directory contains <code class="docutils literal notranslate"><span class="pre">INPUT</span></code>, <code class="docutils literal notranslate"><span class="pre">STRU</span></code>, and <code class="docutils literal notranslate"><span class="pre">KPT</span></code> for an
+LCAO self-consistent calculation of aluminum. The overall sequence is the
+same as for OpenMX: run DFT, locate the matrix outputs, then run
+<code class="docutils literal notranslate"><span class="pre">QTrans_prep</span></code>. ABACUS supplies CSR matrices that <strong>QTrans</strong> reads directly,
+so no <code class="docutils literal notranslate"><span class="pre">read_openmx</span></code> conversion is needed. Before running:</p>
+<ul class="simple">
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">pseudo_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">orbital_dir</span></code> in <code class="docutils literal notranslate"><span class="pre">INPUT</span></code> to your local
+pseudopotential and numerical-orbital directories.</p></li>
+<li><p>Ensure that these directories contain <code class="docutils literal notranslate"><span class="pre">Al_ONCV_PBE-1.0.upf</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Al_gga_7au_100Ry_4s4p1d.orb</span></code>, respectively, as specified in <code class="docutils literal notranslate"><span class="pre">STRU</span></code>.</p></li>
+<li><p>Make the <code class="docutils literal notranslate"><span class="pre">abacus</span></code> executable available in your shell. If using the
+supplied <code class="docutils literal notranslate"><span class="pre">sub_abacus</span></code> submission script, adapt its scheduler settings,
+modules, and executable path to your cluster.</p></li>
+</ul>
+<p>The key settings in <code class="docutils literal notranslate"><span class="pre">INPUT</span></code> are:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>suffix          Al
+basis_type      lcao
+calculation     scf
+out_mat_hs2     1
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">out_mat_hs2</span></code> enables the real-space Hamiltonian and overlap matrix output
+required for graph packing. With <code class="docutils literal notranslate"><span class="pre">suffix</span></code> set to <code class="docutils literal notranslate"><span class="pre">Al</span></code>, ABACUS writes
+these files to <code class="docutils literal notranslate"><span class="pre">OUT.Al/</span></code>. The supplied input uses an energy cutoff of
+150 Ry, <code class="docutils literal notranslate"><span class="pre">scf_thr:</span> <span class="pre">1e-9</span></code>, 10 bands, Gaussian smearing with
+<code class="docutils literal notranslate"><span class="pre">smearing_sigma:</span> <span class="pre">0.01</span></code>, and a Gamma-centered <code class="docutils literal notranslate"><span class="pre">10</span> <span class="pre">x</span> <span class="pre">10</span> <span class="pre">x</span> <span class="pre">10</span></code> k-point mesh.
+These settings describe this example; check convergence for your own system.</p>
+</section>
+<section id="id1">
+<h4>Step 2. Run the self-consistent calculation<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>From the repository root, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/abacus/graph-pack/DFT/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">16</span><span class="w"> </span>abacus<span class="w"> </span>&gt;<span class="w"> </span>abacus.out
+<span class="nb">cd</span><span class="w"> </span>..
+</pre></div>
+</div>
+<p>Check SCF convergence in <code class="docutils literal notranslate"><span class="pre">DFT/OUT.Al/running_scf.log</span></code>. Graph packing
+requires the original <code class="docutils literal notranslate"><span class="pre">DFT/STRU</span></code> and the following output files:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DFT/OUT.Al/
+  running_scf.log
+  data-HR-sparse_SPIN0.csr
+  data-SR-sparse_SPIN0.csr
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h4>Step 3. Configure graph packing<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p>From <code class="docutils literal notranslate"><span class="pre">tutorials/Al/abacus/graph-pack/</span></code>, configure <code class="docutils literal notranslate"><span class="pre">input_graph.yaml</span></code> as
+follows, replacing the data-directory paths with your local paths:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">prep_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;graph-pack&#39;</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">software_path</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">abacus_dftdata_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/SG15_ONCV</span>
+<span class="w">  </span><span class="nt">abacus_orb_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/SG15-std</span>
+
+<span class="nt">material</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">40</span>
+<span class="w">  </span><span class="nt">DFT_software</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">abacus</span>
+
+<span class="nt">graph_pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">data_folder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./DFT</span>
+<span class="w">  </span><span class="nt">abacus_out_folder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OUT.Al</span>
+<span class="w">  </span><span class="nt">abacus_scf_log</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">running_scf.log</span>
+</pre></div>
+</div>
+<p>The supplied <code class="docutils literal notranslate"><span class="pre">data_folder:</span> <span class="pre">./DFT</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">./DFT/</span></code> above.
+<code class="docutils literal notranslate"><span class="pre">abacus_out_folder</span></code> is relative to each selected calculation folder and
+must match the ABACUS output directory. <code class="docutils literal notranslate"><span class="pre">abacus_scf_log</span></code> identifies the log inside that directory.</p>
+<p><code class="docutils literal notranslate"><span class="pre">nao_max:</span> <span class="pre">40</span></code> selects <strong>QTrans</strong>’s ABACUS orbital definition for this example;
+it is not the number of orbitals on each atom. Keep this definition
+consistent with the numerical orbitals used in the DFT calculation.
+<strong>QTrans</strong> reads the ABACUS CSR matrices directly.</p>
+</section>
+<section id="id3">
+<h4>Step 4. Pack and inspect the result<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>Run from <code class="docutils literal notranslate"><span class="pre">tutorials/Al/abacus/graph-pack/</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>QTrans_prep<span class="w"> </span>--config<span class="w"> </span>input_graph.yaml<span class="w"> </span>&gt;<span class="w"> </span>graph.out
+</pre></div>
+</div>
+<p>The resulting <code class="docutils literal notranslate"><span class="pre">graph_data_QTrans.npz</span></code> is written to <code class="docutils literal notranslate"><span class="pre">basic.outdir</span></code> and
+can be supplied through <code class="docutils literal notranslate"><span class="pre">basic.graph_data_path_uc</span></code> for unit-cell calculations.
+Compare with <code class="docutils literal notranslate"><span class="pre">ref/graph.out</span></code> and <code class="docutils literal notranslate"><span class="pre">ref/graph_data_QTrans.npz</span></code> in this
+<code class="docutils literal notranslate"><span class="pre">graph-pack/</span></code> directory. The reference directory also includes the DFT inputs and the required <code class="docutils literal notranslate"><span class="pre">OUT.Al</span></code> files.</p>
+</section>
+</section>
+</section>
+<section id="based-on-hamgnn-prediction-with-openmx">
+<h2>Based on HamGNN Prediction with OpenMX<a class="headerlink" href="#based-on-hamgnn-prediction-with-openmx" title="Link to this heading"></a></h2>
+<p>We can also predict the Hamiltonian using <strong>HamGNN</strong>.
+The prediction example is located in
+<code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/predict-HamGNN/</span></code>. It uses the universal Hamiltonian model
+<span id="id4">[<a class="reference internal" href="../intro/refers.html#id4" title="Yang Zhong, Hongyu Yu, Ji-Hui Yang, Xingyu Guo, Hongjun Xiang, and Xingao Gong. Universal Machine Learning Kohn–Sham Hamiltonian for Materials. Chinese Physics Letters, 41(7):077103, June 2024. doi:10.1088/0256-307X/41/7/077103.">9</a>]</span>, available from
+<a class="reference external" href="https://doi.org/10.5281/zenodo.10827117">Zenodo</a>.</p>
+<section id="prepare-graph-data-for-prediction">
+<h3>Prepare graph data for prediction<a class="headerlink" href="#prepare-graph-data-for-prediction" title="Link to this heading"></a></h3>
+<p>The prediction route first constructs graph data containing the structure,
+overlap matrices, and non-self-consistent Hamiltonian contribution. <strong>HamGNN</strong>
+then predicts the Hamiltonian using this graph data and the universal model.</p>
+<p>From the repository root, enter the DFT directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/openmx/predict-HamGNN/DFT/
+</pre></div>
+</div>
+<p>Update <code class="docutils literal notranslate"><span class="pre">DATA.PATH</span></code> in <code class="docutils literal notranslate"><span class="pre">openmx_Al.dat</span></code> and ensure that
+<code class="docutils literal notranslate"><span class="pre">openmx_postprocess</span></code> and <code class="docutils literal notranslate"><span class="pre">read_openmx</span></code> are compatible with your OpenMX
+installation. Obtain these tools from the
+<a class="reference external" href="https://github.com/QuantumLab-ZY/HamGNN/">HamGNN project</a> and place the
+executables in this DFT directory, or update the command and configuration
+to use their installation paths.</p>
+<p>Run the preprocessing command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">1</span><span class="w"> </span>./openmx_postprocess<span class="w"> </span>openmx_Al.dat<span class="w"> </span>&gt;<span class="w"> </span>openmx_nonscf.out
+</pre></div>
+</div>
+<p>This step produces <code class="docutils literal notranslate"><span class="pre">overlap.scfout</span></code>. The graph-packing configuration uses
+<code class="docutils literal notranslate"><span class="pre">DFT_software:</span> <span class="pre">openmx</span></code> and <code class="docutils literal notranslate"><span class="pre">nao_max:</span> <span class="pre">26</span></code> to match the universal model’s
+orbital definition. The complete <code class="docutils literal notranslate"><span class="pre">input_graph.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">prep_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;graph-pack&#39;</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">software_path</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">openmx_read_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./read_openmx</span>
+
+<span class="nt">material</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">26</span>
+<span class="w">  </span><span class="nt">DFT_software</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+
+<span class="nt">graph_pack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">HSout_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">  </span><span class="nt">vbout_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="w">  </span><span class="nt">nonscf_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">overlap.scfout</span>
+<span class="w">  </span><span class="nt">stdin_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx_Al.dat</span>
+<span class="w">  </span><span class="nt">data_folder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">stdin_filename</span></code> supplies the structure and basis information from
+the OpenMX input. Use YAML <code class="docutils literal notranslate"><span class="pre">null</span></code> for disabled filenames, and leave
+<code class="docutils literal notranslate"><span class="pre">vbout_filename</span></code> unset or null to select the non-SCF graph-packing route.
+Set <code class="docutils literal notranslate"><span class="pre">software_path.openmx_read_path</span></code> to the local <code class="docutils literal notranslate"><span class="pre">./read_openmx</span></code> or
+another compatible executable.</p>
+<p>From this DFT directory, pack the data and copy it to the filename expected
+by HamGNN:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>QTrans_prep<span class="w"> </span>--config<span class="w"> </span>input_graph.yaml<span class="w"> </span>&gt;<span class="w"> </span>graph_pack.out
+cp<span class="w"> </span>graph_data_QTrans.npz<span class="w"> </span>graph_data.npz
+</pre></div>
+</div>
+<p><strong>HamGNN</strong> expects <code class="docutils literal notranslate"><span class="pre">graph_data.npz</span></code> in the directory specified by
+<code class="docutils literal notranslate"><span class="pre">dataset_params.graph_data_path</span></code>. The supplied <code class="docutils literal notranslate"><span class="pre">predict/HamGNN_config.yaml</span></code>
+sets this path to <code class="docutils literal notranslate"><span class="pre">../DFT/</span></code>. Previously generated preprocessing outputs
+are available in <code class="docutils literal notranslate"><span class="pre">predict-HamGNN/ref/DFT/</span></code>.</p>
+</section>
+<section id="prediction-configuration">
+<h3>Prediction configuration<a class="headerlink" href="#prediction-configuration" title="Link to this heading"></a></h3>
+<p>Before running inference, update <code class="docutils literal notranslate"><span class="pre">setup.checkpoint_path</span></code> in
+<code class="docutils literal notranslate"><span class="pre">predict/HamGNN_config.yaml</span></code> to the downloaded model and use a compatible
+<strong>HamGNN</strong> environment. This Al example selects <code class="docutils literal notranslate"><span class="pre">setup.stage:</span> <span class="pre">test</span></code>,
+<code class="docutils literal notranslate"><span class="pre">output_nets.HamGNN_out.nao_max:</span> <span class="pre">26</span></code>, and <code class="docutils literal notranslate"><span class="pre">add_H0:</span> <span class="pre">True</span></code>. Keep the model,
+orbital definition, graph data, and non-self-consistent contribution consistent.</p>
+<p>Run the prediction from the <code class="docutils literal notranslate"><span class="pre">predict</span></code> directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>../predict/
+HamGNN2.0<span class="w"> </span>--config<span class="w"> </span>HamGNN_config.yaml<span class="w"> </span>&gt;<span class="w"> </span>HamGNN_test.out
+</pre></div>
+</div>
+<p>The predicted Hamiltonian is written to
+<code class="docutils literal notranslate"><span class="pre">version_0/prediction_hamiltonian.npy</span></code> for the reference run. Reference
+outputs are provided in <code class="docutils literal notranslate"><span class="pre">predict-HamGNN/ref/predict/</span></code>, including
+<code class="docutils literal notranslate"><span class="pre">HamGNN_test.out</span></code> and the prediction file. The output version directory
+may change for subsequent runs.</p>
+<p>Use the predicted Hamiltonian together with the corresponding graph data;
+the structures, ordering, and orbital basis must match. For EPC gradient
+preparation, set <code class="docutils literal notranslate"><span class="pre">grad_epc.use_prediction:</span> <span class="pre">True</span></code> and supply the prediction
+through <code class="docutils literal notranslate"><span class="pre">grad_epc.pred_H_sc_path</span></code> together with matching supercell graph
+data and mapping, as described in <a class="reference internal" href="epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">EPC Gradient Matrix Preparation</span></a>.</p>
+<p>The prediction example above is for nonmagnetic Al. The magnetic Fe
+example in this tutorial uses spin-polarized DFT data; applying a model to
+Fe requires a model and graph representation compatible with that magnetic
+configuration.</p>
+<p>For HamGNN installation and inference details, consult the
+<a class="reference external" href="https://github.com/QuantumLab-ZY/HamGNN/">HamGNN documentation</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">graph-pack</span></code> mode of <code class="docutils literal notranslate"><span class="pre">QTrans_prep</span></code> supports MPI parallel execution
+across multiple calculation folders, including displaced supercells.
+Each rank builds the graphs for its assigned folders; rank 0 gathers,
+sorts, and saves all graphs in a single output file. Each rank may process
+one or more folders, depending on the number of folders and MPI ranks.</p>
+<p>For multiple folders selected by <code class="docutils literal notranslate"><span class="pre">graph_pack.data_folder</span></code>, you can run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">4</span><span class="w"> </span>QTrans_prep<span class="w"> </span>--config<span class="w"> </span>input_graph.yaml<span class="w"> </span>&gt;<span class="w"> </span>graph_pack.out
+</pre></div>
+</div>
+<p>A single folder is processed by one rank, so the single-folder examples
+above use a single process. Gradient matrix generation with <code class="docutils literal notranslate"><span class="pre">grad-epc</span></code>
+is performed on rank 0 and does not benefit from MPI parallel execution.</p>
+</div>
+</section>
+</section>
+<section id="passing-unit-cell-data-to-the-calculator">
+<h2>Passing unit-cell data to the calculator<a class="headerlink" href="#passing-unit-cell-data-to-the-calculator" title="Link to this heading"></a></h2>
+<p>The calculation tutorials read <code class="docutils literal notranslate"><span class="pre">data/graph_data.npz</span></code> within each
+material/software directory. Graph packing writes
+<code class="docutils literal notranslate"><span class="pre">graph_data_QTrans.npz</span></code>; renaming the copied file does not change its contents.
+For example, after completing the OpenMX Al graph-packing calculation,
+run from the tutorial repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>-i<span class="w"> </span>tutorials/Al/openmx/graph-pack/graph_data_QTrans.npz<span class="w"> </span>tutorials/Al/openmx/data/graph_data.npz
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">-i</span></code> option asks before replacing supplied example data. To preserve
+those data, keep your generated file in a separate directory and update
+<code class="docutils literal notranslate"><span class="pre">basic.graph_data_path_uc</span></code> in the complete calculator YAML instead.
+The same handoff applies to OpenMX Fe and ABACUS Al, using their respective
+material/software directories. Copy the unit-cell dataset, not the graph
+containing the displaced supercells.</p>
+<p>For the prediction route, use the graph and predicted Hamiltonian files
+specified in the prediction section above; copying a graph alone does not
+substitute the predicted Hamiltonian. Continue with
+<a class="reference internal" href="epc_prep.html#tutorial-epc-grad-prep"><span class="std std-ref">EPC Gradient Matrix Preparation</span></a> for gradient data and
+<a class="reference internal" href="phonon_prep.html#tutorial-phonon-prep"><span class="std std-ref">Phonon Force Data Preparation</span></a> for phonon force data.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="epc_prep.html" class="btn btn-neutral float-right" title="EPC Gradient Matrix Preparation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

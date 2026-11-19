@@ -1,0 +1,262 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electronic Velocity &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Electron-Phonon Coupling" href="epc.html" />
+    <link rel="prev" title="Hamiltonian in an Atomic Orbital Basis" href="ham_ao.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Electronic Velocity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#group-velocity-in-a-nonorthogonal-basis">Group Velocity in a Nonorthogonal Basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analytic-derivatives-of-the-bloch-matrices">Analytic Derivatives of the Bloch Matrices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-and-units">Implementation and Units</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="epc.html">Electron-Phonon Coupling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conductivity.html">Conductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resistivity.html">Resistivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconductivity.html">Superconductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="smear_method.html">Smearing Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Electronic Velocity</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/velocity.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="electronic-velocity">
+<span id="theory-velocity"></span><h1>Electronic Velocity<a class="headerlink" href="#electronic-velocity" title="Link to this heading"></a></h1>
+<p><strong>QTrans</strong> evaluates electronic band velocities analytically from the
+real-space Hamiltonian and overlap matrices in an atomic orbital basis.
+These velocities enter the <a class="reference internal" href="conductivity.html#theory-conductivity"><span class="std std-ref">conductivity</span></a> and
+<a class="reference internal" href="resistivity.html#theory-resistivity"><span class="std std-ref">transport spectral function</span></a> calculations.</p>
+<section id="group-velocity-in-a-nonorthogonal-basis">
+<h2>Group Velocity in a Nonorthogonal Basis<a class="headerlink" href="#group-velocity-in-a-nonorthogonal-basis" title="Link to this heading"></a></h2>
+<p>For a differentiable band <span class="math notranslate nohighlight">\(\varepsilon_{\nu\mathbf{k}}\)</span>, the group
+velocity is</p>
+<div class="math notranslate nohighlight">
+\[v_{\nu\mathbf{k},a}
+= \frac{1}{\hbar}\frac{\partial\varepsilon_{\nu\mathbf{k}}}{\partial k_a},\]</div>
+<p>where <span class="math notranslate nohighlight">\(a\)</span> labels a Cartesian direction and <span class="math notranslate nohighlight">\(\mathbf{k}\)</span> is the
+physical wave vector, with units of inverse length. In the atomic orbital
+basis, the band energies and expansion coefficients satisfy</p>
+<div class="math notranslate nohighlight">
+\[H^{\mathbf{k}}\mathbf{C}_{\nu\mathbf{k}}
+= \varepsilon_{\nu\mathbf{k}}S^{\mathbf{k}}\mathbf{C}_{\nu\mathbf{k}},
+\qquad
+\mathbf{C}_{\nu\mathbf{k}}^\dagger S^{\mathbf{k}}
+\mathbf{C}_{\nu\mathbf{k}}=1.\]</div>
+<p>Differentiating this generalized eigenvalue equation and using the
+normalization gives the generalized Hellmann–Feynman expression</p>
+<div class="math notranslate nohighlight">
+\[v_{\nu\mathbf{k},a}
+= \frac{1}{\hbar}\mathbf{C}_{\nu\mathbf{k}}^\dagger
+\left(
+\frac{\partial H^{\mathbf{k}}}{\partial k_a}
+-\varepsilon_{\nu\mathbf{k}}
+\frac{\partial S^{\mathbf{k}}}{\partial k_a}
+\right)
+\mathbf{C}_{\nu\mathbf{k}}.\]</div>
+<p>The derivatives of the expansion coefficients cancel, so they do not need
+to be evaluated explicitly. The overlap derivative accounts for the
+nonorthogonality of the basis. Omitting it generally gives an incorrect
+band velocity. For a <span class="math notranslate nohighlight">\(\mathbf{k}\)</span>-independent orthonormal basis,
+<span class="math notranslate nohighlight">\(S^{\mathbf{k}}=I\)</span> and this term vanishes.</p>
+</section>
+<section id="analytic-derivatives-of-the-bloch-matrices">
+<h2>Analytic Derivatives of the Bloch Matrices<a class="headerlink" href="#analytic-derivatives-of-the-bloch-matrices" title="Link to this heading"></a></h2>
+<p>Using the same Bloch phase convention as <a class="reference internal" href="ham_ao.html"><span class="doc">Hamiltonian in an Atomic Orbital Basis</span></a>, write</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}H^{\mathbf{k}}_{i\alpha,j\beta}
+&amp;= \sum_n\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n}
+H_{0i\alpha,nj\beta}, \\
+S^{\mathbf{k}}_{i\alpha,j\beta}
+&amp;= \sum_n\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n}
+S_{0i\alpha,nj\beta}.\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\mathbf{R}_n\)</span> is a lattice translation, <span class="math notranslate nohighlight">\(i,j\)</span> label atoms
+in the unit cell, and <span class="math notranslate nohighlight">\(\alpha,\beta\)</span> label their orbitals. The real-space
+matrices are independent of <span class="math notranslate nohighlight">\(\mathbf{k}\)</span>. Their Bloch derivatives
+therefore follow directly from the phase factors:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{\partial H^{\mathbf{k}}_{i\alpha,j\beta}}{\partial k_a}
+&amp;= \mathrm{i}\sum_n R_{n,a}
+\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n}
+H_{0i\alpha,nj\beta}, \\
+\frac{\partial S^{\mathbf{k}}_{i\alpha,j\beta}}{\partial k_a}
+&amp;= \mathrm{i}\sum_n R_{n,a}
+\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n}
+S_{0i\alpha,nj\beta}.\end{split}\]</div>
+<p>Substitution into above formula gives</p>
+<div class="math notranslate nohighlight">
+\[v_{\nu\mathbf{k},a}
+= \frac{1}{\hbar}\operatorname{Re}\Bigg[
+\mathrm{i}\sum_n\sum_{i\alpha,j\beta}
+R_{n,a}\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n}
+(C^{\mathbf{k},\nu}_{i\alpha})^*
+\left(H_{0i\alpha,nj\beta}
+-\varepsilon_{\nu\mathbf{k}}S_{0i\alpha,nj\beta}\right)
+C^{\mathbf{k},\nu}_{j\beta}\Bigg].\]</div>
+<p>For Hermitian Bloch matrices, the result is real; taking the real part
+removes numerical imaginary residuals. This expression is analytic for the
+supplied real-space matrices and requires no finite differences between
+neighboring <span class="math notranslate nohighlight">\(\mathbf{k}\)</span> points.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The factors <span class="math notranslate nohighlight">\(R_{n,a}H_{0i\alpha,nj\beta}\)</span> and
+<span class="math notranslate nohighlight">\(R_{n,a}S_{0i\alpha,nj\beta}\)</span> arise from differentiation with respect
+to the wave vector. They are not derivatives with respect to atomic
+displacements. The latter describe a different response, such as the
+electron-phonon interaction.</p>
+</div>
+</section>
+<section id="implementation-and-units">
+<h2>Implementation and Units<a class="headerlink" href="#implementation-and-units" title="Link to this heading"></a></h2>
+<p>The implementation precomputes the translation-weighted real-space matrices,
+Fourier transforms them at each requested wave vector, and contracts the
+results with the normalized band coefficients. In collinear spin-polarized
+calculations, this procedure is applied separately to each spin channel.
+For spinor calculations, the Hamiltonian and overlap matrices are represented
+in the corresponding spinor basis.</p>
+<p>Internally, reciprocal Cartesian coordinates <span class="math notranslate nohighlight">\(\boldsymbol{\kappa}\)</span>
+omit the factor of <span class="math notranslate nohighlight">\(2\pi\)</span>, so</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{k}=2\pi\boldsymbol{\kappa},
+\qquad
+\mathrm{e}^{\mathrm{i}\mathbf{k}\cdot\mathbf{R}_n}
+=\mathrm{e}^{2\pi\mathrm{i}\boldsymbol{\kappa}\cdot\mathbf{R}_n}.\]</div>
+<p>Consequently,</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial}{\partial k_a}
+= \frac{1}{2\pi}\frac{\partial}{\partial\kappa_a}.\]</div>
+<p>The factor <span class="math notranslate nohighlight">\(2\pi\)</span> from differentiating the internal phase cancels this
+conversion factor. The velocity contraction therefore contains
+<span class="math notranslate nohighlight">\(\mathrm{i}R_{n,a}\)</span>, without an additional <span class="math notranslate nohighlight">\(2\pi\)</span>.</p>
+<p>With energies in Hartree and translations in Bohr, the routine returns
+Cartesian velocities in atomic units. Conversion to SI units uses</p>
+<div class="math notranslate nohighlight">
+\[v_{\mathrm{SI}}
+= v_{\mathrm{au}}\frac{E_{\mathrm{h}}a_0}{\hbar},\]</div>
+<p>where <span class="math notranslate nohighlight">\(E_{\mathrm{h}}\)</span> is the Hartree energy and <span class="math notranslate nohighlight">\(a_0\)</span> is the Bohr
+radius. One atomic unit of velocity is approximately
+<span class="math notranslate nohighlight">\(2.1877\times10^6\,\mathrm{m\,s^{-1}}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At an exact band degeneracy, individual band slopes require care. For a
+chosen direction, the first-order slopes are the eigenvalues of
+<span class="math notranslate nohighlight">\(\partial_{k_a}H-\varepsilon\partial_{k_a}S\)</span> projected onto an
+overlap-orthonormal basis of the degenerate subspace. The current velocity
+routine evaluates diagonal expectations in the eigenvectors returned by
+the band solver; it does not perform this additional diagonalization.
+Such expectations can depend on the chosen basis within a degenerate
+subspace.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ham_ao.html" class="btn btn-neutral float-left" title="Hamiltonian in an Atomic Orbital Basis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="epc.html" class="btn btn-neutral float-right" title="Electron-Phonon Coupling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phonon Force Data Preparation &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Dispersion of Quasiparticle" href="qp_disp.html" />
+    <link rel="prev" title="EPC Gradient Matrix Preparation" href="epc_prep.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="obtain_hs.html">Generation of Hamiltonian and Overlap Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Phonon Force Data Preparation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#vasp-force-calculations">VASP force calculations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#step-1-generate-displaced-supercells">Step 1. Generate displaced supercells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-2-calculate-forces">Step 2. Calculate forces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-3-collect-forces">Step 3. Collect forces</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#abacus-force-calculations">ABACUS force calculations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Step 1. Generate displaced supercells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Step 2. Calculate forces</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-3-collect-forces-and-convert-units">Step 3. Collect forces and convert units</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#use-the-force-data-in-qtrans">Use the force data in <strong>QTrans</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_dos.html">DOS of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_path.html">EPC Path Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resist.html">Resistivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconduct.html">Superconductivity Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Phonon Force Data Preparation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/phonon_prep.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="phonon-force-data-preparation">
+<span id="tutorial-phonon-prep"></span><h1>Phonon Force Data Preparation<a class="headerlink" href="#phonon-force-data-preparation" title="Link to this heading"></a></h1>
+<p>This tutorial prepares <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> for <strong>QTrans</strong> using the
+finite-displacement workflow in
+<a class="reference external" href="https://phonopy.github.io/phonopy/">Phonopy</a>: generate displaced
+supercells, calculate their atomic forces with a DFT code, and collect the
+forces into a Phonopy dataset. Bulk Al examples are provided for VASP and
+ABACUS.</p>
+<p>The VASP force calculations are stored in
+<code class="docutils literal notranslate"><span class="pre">tutorials/Al/openmx/phonopy/</span></code> because they supply phonons for the OpenMX
+transport examples. The electronic Hamiltonian and phonon forces do not
+have to come from the same DFT code, but their structures, atom ordering,
+and physical settings must be consistent.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>QTrans</strong> reads <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> using Phonopy’s default VASP convention:
+<strong>displacements in angstrom and forces in eV/angstrom</strong>. A <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code>
+file does not identify its units. Generating it successfully with Phonopy
+does not guarantee that its units are suitable for <strong>QTrans</strong>.</p>
+<p>In particular, Phonopy’s ABACUS interface writes displacements in bohr
+and forces in eV/angstrom. Convert the displacement vectors before
+supplying that dataset to <strong>QTrans</strong>; leave the force values unchanged.</p>
+</div>
+<section id="vasp-force-calculations">
+<h2>VASP force calculations<a class="headerlink" href="#vasp-force-calculations" title="Link to this heading"></a></h2>
+<p>For DFT parameter definitions and execution details, consult the
+<a class="reference external" href="https://www.vasp.at/wiki/">VASP documentation</a> and the
+<a class="reference external" href="https://phonopy.github.io/phonopy/vasp.html">Phonopy VASP interface</a>.
+The supplied <code class="docutils literal notranslate"><span class="pre">supercells/INCAR</span></code>, <code class="docutils literal notranslate"><span class="pre">KPOINTS</span></code>, and potential inputs provide
+an example setup; converge the force accuracy for your own calculation.</p>
+<section id="step-1-generate-displaced-supercells">
+<h3>Step 1. Generate displaced supercells<a class="headerlink" href="#step-1-generate-displaced-supercells" title="Link to this heading"></a></h3>
+<p>From the tutorial repository root, enter the example directory and generate
+a <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">x</span> <span class="pre">3</span> <span class="pre">x</span> <span class="pre">3</span></code> supercell from the primitive-cell <code class="docutils literal notranslate"><span class="pre">POSCAR</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/openmx/phonopy/
+phonopy<span class="w"> </span>-d<span class="w"> </span>--dim<span class="o">=</span><span class="s2">&quot;3 3 3&quot;</span>
+</pre></div>
+</div>
+<p>VASP is Phonopy’s default interface, so no calculator flag is needed.
+The reference files include <code class="docutils literal notranslate"><span class="pre">SPOSCAR</span></code> (the undisplaced supercell),
+<code class="docutils literal notranslate"><span class="pre">POSCAR-001</span></code> (a displaced supercell), and <code class="docutils literal notranslate"><span class="pre">phonopy_disp.yaml</span></code> (the
+structure and displacement information). This Al example has 27 atoms in
+the supercell and one symmetry-independent displacement. Other materials
+can require several <code class="docutils literal notranslate"><span class="pre">POSCAR-xxx</span></code> files.</p>
+<p>Keep <code class="docutils literal notranslate"><span class="pre">phonopy_disp.yaml</span></code> in the working directory. For this example,
+copy the displaced structure into the prepared force-calculation directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>POSCAR-001<span class="w"> </span>supercells/POSCAR
+</pre></div>
+</div>
+</section>
+<section id="step-2-calculate-forces">
+<h3>Step 2. Calculate forces<a class="headerlink" href="#step-2-calculate-forces" title="Link to this heading"></a></h3>
+<p>Run a static, self-consistent VASP calculation in <code class="docutils literal notranslate"><span class="pre">supercells/</span></code> with the
+displaced atomic positions fixed. Do not relax the displaced structure.
+For example, using your VASP executable and MPI configuration:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>supercells/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>vasp_std<span class="w"> </span>&gt;<span class="w"> </span>vasp.out
+<span class="nb">cd</span><span class="w"> </span>..
+</pre></div>
+</div>
+<p>The supplied reference <code class="docutils literal notranslate"><span class="pre">INCAR</span></code> uses <code class="docutils literal notranslate"><span class="pre">ENCUT</span> <span class="pre">=</span> <span class="pre">500</span></code> eV,
+<code class="docutils literal notranslate"><span class="pre">EDIFF</span> <span class="pre">=</span> <span class="pre">1E-08</span></code>, <code class="docutils literal notranslate"><span class="pre">IBRION</span> <span class="pre">=</span> <span class="pre">-1</span></code>, and <code class="docutils literal notranslate"><span class="pre">NSW</span> <span class="pre">=</span> <span class="pre">0</span></code>.
+Adjust parallel settings and potential paths for your installation.
+Confirm electronic convergence and the presence of atomic forces in
+<code class="docutils literal notranslate"><span class="pre">vasprun.xml</span></code>. If several displacements are generated, calculate each in
+its own directory with consistent DFT settings.</p>
+</section>
+<section id="step-3-collect-forces">
+<h3>Step 3. Collect forces<a class="headerlink" href="#step-3-collect-forces" title="Link to this heading"></a></h3>
+<p>From the directory containing <code class="docutils literal notranslate"><span class="pre">phonopy_disp.yaml</span></code>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>phonopy<span class="w"> </span>-f<span class="w"> </span>./supercells/vasprun.xml
+</pre></div>
+</div>
+<p>For several displacement directories, pass all output files in the same
+order as the displaced structures. With appropriately named directories,
+the usual command is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>phonopy<span class="w"> </span>-f<span class="w"> </span>./*/vasprun.xml
+</pre></div>
+</div>
+<p>This generates <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code>. VASP-interface displacements are already in
+angstrom and forces in eV/angstrom, so no unit conversion is needed.
+Reference inputs and outputs are in <code class="docutils literal notranslate"><span class="pre">ref/</span></code>. After checking the result,
+copy it to the data directory used by the Al examples:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>FORCE_SETS<span class="w"> </span>../data/FORCE_SETS
+</pre></div>
+</div>
+</section>
+</section>
+<section id="abacus-force-calculations">
+<h2>ABACUS force calculations<a class="headerlink" href="#abacus-force-calculations" title="Link to this heading"></a></h2>
+<p>For DFT parameters and execution details, consult the
+<a class="reference external" href="https://abacus.deepmodeling.com/en/latest/">ABACUS documentation</a> and the
+<a class="reference external" href="https://phonopy.github.io/phonopy/abacus.html">Phonopy ABACUS interface</a>.
+The example is in <code class="docutils literal notranslate"><span class="pre">tutorials/Al/abacus/phonopy/</span></code>; reference structures,
+force outputs, and the conversion script are in <code class="docutils literal notranslate"><span class="pre">ref/</span></code>.</p>
+<section id="id1">
+<h3>Step 1. Generate displaced supercells<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>From the tutorial repository root, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>tutorials/Al/abacus/phonopy/
+phonopy<span class="w"> </span>--abacus<span class="w"> </span>-d<span class="w"> </span>--dim<span class="o">=</span><span class="s2">&quot;3 3 3&quot;</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">--abacus</span></code> selects the ABACUS interface and reads the primitive-cell
+<code class="docutils literal notranslate"><span class="pre">STRU</span></code>. Phonopy generates <code class="docutils literal notranslate"><span class="pre">STRU-001</span></code> and <code class="docutils literal notranslate"><span class="pre">phonopy_disp.yaml</span></code> for this
+27-atom Al supercell. Copy the displaced structure into the prepared
+calculation directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>STRU-001<span class="w"> </span>supercells/STRU
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>Step 2. Calculate forces<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Use a static SCF calculation (<code class="docutils literal notranslate"><span class="pre">calculation</span> <span class="pre">scf</span></code>) and enable force output
+with <code class="docutils literal notranslate"><span class="pre">cal_force</span> <span class="pre">1</span></code> in <code class="docutils literal notranslate"><span class="pre">supercells/INPUT</span></code>. The supplied example uses
+<code class="docutils literal notranslate"><span class="pre">basis_type</span> <span class="pre">lcao</span></code>, <code class="docutils literal notranslate"><span class="pre">ecutwfc</span> <span class="pre">100</span></code> Ry, and <code class="docutils literal notranslate"><span class="pre">scf_thr</span> <span class="pre">1e-9</span></code>. Update
+<code class="docutils literal notranslate"><span class="pre">pseudo_dir</span></code>, <code class="docutils literal notranslate"><span class="pre">orbital_dir</span></code>, and the referenced potential and orbital
+files for your installation. Keep the displaced atomic positions fixed.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>supercells/
+mpirun<span class="w"> </span>-np<span class="w"> </span><span class="m">8</span><span class="w"> </span>abacus<span class="w"> </span>&gt;<span class="w"> </span>abacus.out
+<span class="nb">cd</span><span class="w"> </span>..
+</pre></div>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">suffix</span> <span class="pre">Al</span></code>, the force output needed by Phonopy is
+<code class="docutils literal notranslate"><span class="pre">supercells/OUT.Al/running_scf.log</span></code>. Check SCF convergence and force
+output before collecting the dataset. Repeat for every displaced
+supercell if more than one is generated.</p>
+</section>
+<section id="step-3-collect-forces-and-convert-units">
+<h3>Step 3. Collect forces and convert units<a class="headerlink" href="#step-3-collect-forces-and-convert-units" title="Link to this heading"></a></h3>
+<p>From the directory containing the ABACUS <code class="docutils literal notranslate"><span class="pre">phonopy_disp.yaml</span></code>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>phonopy<span class="w"> </span>--abacus<span class="w"> </span>-f<span class="w"> </span>./supercells/OUT.Al/running_scf.log
+</pre></div>
+</div>
+<p>For multiple displacements, supply all corresponding <code class="docutils literal notranslate"><span class="pre">running_scf.log</span></code>
+files in displacement order. The resulting <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> uses the ABACUS
+interface convention:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Quantity</p></th>
+<th class="head"><p>Original ABACUS-interface dataset</p></th>
+<th class="head"><p>Dataset for <strong>QTrans</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Displacement</p></td>
+<td><p>bohr</p></td>
+<td><p>angstrom (multiply by approximately 0.529177)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Force</p></td>
+<td><p>eV/angstrom</p></td>
+<td><p>eV/angstrom (unchanged)</p></td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>QTrans</strong> script <code class="docutils literal notranslate"><span class="pre">ref/phonon_convert.py</span></code> converts this type-1
+finite-displacement dataset using the unit factor from the installed
+Phonopy version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>ref/phonon_convert.py<span class="w"> </span>--calculator<span class="w"> </span>abacus<span class="w"> </span>--input<span class="w"> </span>FORCE_SETS<span class="w"> </span>--output<span class="w"> </span>FORCE_SETS_converted
+cp<span class="w"> </span>FORCE_SETS_converted<span class="w"> </span>../data/FORCE_SETS
+</pre></div>
+</div>
+<p>The script preserves the original file and refuses to overwrite an
+existing output. If <code class="docutils literal notranslate"><span class="pre">FORCE_SETS_converted</span></code> already exists, choose a new
+output filename. Convert the original ABACUS-interface file only once;
+its units cannot be inferred automatically from its contents.</p>
+<p>In the supplied reference, the first displacement changes from
+<code class="docutils literal notranslate"><span class="pre">[-0.0141421356237309,</span> <span class="pre">0,</span> <span class="pre">0.0141421356237309]</span></code> bohr to approximately
+<code class="docutils literal notranslate"><span class="pre">[-0.007483696,</span> <span class="pre">0,</span> <span class="pre">0.007483696]</span></code> angstrom. The force components remain
+unchanged. Last digits can differ slightly with the physical constants
+used by different Phonopy versions.</p>
+<p>Keep the original <code class="docutils literal notranslate"><span class="pre">FORCE_SETS</span></code> together with the ABACUS
+<code class="docutils literal notranslate"><span class="pre">phonopy_disp.yaml</span></code> for calculations through Phonopy’s ABACUS interface.
+The converted copy is for <strong>QTrans</strong>’s VASP-unit reader; do not combine it
+with ABACUS-unit displacements in a subsequent Phonopy calculation.</p>
+</section>
+</section>
+<section id="use-the-force-data-in-qtrans">
+<h2>Use the force data in <strong>QTrans</strong><a class="headerlink" href="#use-the-force-data-in-qtrans" title="Link to this heading"></a></h2>
+<p>The Al calculation inputs read <code class="docutils literal notranslate"><span class="pre">../data/FORCE_SETS</span></code> together with
+<code class="docutils literal notranslate"><span class="pre">../data/Al-pri.vasp</span></code> and <code class="docutils literal notranslate"><span class="pre">phonon.supercell_matrix</span></code> set to a diagonal
+<code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">x</span> <span class="pre">3</span> <span class="pre">x</span> <span class="pre">3</span></code> supercell. Use the matching primitive structure in angstrom,
+with the same cell orientation and atom ordering as the force calculation.
+The phonon supercell size is independent of the supercell used to prepare
+EPC gradients.</p>
+<p>See <a class="reference internal" href="qp_disp.html#tutorial-dispersion"><span class="std std-ref">Dispersion of Quasiparticle</span></a> and <a class="reference internal" href="qp_dos.html#tutorial-dos"><span class="std std-ref">DOS of Quasiparticle</span></a> for complete
+<strong>QTrans</strong> inputs that calculate phonon dispersions and DOS. The
+<a class="reference internal" href="../workflow.html"><span class="doc">Workflow</span></a> summarizes the input conventions for other interfaces.
+Check the units of the actual Phonopy interface before reusing force data
+from another DFT code; do not apply the ABACUS conversion indiscriminately.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="epc_prep.html" class="btn btn-neutral float-left" title="EPC Gradient Matrix Preparation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qp_disp.html" class="btn btn-neutral float-right" title="Dispersion of Quasiparticle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

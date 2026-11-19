@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conductivity &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Resistivity" href="resistivity.html" />
+    <link rel="prev" title="Electron-Phonon Coupling" href="epc.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ham_ao.html">Hamiltonian in an Atomic Orbital Basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="velocity.html">Electronic Velocity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc.html">Electron-Phonon Coupling</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Conductivity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#boltzmann-transport-equation-bte">Boltzmann Transport Equation (BTE)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#electrical-conductivity-and-mobility">Electrical Conductivity and Mobility</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#self-energy-relaxation-time-approximation-erta">Self-Energy Relaxation Time Approximation (ERTA)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iterative-boltzmann-transport-equation-ibte">Iterative Boltzmann Transport Equation (IBTE)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="resistivity.html">Resistivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconductivity.html">Superconductivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="smear_method.html">Smearing Methods</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Conductivity</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/theory/conductivity.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="conductivity">
+<span id="theory-conductivity"></span><h1>Conductivity<a class="headerlink" href="#conductivity" title="Link to this heading"></a></h1>
+<section id="boltzmann-transport-equation-bte">
+<h2>Boltzmann Transport Equation (BTE)<a class="headerlink" href="#boltzmann-transport-equation-bte" title="Link to this heading"></a></h2>
+<p><strong>QTrans</strong> calculates electrical conductivity and carrier mobility using the
+linearized Boltzmann transport equation (BTE) <span id="id1">[<a class="reference internal" href="../intro/refers.html#id8" title="Samuel Poncé, Wenbin Li, Sven Reichardt, and Feliciano Giustino. First-principles calculations of charge carrier mobility and conductivity in bulk semiconductors and two-dimensional materials. Reports on Progress in Physics, 83(3):036501, February 2020. URL: https://dx.doi.org/10.1088/1361-6633/ab6a43, doi:10.1088/1361-6633/ab6a43.">3</a>]</span>. The equations
+below describe a spatially homogeneous system in a weak, static electric field,
+with phonons in thermal equilibrium and electron-phonon scattering as the
+collision mechanism.</p>
+<p>We define the linear response of the electron distribution as</p>
+<div class="math notranslate nohighlight">
+\[\partial_{E_\beta} f_{\nu\mathbf{k}}
+\equiv \left.\frac{\partial f_{\nu\mathbf{k}}}{\partial E_\beta}
+\right|_{\mathbf{E}=\mathbf{0}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the electron band index, <span class="math notranslate nohighlight">\(\mathbf{k}\)</span> is the electron
+wave vector, and <span class="math notranslate nohighlight">\(\beta\)</span> labels a Cartesian direction. Throughout this
+page, <span class="math notranslate nohighlight">\(e&gt;0\)</span> is the elementary charge, so the electron charge is <span class="math notranslate nohighlight">\(-e\)</span>.
+The equilibrium electron and phonon occupations are denoted by
+<span class="math notranslate nohighlight">\(f^0_{\nu\mathbf{k}}\)</span> and <span class="math notranslate nohighlight">\(n^0_{\mathbf{q}b}\)</span>, respectively, where
+<span class="math notranslate nohighlight">\(b\)</span> is the phonon branch index.</p>
+<p>The linearized BTE can be written as</p>
+<div class="math notranslate nohighlight">
+\[\partial_{E_\beta} f_{\nu\mathbf{k}}
+= e\tau_{\nu\mathbf{k}}v_{\nu\mathbf{k}\beta}
+\frac{\partial f^0_{\nu\mathbf{k}}}{\partial\varepsilon_{\nu\mathbf{k}}}
++ \tau_{\nu\mathbf{k}}\sum_{\mu b}
+\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+K_{\nu\mathbf{k},\mu\mathbf{k+q}}^{b}
+\partial_{E_\beta} f_{\mu\mathbf{k+q}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\varepsilon_{\nu\mathbf{k}}\)</span> is the electron energy,
+<span class="math notranslate nohighlight">\(v_{\nu\mathbf{k}\beta}\)</span> is the corresponding group velocity component,
+and <span class="math notranslate nohighlight">\(\Omega_{\mathrm{BZ}}\)</span> is the Brillouin-zone volume. The total
+relaxation time <span class="math notranslate nohighlight">\(\tau_{\nu\mathbf{k}}\)</span> is defined by</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\tau_{\nu\mathbf{k}}^{-1}
+={}&amp; \frac{2\pi}{\hbar}\sum_{\mu b}
+\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2 \\
+&amp;\times\Big[
+(n^0_{\mathbf{q}b}+1-f^0_{\mu\mathbf{k+q}})
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
+-\hbar\omega_{\mathbf{q}b}) \\
+&amp;\qquad+
+(n^0_{\mathbf{q}b}+f^0_{\mu\mathbf{k+q}})
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
++\hbar\omega_{\mathbf{q}b})\Big].\end{split}\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(g_{\mu\nu b}(\mathbf{k},\mathbf{q})\)</span> is the electron–phonon
+coupling matrix element, and <span class="math notranslate nohighlight">\(\omega_{\mathbf{q}b}\)</span> is the phonon angular
+frequency. The terms with <span class="math notranslate nohighlight">\(-\hbar\omega_{\mathbf{q}b}\)</span> and
+<span class="math notranslate nohighlight">\(+\hbar\omega_{\mathbf{q}b}\)</span> in the delta functions describe phonon
+emission and absorption, respectively. This expression is summed over all
+final electronic states and phonon modes; it is a total rate for the initial
+state <span class="math notranslate nohighlight">\(\nu\mathbf{k}\)</span>, rather than a rate for a single transition.</p>
+<p>The scattering-in kernel in the linearized BTE is</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}K_{\nu\mathbf{k},\mu\mathbf{k+q}}^{b}
+={}&amp; \frac{2\pi}{\hbar}|g_{\mu\nu b}(\mathbf{k},\mathbf{q})|^2 \\
+&amp;\times\Big[
+(n^0_{\mathbf{q}b}+1-f^0_{\nu\mathbf{k}})
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
++\hbar\omega_{\mathbf{q}b}) \\
+&amp;\qquad+
+(n^0_{\mathbf{q}b}+f^0_{\nu\mathbf{k}})
+\delta(\varepsilon_{\nu\mathbf{k}}-\varepsilon_{\mu\mathbf{k+q}}
+-\hbar\omega_{\mathbf{q}b})\Big].\end{split}\]</div>
+<p>Unlike the expression for <span class="math notranslate nohighlight">\(\tau_{\nu\mathbf{k}}^{-1}\)</span>, this kernel
+contains the equilibrium occupation of the initial state
+<span class="math notranslate nohighlight">\(f^0_{\nu\mathbf{k}}\)</span>. It couples the distribution response at
+<span class="math notranslate nohighlight">\(\mu\mathbf{k+q}\)</span> to that at <span class="math notranslate nohighlight">\(\nu\mathbf{k}\)</span>.</p>
+</section>
+<section id="electrical-conductivity-and-mobility">
+<h2>Electrical Conductivity and Mobility<a class="headerlink" href="#electrical-conductivity-and-mobility" title="Link to this heading"></a></h2>
+<p>The electrical conductivity tensor relates the induced current density to
+the applied field, <span class="math notranslate nohighlight">\(j_\alpha=\sum_\beta\sigma_{\alpha\beta}E_\beta\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\sigma_{\alpha\beta}
+= -\frac{e}{V_{\mathrm{uc}}}\sum_\nu
+\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+v_{\nu\mathbf{k}\alpha}\partial_{E_\beta}f_{\nu\mathbf{k}},\]</div>
+<p>where <span class="math notranslate nohighlight">\(V_{\mathrm{uc}}\)</span> is the unit-cell volume. For a single carrier type
+in a semiconductor, the mobility tensor is obtained from its contribution to
+the conductivity:</p>
+<div class="math notranslate nohighlight">
+\[\mu_{\alpha\beta}=\frac{\sigma_{\alpha\beta}}{e n_c},\]</div>
+<p>where <span class="math notranslate nohighlight">\(n_c&gt;0\)</span> is the carrier number density per unit volume. Electron and
+hole mobilities use their respective conductivity contributions and densities.</p>
+<p><strong>QTrans</strong> provides two methods for solving the BTE.</p>
+<section id="self-energy-relaxation-time-approximation-erta">
+<h3>Self-Energy Relaxation Time Approximation (ERTA)<a class="headerlink" href="#self-energy-relaxation-time-approximation-erta" title="Link to this heading"></a></h3>
+<p>The self-energy relaxation time approximation, called ERTA in <strong>QTrans</strong> and
+also commonly abbreviated as SERTA, neglects the scattering-in term on the
+right-hand side of the linearized BTE. The distribution response is then</p>
+<div class="math notranslate nohighlight">
+\[[\partial_{E_\beta}f_{\nu\mathbf{k}}]^{\mathrm{ERTA}}
+= e\tau_{\nu\mathbf{k}}v_{\nu\mathbf{k}\beta}
+\frac{\partial f^0_{\nu\mathbf{k}}}{\partial\varepsilon_{\nu\mathbf{k}}},\]</div>
+<p>which gives</p>
+<div class="math notranslate nohighlight">
+\[\sigma_{\alpha\beta}^{\mathrm{ERTA}}
+= \frac{e^2}{V_{\mathrm{uc}}}\sum_\nu
+\int_{\mathrm{BZ}}\frac{d^3k}{\Omega_{\mathrm{BZ}}}
+\left(-\frac{\partial f^0_{\nu\mathbf{k}}}
+{\partial\varepsilon_{\nu\mathbf{k}}}\right)
+v_{\nu\mathbf{k}\alpha}v_{\nu\mathbf{k}\beta}\tau_{\nu\mathbf{k}}.\]</div>
+</section>
+<section id="iterative-boltzmann-transport-equation-ibte">
+<h3>Iterative Boltzmann Transport Equation (IBTE)<a class="headerlink" href="#iterative-boltzmann-transport-equation-ibte" title="Link to this heading"></a></h3>
+<p>The iterative method retains the scattering-in term. Starting from the ERTA
+solution,</p>
+<div class="math notranslate nohighlight">
+\[[\partial_{E_\beta}f_{\nu\mathbf{k}}]^{(0)}
+= [\partial_{E_\beta}f_{\nu\mathbf{k}}]^{\mathrm{ERTA}},\]</div>
+<p>successive approximations are obtained from</p>
+<div class="math notranslate nohighlight">
+\[[\partial_{E_\beta}f_{\nu\mathbf{k}}]^{(i+1)}
+= [\partial_{E_\beta}f_{\nu\mathbf{k}}]^{(0)}
++ \tau_{\nu\mathbf{k}}\sum_{\mu b}
+\int_{\mathrm{BZ}}\frac{d^3q}{\Omega_{\mathrm{BZ}}}
+K_{\nu\mathbf{k},\mu\mathbf{k+q}}^{b}
+[\partial_{E_\beta}f_{\mu\mathbf{k+q}}]^{(i)}.\]</div>
+<p>The converged distribution response is used to evaluate the conductivity
+and, for a specified carrier density, the mobility.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The equations above are written for one spin channel, or for a band index
+that explicitly includes all spin states. If a spin-degenerate system is
+represented using only one copy of each band, its total conductivity
+includes an additional factor of two. No extra factor is needed when spin
+states are counted explicitly. The carrier density used for mobility must
+follow the same spin-counting convention. <strong>QTrans</strong> includes the
+appropriate spin factor in its transport calculations.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="epc.html" class="btn btn-neutral float-left" title="Electron-Phonon Coupling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="resistivity.html" class="btn btn-neutral float-right" title="Resistivity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

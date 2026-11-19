@@ -1,0 +1,2173 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atomic Orbital Basis Definition &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Valence Electron Counts" href="valence_electrons.html" />
+    <link rel="prev" title="Keywords of QTrans_run" href="calculator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../input_keywords.html">Input Keywords</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="preparer.html">Keywords of QTrans_prep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="calculator.html">Keywords of QTrans_run</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Atomic Orbital Basis Definition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openmx-14">openmx_14</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openmx-19">openmx_19</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openmx-26">openmx_26</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#siesta-13">siesta_13</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#siesta-19">siesta_19</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#abacus-13">abacus_13</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#abacus-15">abacus_15</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#abacus-27">abacus_27</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#abacus-40">abacus_40</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="valence_electrons.html">Valence Electron Counts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../input_keywords.html">Input Keywords</a></li>
+      <li class="breadcrumb-item active">Atomic Orbital Basis Definition</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/keywords/ao_define.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="atomic-orbital-basis-definition">
+<span id="ao-define-title"></span><h1>Atomic Orbital Basis Definition<a class="headerlink" href="#atomic-orbital-basis-definition" title="Link to this heading"></a></h1>
+<p>Here we list the information of supported atomic orbital basis.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#ao-define-openmx-14"><span class="std std-ref">openmx_14</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-openmx-19"><span class="std std-ref">openmx_19</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-openmx-26"><span class="std std-ref">openmx_26</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-siesta-13"><span class="std std-ref">siesta_13</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-siesta-19"><span class="std std-ref">siesta_19</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-abacus-13"><span class="std std-ref">abacus_13</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-abacus-15"><span class="std std-ref">abacus_15</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-abacus-27"><span class="std std-ref">abacus_27</span></a></p></li>
+<li><p><a class="reference internal" href="#ao-define-abacus-40"><span class="std std-ref">abacus_40</span></a></p></li>
+</ul>
+</div></blockquote>
+<section id="openmx-14">
+<span id="ao-define-openmx-14"></span><h2>openmx_14<a class="headerlink" href="#openmx-14" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-openmx-14-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>8.0</p></td>
+<td><p>He8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s3p2</p></td>
+<td><p>8.0</p></td>
+<td><p>Li8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s2p2</p></td>
+<td><p>7.0</p></td>
+<td><p>Be7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>B7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>C6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>N6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>O6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>F6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ne9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Na9.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Mg9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Al</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Al7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ar9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>K10.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ca</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ca9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Sc</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Sc9.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ti</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ti7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>V</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>V6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cr</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Cr6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Mn</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Mn6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fe</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>5.5</p></td>
+<td><p>Fe5.5H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Co</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Co6.0H.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ni</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ni6.0H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cu</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Cu6.0H.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zn</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Zn6.0H.pao</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="openmx-19">
+<span id="ao-define-openmx-19"></span><h2>openmx_19<a class="headerlink" href="#openmx-19" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-openmx-19-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>8.0</p></td>
+<td><p>He8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s3p2</p></td>
+<td><p>8.0</p></td>
+<td><p>Li8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s2p2</p></td>
+<td><p>7.0</p></td>
+<td><p>Be7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>B7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>C6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>N6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>O6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>F6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ne9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Na9.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Mg9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Al</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Al7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ar9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>K10.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ca</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ca9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Sc</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Sc9.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ti</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ti7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>V</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>V6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cr</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Cr6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Mn</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>6.0</p></td>
+<td><p>Mn6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fe</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>5.5</p></td>
+<td><p>Fe5.5H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Co</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Co6.0H.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ni</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ni6.0H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cu</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Cu6.0H.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zn</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Zn6.0H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Ga</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ga7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ge</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ge7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>As</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>As7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Se</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Se7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Br</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Br7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kr</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Kr10.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Rb</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>11.0</p></td>
+<td><p>Rb11.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sr</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Sr10.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Y</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Y10.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zr</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Zr7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Nb</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Nb7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mo</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Mo7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Tc</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Tc7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ru</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ru7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Rh</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Rh7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pd</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Pd7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Ag</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ag7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cd</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Cd7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>In</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>In7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sn</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Sn7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Sb</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Sb7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Xe</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>11.0</p></td>
+<td><p>Xe11.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cs</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>12.0</p></td>
+<td><p>Cs12.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ba</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Ba10.0.pao</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="openmx-26">
+<span id="ao-define-openmx-26"></span><h2>openmx_26<a class="headerlink" href="#openmx-26" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-openmx-26-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>8.0</p></td>
+<td><p>He8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s3p2</p></td>
+<td><p>8.0</p></td>
+<td><p>Li8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s2p2</p></td>
+<td><p>7.0</p></td>
+<td><p>Be7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>B7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>C6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>N6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>O6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>F6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ne9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Na9.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Mg9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Al</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Al7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ar9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>K10.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ca</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ca9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Sc</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Sc9.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ti</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ti7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>V</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>V6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cr</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Cr6.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Mn</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>6.0</p></td>
+<td><p>Mn6.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fe</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>5.5</p></td>
+<td><p>Fe5.5H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Co</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Co6.0H.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ni</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ni6.0H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cu</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Cu6.0H.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zn</p></td>
+<td><p>s3p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Zn6.0H.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Ga</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ga7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ge</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ge7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>As</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>As7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Se</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Se7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Br</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Br7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kr</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Kr10.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Rb</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>11.0</p></td>
+<td><p>Rb11.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sr</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Sr10.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Y</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Y10.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zr</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Zr7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Nb</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Nb7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mo</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Mo7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Tc</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Tc7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ru</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ru7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Rh</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Rh7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pd</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Pd7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Ag</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Ag7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cd</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Cd7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>In</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>In7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sn</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Sn7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Sb</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>7.0</p></td>
+<td><p>Sb7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Te</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Te7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>I</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>I7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Xe</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>11.0</p></td>
+<td><p>Xe11.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Cs</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>12.0</p></td>
+<td><p>Cs12.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ba</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>10.0</p></td>
+<td><p>Ba10.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>La</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>La8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ce</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ce8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Pr</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Pr8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Nd</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Nd8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Pm</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Pm8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sm</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Sm8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Dy</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Dy8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ho</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ho8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Lu</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Lu8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hf</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>9.0</p></td>
+<td><p>Hf9.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Ta</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ta7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>W</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>W7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Re</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Re7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Os</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Os7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Ir</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ir7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pt</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pt7.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Au</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Au7.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hg</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Hg8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Tl</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Tl8.0.pao</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pb</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Pb8.0.pao</p></td>
+</tr>
+<tr class="row-even"><td><p>Bi</p></td>
+<td><p>s3p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Bi8.0.pao</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="siesta-13">
+<span id="ao-define-siesta-13"></span><h2>siesta_13<a class="headerlink" href="#siesta-13" title="Link to this heading"></a></h2>
+<p>The table specifies the orbital composition used by <strong>QTrans</strong>.
+SIESTA orbital cutoff radii and basis-generation settings depend on the
+DFT input and are not prescribed by this mapping.</p>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-siesta-13-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Orbital composition</p></th>
+<th class="head"><p>Number of orbitals</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>Al</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ca</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>Ga</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>As</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="siesta-19">
+<span id="ao-define-siesta-19"></span><h2>siesta_19<a class="headerlink" href="#siesta-19" title="Link to this heading"></a></h2>
+<p>The table specifies the orbital composition used by <strong>QTrans</strong>.
+SIESTA orbital cutoff radii and basis-generation settings depend on the
+DFT input and are not prescribed by this mapping.</p>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-siesta-19-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Orbital composition</p></th>
+<th class="head"><p>Number of orbitals</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>Al</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ca</p></td>
+<td><p>s2p1</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-even"><td><p>Ga</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>As</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-even"><td><p>Ti</p></td>
+<td><p>s3p2d2</p></td>
+<td><p>19</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mo</p></td>
+<td><p>s2p1d2</p></td>
+<td><p>15</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="abacus-13">
+<span id="ao-define-abacus-13"></span><h2>abacus_13<a class="headerlink" href="#abacus-13" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-abacus-13-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>He_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>B_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>C_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>N_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>O_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>F_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ne_gga_6au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ar_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>As</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>As_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Se</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Se_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Br</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Br_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Kr</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Kr_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="abacus-15">
+<span id="ao-define-abacus-15"></span><h2>abacus_15<a class="headerlink" href="#abacus-15" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-abacus-15-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>He_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s4p1</p></td>
+<td><p>7.0</p></td>
+<td><p>Li_gga_7au_100Ry_4s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s4p1</p></td>
+<td><p>7.0</p></td>
+<td><p>Be_gga_7au_100Ry_4s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>B_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>C_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>N_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>O_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>F_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ne_gga_6au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Na_gga_8au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Mg_gga_8au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ar_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>K</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>K_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ca</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ca_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>As</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>As_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Se</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Se_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Br</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Br_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Kr</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Kr_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Rb</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>Rb_gga_10au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Sr</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Sr_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cs</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>Cs_gga_10au_100Ry_4s2p1d.orb</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="abacus-27">
+<span id="ao-define-abacus-27"></span><h2>abacus_27<a class="headerlink" href="#abacus-27" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-abacus-27-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>He_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s4p1</p></td>
+<td><p>7.0</p></td>
+<td><p>Li_gga_7au_100Ry_4s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s4p1</p></td>
+<td><p>7.0</p></td>
+<td><p>Be_gga_7au_100Ry_4s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>B_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>C_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>N_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>O_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>F_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ne_gga_6au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Na_gga_8au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Mg_gga_8au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ar_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>K</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>K_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ca</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ca_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sc</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Sc_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ti</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ti_gga_8au_100Ry_4s2p2d1f</p></td>
+</tr>
+<tr class="row-odd"><td><p>V</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>V_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Cr</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Cr_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mn</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Mn_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Fe</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Fe_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Co</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Co_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ni</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ni_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cu</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Cu_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Zn</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Zn_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ga</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ga_gga_8au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ge</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ge_gga_8au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>As</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>As_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Se</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Se_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Br</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Br_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Kr</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Kr_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Rb</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>Rb_gga_10au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Sr</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Sr_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Y</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Y_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Zr</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Zr_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Nb</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Nb_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Mo</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Mo_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tc</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Tc_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ru</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ru_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Rh</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Rh_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Pd</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pd_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ag</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ag_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Cd</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cd_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>In</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>In_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Sn</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Sn_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sb</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Sb_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Te</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Te_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>I</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>I_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Xe</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Xe_gga_8au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cs</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>Cs_gga_10au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ba</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>10.0</p></td>
+<td><p>Ba_gga_10au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Re</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Re_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Os</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Os_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ir</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ir_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Pt</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pt_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Au</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Au_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Hg</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>9.0</p></td>
+<td><p>Hg_gga_9au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tl</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Tl_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Pb</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pb_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bi</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Bi_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="abacus-40">
+<span id="ao-define-abacus-40"></span><h2>abacus_40<a class="headerlink" href="#abacus-40" title="Link to this heading"></a></h2>
+<blockquote>
+<div><table class="custom-table center-align-text docutils align-default" id="ao-abacus-40-table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Element</p></th>
+<th class="head"><p>Basis Components</p></th>
+<th class="head"><p>Cutoff Radius (Bohr)</p></th>
+<th class="head"><p>Basis File Name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>H</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>H_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>He</p></td>
+<td><p>s2p1</p></td>
+<td><p>6.0</p></td>
+<td><p>He_gga_6au_100Ry_2s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Li</p></td>
+<td><p>s4p1</p></td>
+<td><p>7.0</p></td>
+<td><p>Li_gga_7au_100Ry_4s1p.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Be</p></td>
+<td><p>s4p1</p></td>
+<td><p>7.0</p></td>
+<td><p>Be_gga_7au_100Ry_4s1p.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>B</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>B_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>C</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>C_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>N</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>N_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>O</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>O_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>F_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ne</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>6.0</p></td>
+<td><p>Ne_gga_6au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Na</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Na_gga_8au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mg</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Mg_gga_8au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Al</p></td>
+<td><p>s4p4d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Al_gga_7au_100Ry_4s4p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Si</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Si_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>P</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>P_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>S</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>S_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Cl</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cl_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ar</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ar_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>K_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ca</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Ca_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Sc</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Sc_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ti</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ti_gga_8au_100Ry_4s2p2d1f</p></td>
+</tr>
+<tr class="row-even"><td><p>V</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>V_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cr</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Cr_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Mn</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Mn_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fe</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Fe_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Co</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Co_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ni</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ni_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Cu</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Cu_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zn</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Zn_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ga</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ga_gga_8au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ge</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Ge_gga_8au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>As</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>As_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Se</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>8.0</p></td>
+<td><p>Se_gga_8au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Br</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Br_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Kr</p></td>
+<td><p>s2p2d1</p></td>
+<td><p>7.0</p></td>
+<td><p>Kr_gga_7au_100Ry_2s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Rb</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>Rb_gga_10au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sr</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>9.0</p></td>
+<td><p>Sr_gga_9au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Y</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Y_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zr</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Zr_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Nb</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Nb_gga_8au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mo</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Mo_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Tc</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Tc_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ru</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ru_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Rh</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Rh_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pd</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pd_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Ag</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ag_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Cd</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Cd_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>In</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>In_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sn</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Sn_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Sb</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Sb_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Te</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Te_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>I</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>I_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Xe</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>8.0</p></td>
+<td><p>Xe_gga_8au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Cs</p></td>
+<td><p>s4p2d1</p></td>
+<td><p>10.0</p></td>
+<td><p>Cs_gga_10au_100Ry_4s2p1d.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ba</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>10.0</p></td>
+<td><p>Ba_gga_10au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Hf</p></td>
+<td><p>s4p2d2f2</p></td>
+<td><p>10.0</p></td>
+<td><p>Hf_gga_10au_100Ry_4s2p2d2f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ta</p></td>
+<td><p>s4p2d2f2</p></td>
+<td><p>10.0</p></td>
+<td><p>Ta_gga_10au_100Ry_4s2p2d2f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>W</p></td>
+<td><p>s4p2d2f2</p></td>
+<td><p>10.0</p></td>
+<td><p>W_gga_10au_100Ry_4s2p2d2f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Re</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Re_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Os</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Os_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ir</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Ir_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Pt</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pt_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Au</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Au_gga_7au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Hg</p></td>
+<td><p>s4p2d2f1</p></td>
+<td><p>9.0</p></td>
+<td><p>Hg_gga_9au_100Ry_4s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tl</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Tl_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-even"><td><p>Pb</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Pb_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bi</p></td>
+<td><p>s2p2d2f1</p></td>
+<td><p>7.0</p></td>
+<td><p>Bi_gga_7au_100Ry_2s2p2d1f.orb</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p><a class="reference internal" href="#ao-define-title"><span class="std std-ref">Back to top</span></a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="calculator.html" class="btn btn-neutral float-left" title="Keywords of QTrans_run" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="valence_electrons.html" class="btn btn-neutral float-right" title="Valence Electron Counts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

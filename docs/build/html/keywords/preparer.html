@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keywords of QTrans_prep &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Keywords of QTrans_run" href="calculator.html" />
+    <link rel="prev" title="Input Keywords" href="../input_keywords.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../input_keywords.html">Input Keywords</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Keywords of QTrans_prep</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#structure-of-the-input-data">Structure of the input data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keywords">Keywords</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#blocks">Blocks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basic-block">basic block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#software-path-block">software_path block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#material-block">material block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scf-params-block">scf_params block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#grad-epc-block">grad_epc block</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graph-pack-block">graph_pack block</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="calculator.html">Keywords of QTrans_run</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ao_define.html">Atomic Orbital Basis Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="valence_electrons.html">Valence Electron Counts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../input_keywords.html">Input Keywords</a></li>
+      <li class="breadcrumb-item active">Keywords of QTrans_prep</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/keywords/preparer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="keywords-of-qtrans-prep">
+<h1>Keywords of QTrans_prep<a class="headerlink" href="#keywords-of-qtrans-prep" title="Link to this heading"></a></h1>
+<section id="structure-of-the-input-data">
+<h2>Structure of the input data<a class="headerlink" href="#structure-of-the-input-data" title="Link to this heading"></a></h2>
+<p>We use a <code class="docutils literal notranslate"><span class="pre">yaml</span></code> file as the input configuration.
+For different <code class="docutils literal notranslate"><span class="pre">prep_mode</span></code> values, the program requires different input blocks.
+However, the parameters in <strong>basic</strong> block must always be defined in the input file.
+The format is as follows:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>baisc:
+    prep_mode: &lt;prep_mode&gt;
+    outdir: &lt;outdir&gt;
+
+block_name1:
+    key1: value1
+    key2: value2
+
+block_name2:
+    key3: value3
+    key4: value4
+</pre></div>
+</div>
+</section>
+<section id="keywords">
+<h2>Keywords<a class="headerlink" href="#keywords" title="Link to this heading"></a></h2>
+<section id="blocks">
+<span id="prep-title-keywords"></span><h3>Blocks<a class="headerlink" href="#blocks" title="Link to this heading"></a></h3>
+<blockquote>
+<div><div class="left-align-text docutils container">
+<p><strong>Block &lt;basic&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#prep-prep-mode"><span class="std std-ref">prep_mode</span></a>,
+<a class="reference internal" href="#prep-outdir"><span class="std std-ref">outdir</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;software_path&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#prep-vasp-path"><span class="std std-ref">vasp_path</span></a>,
+<a class="reference internal" href="#prep-vaspkit-path"><span class="std std-ref">vaspkit_path</span></a>,
+<a class="reference internal" href="#prep-vasp-pot-dir"><span class="std std-ref">vasp_pot_dir</span></a>,
+<a class="reference internal" href="#prep-openmx-path"><span class="std std-ref">openmx_path</span></a>,
+<a class="reference internal" href="#prep-openmx-pp-path"><span class="std std-ref">openmx_pp_path</span></a>,
+<a class="reference internal" href="#prep-openmx-read-path"><span class="std std-ref">openmx_read_path</span></a>,
+<a class="reference internal" href="#prep-openmx-dftdata-dir"><span class="std std-ref">openmx_dftdata_dir</span></a>,
+<a class="reference internal" href="#prep-abacus-path"><span class="std std-ref">abacus_path</span></a>,
+<a class="reference internal" href="#prep-abacus-pp-path"><span class="std std-ref">abacus_pp_path</span></a>,
+<a class="reference internal" href="#prep-jx-path"><span class="std std-ref">jx_path</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;material&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#prep-struct-path"><span class="std std-ref">struct_path</span></a>,
+<a class="reference internal" href="#prep-std-symm-cell"><span class="std std-ref">std_symm_cell</span></a>,
+<a class="reference internal" href="#prep-symm-tol"><span class="std std-ref">symm_tol</span></a>,
+<a class="reference internal" href="#prep-magnetic-tolerance"><span class="std std-ref">magnetic_tolerance</span></a>,
+<a class="reference internal" href="#prep-magnetic-type"><span class="std std-ref">magnetic_type</span></a>,
+<a class="reference internal" href="#prep-soc-switch"><span class="std std-ref">soc_switch</span></a>,
+<a class="reference internal" href="#prep-dft-software"><span class="std std-ref">DFT_software</span></a>,
+<a class="reference internal" href="#prep-nao-max"><span class="std std-ref">nao_max</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;scf_params&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#prep-scf-uc-kpt"><span class="std std-ref">scf_uc_kpt</span></a>,
+<a class="reference internal" href="#prep-scf-rec-density"><span class="std std-ref">scf_rec_density</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;grad_epc&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#prep-dson-delta-r"><span class="std std-ref">dSon_delta_r</span></a>,
+<a class="reference internal" href="#prep-grad-sparse-thr"><span class="std std-ref">grad_sparse_thr</span></a>,
+<a class="reference internal" href="#prep-epc-sc-matrix"><span class="std std-ref">epc_sc_matrix</span></a>,
+<a class="reference internal" href="#prep-epc-sc-auto-length"><span class="std std-ref">epc_sc_auto_length</span></a>,
+<a class="reference internal" href="#prep-epc-sc-disp"><span class="std std-ref">epc_sc_disp</span></a>,
+<a class="reference internal" href="#prep-graph-data-sc-path"><span class="std std-ref">graph_data_sc_path</span></a>,
+<a class="reference internal" href="#prep-pred-h-sc-path"><span class="std std-ref">pred_H_sc_path</span></a>,
+<a class="reference internal" href="#prep-mat-info-sc-path"><span class="std std-ref">mat_info_sc_path</span></a>,
+<a class="reference internal" href="#prep-use-prediction"><span class="std std-ref">use_prediction</span></a></p>
+</div></blockquote>
+<p><strong>Block &lt;graph_pack&gt;:</strong></p>
+<blockquote>
+<div><p><a class="reference internal" href="#prep-hsout-filename"><span class="std std-ref">HSout_filename</span></a>,
+<a class="reference internal" href="#prep-nonscf-filename"><span class="std std-ref">nonscf_filename</span></a>,
+<a class="reference internal" href="#prep-stdin-filename"><span class="std std-ref">stdin_filename</span></a>,
+<a class="reference internal" href="#prep-vbout-filename"><span class="std std-ref">vbout_filename</span></a>,
+<a class="reference internal" href="#prep-data-folder"><span class="std std-ref">data_folder</span></a>,
+<a class="reference internal" href="#prep-converge-step-ratio"><span class="std std-ref">converge_step_ratio</span></a>,</p>
+</div></blockquote>
+</div>
+</div></blockquote>
+</section>
+<section id="basic-block">
+<h3>basic block<a class="headerlink" href="#basic-block" title="Link to this heading"></a></h3>
+<div class="param-card basic docutils container" id="prep-prep-mode">
+<div class="param-header">prep_mode</div><div class="param-meta">Options: <code>grad-epc</code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Preparation mode.</p>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card basic docutils container" id="prep-outdir">
+<div class="param-header">outdir</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code><b><i>MUST SET BY USER</i></b></code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The output directory.</p>
+</div></blockquote>
+</div>
+<div class="param-block">basic</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="software-path-block">
+<h3>software_path block<a class="headerlink" href="#software-path-block" title="Link to this heading"></a></h3>
+<div class="param-card software_path docutils container" id="prep-vasp-path">
+<div class="param-header">vasp_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./vasp_std</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the VASP executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-vaspkit-path">
+<div class="param-header">vaspkit_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./vaspkit</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the VASPkit executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-vasp-pot-dir">
+<div class="param-header">vasp_pot_dir</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Directory containing the VASP pseudopotential files.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-openmx-path">
+<div class="param-header">openmx_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./openmx</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the OpenMX executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-openmx-pp-path">
+<div class="param-header">openmx_pp_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./openmx_postprocess</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the openmx_postprocess executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-openmx-read-path">
+<div class="param-header">openmx_read_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./read_openmx</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the read_openmx executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-openmx-dftdata-dir">
+<div class="param-header">openmx_dftdata_dir</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Directory containing OpenMX pseudopotentials and orbital basis files.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-abacus-path">
+<div class="param-header">abacus_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./abacus</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the ABACUS executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-abacus-pp-path">
+<div class="param-header">abacus_pp_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./abacus_postprocess</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the abacus_postprocess executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card software_path docutils container" id="prep-jx-path">
+<div class="param-header">jx_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>./jx</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the JX executable.</p>
+</div></blockquote>
+</div>
+<div class="param-block">software path</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="material-block">
+<h3>material block<a class="headerlink" href="#material-block" title="Link to this heading"></a></h3>
+<div class="param-card material docutils container" id="prep-struct-path">
+<div class="param-header">struct_path</div><div class="param-meta">Options: <code>POSCAR | *.vasp | *.xsf | *.dat | *.npz</code><br>Default: <code>./POSCAR</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The path to the structure file.</p>
+<table class="custom-table center-align-text docutils align-default" id="struct-path-table">
+<caption><span class="caption-text">Supported Structure File Formats</span><a class="headerlink" href="#struct-path-table" title="Link to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>POSCAR</p></td>
+<td><p>Structure file in VASP POSCAR format</p></td>
+</tr>
+<tr class="row-even"><td><p>.vasp</p></td>
+<td><p>Structure file in VASP POSCAR format</p></td>
+</tr>
+<tr class="row-odd"><td><p>.xsf</p></td>
+<td><p>XCrySDen structure file</p></td>
+</tr>
+<tr class="row-even"><td><p>.dat</p></td>
+<td><p>OpenMX input file</p></td>
+</tr>
+<tr class="row-odd"><td><p>.npz</p></td>
+<td><p>HamGNN graph data file</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-std-symm-cell">
+<div class="param-header">std_symm_cell</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the input structure will be converted to
+a standard lattice prior to use.</p>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-symm-tol">
+<div class="param-header">symm_tol</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.00001</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Tolerance (in angstroms) for symmetry finding.</p>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-magnetic-tolerance">
+<div class="param-header">magnetic_tolerance</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.01</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Threshold (in Bohr magneton) for identifying magnetic atoms.</p>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-moment-similar-tolerence">
+<div class="param-header">moment_similar_tolerence</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>-1.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Threshold (in Bohr magneton) to judge if two atomic magnetic moments
+are similar enough to be considered identical.</p>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-magnetic-type">
+<div class="param-header">magnetic_type</div><div class="param-meta">Options: <code>'none' | 'collinear' | 'nc'</code><br>Default: <code>'none'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the magnetic configuration of the system.</p>
+<table class="custom-table center-align-text docutils align-default" id="prep-magnetic-conf-table">
+<caption><span class="caption-text">Magnetic Configuration</span><a class="headerlink" href="#prep-magnetic-conf-table" title="Link to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>‘none’</p></td>
+<td><p>Non-magnetic</p></td>
+</tr>
+<tr class="row-even"><td><p>‘collinear’</p></td>
+<td><p>Collinear spin configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘nc’</p></td>
+<td><p>Non-collinear spin configuration</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-soc-switch">
+<div class="param-header">soc_switch</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <strong>True</strong>, the system will be treated with spin-orbit coupling (SOC).</p>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-dft-software">
+<div class="param-header">DFT_software</div><div class="param-meta">Options: <code>'openmx' | 'abacus' | 'siesta'</code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Selects the DFT software associated with the input data and generated files.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">openmx</span></code>: OpenMX interface.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">abacus</span></code>: ABACUS interface.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">siesta</span></code>: SIESTA basis definitions are listed in
+<a class="reference internal" href="ao_define.html#ao-define-title"><span class="std std-ref">Atomic Orbital Basis Definition</span></a>, but the current
+preparer input validation does not yet accept this option.</p></li>
+</ul>
+<p>Use <code class="docutils literal notranslate"><span class="pre">openmx</span></code> or <code class="docutils literal notranslate"><span class="pre">abacus</span></code> for the preparation workflows documented here.</p>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card material docutils container" id="prep-nao-max">
+<div class="param-header">nao_max</div><div class="param-meta">Options: <code>13 | 14 | 15 | 19 | 26 | 27 | 40</code><br>Default: <code>26</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Determines which predefined atomic orbital basis set to use,
+based on the specified integer value and <a class="reference internal" href="#prep-dft-software"><span class="std std-ref">DFT_software</span></a>.
+The basis set is specified as {<strong>DFT_software</strong>}_{<strong>nao_max</strong>}.
+More details can be found in <a class="reference internal" href="ao_define.html#ao-define-title"><span class="std std-ref">Input Keywords/Atomic Orbital Basis Definition</span></a>.</p>
+<table class="custom-table center-align-text docutils align-default" id="prep-orbit-basis-table">
+<caption><span class="caption-text">Atomic Orbital Basis</span><a class="headerlink" href="#prep-orbit-basis-table" title="Link to this table"></a></caption>
+<tbody>
+<tr class="row-odd"><td><p>openmx_14</p></td>
+<td><p><strong>OpenMX</strong> basis set specifying a maximum of <strong>14</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>openmx_19</p></td>
+<td><p><strong>OpenMX</strong> basis set specifying a maximum of <strong>19</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>openmx_26</p></td>
+<td><p><strong>OpenMX</strong> basis set specifying a maximum of <strong>26</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>siesta_13</p></td>
+<td><p><strong>SIESTA</strong> basis set specifying a maximum of <strong>13</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>siesta_19</p></td>
+<td><p><strong>SIESTA</strong> basis set specifying a maximum of <strong>19</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>abacus_13</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>13</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>abacus_15</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>15</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-even"><td><p>abacus_27</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>27</strong> orbitals per element</p></td>
+</tr>
+<tr class="row-odd"><td><p>abacus_40</p></td>
+<td><p><strong>ABACUS</strong> basis set specifying a maximum of <strong>40</strong> orbitals per element</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="param-block">material</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="scf-params-block">
+<h3>scf_params block<a class="headerlink" href="#scf-params-block" title="Link to this heading"></a></h3>
+<div class="param-card scf_params docutils container" id="prep-scf-uc-kpt">
+<div class="param-header">scf_uc_kpt</div><div class="param-meta">Options: <code>'auto' | <b><i>*LIST[INT, INT, INT]*</i></b></code><br>Default: <code>'auto'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The size of the reciprocal-space <strong>k</strong>-point
+sampling grid. If set to <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>,
+the grid will be automatically generated based on
+<a class="reference internal" href="#prep-scf-rec-density"><span class="std std-ref">scf_rec_density</span></a>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">scf params</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card scf_params docutils container" id="prep-scf-rec-density">
+<div class="param-header">scf_rec_density</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>50.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The reciprocal-space <strong>k</strong>-point sampling density for
+SCF calculations,
+specified in units of [angstrom].
+If <a class="reference internal" href="#prep-scf-uc-kpt"><span class="std std-ref">scf_uc_kpt</span></a> is <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>, the k-point grid will be generated
+based on this value and the lattice constants.</p>
+</div></blockquote>
+</div>
+<div class="param-block">scf params</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="grad-epc-block">
+<h3>grad_epc block<a class="headerlink" href="#grad-epc-block" title="Link to this heading"></a></h3>
+<div class="param-card grad_epc docutils container" id="prep-dson-delta-r">
+<div class="param-header">dSon_delta_r</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.001</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Small displacement (in angstroms)
+applied to compute the gradient of onsite overlap matrix elements.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-grad-sparse-thr">
+<div class="param-header">grad_sparse_thr</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.0001</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The threshold (in Hartree/bohr) below which
+elements in the sparse gradient matrix are neglected.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-epc-sc-matrix">
+<div class="param-header">epc_sc_matrix</div><div class="param-meta">Options: <code>'auto' | <b><i>*LIST[INT, INT, INT]*</i></b></code><br>Default: <code>'auto'</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The supercell size used for EPC gradient matrix calculation.
+Note that all three integers must be odd.
+If set to <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>,
+the supercell size will be automatically determined
+based on <a class="reference internal" href="#prep-epc-sc-auto-length"><span class="std std-ref">epc_sc_auto_length</span></a>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-epc-sc-auto-length">
+<div class="param-header">epc_sc_auto_length</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>10.0</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <a class="reference internal" href="#prep-epc-sc-matrix"><span class="std std-ref">epc_sc_matrix</span></a> is set to <code class="docutils literal notranslate"><span class="pre">'auto'</span></code>,
+the supercell size required for EPC gradient matrix calculation
+will be automatically determined using this value, specified in angstroms.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-epc-sc-disp">
+<div class="param-header">epc_sc_disp</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.01</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Small displacement (in angstroms) used to compute
+the gradient of the Hamiltonian for EPC calculation,
+using the finite displacement method.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-graph-data-sc-path">
+<div class="param-header">graph_data_sc_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the graph data of supercells used to
+compute the Hamiltonian gradient for EPC calculation,
+using the finite displacement method.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-pred-h-sc-path">
+<div class="param-header">pred_H_sc_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the prediction Hamiltonian of supercells used to
+compute the Hamiltonian gradient for EPC calculation,
+using the finite displacement method.
+Used only if <a class="reference internal" href="#prep-use-prediction"><span class="std std-ref">use_prediction</span></a> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-mat-info-sc-path">
+<div class="param-header">mat_info_sc_path</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Path to the <code class="docutils literal notranslate"><span class="pre">mat_info_sc.npy</span></code> file generated by <strong>QTrans</strong>.
+It should contain the mapping between unit cell and supercells used to
+compute the Hamiltonian gradient for EPC calculation,
+using the finite displacement method.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card grad_epc docutils container" id="prep-use-prediction">
+<div class="param-header">use_prediction</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the program reads the Hamiltonians from
+<a class="reference internal" href="#prep-pred-h-sc-path"><span class="std std-ref">pred_H_sc_path</span></a>
+instead of from <a class="reference internal" href="#prep-graph-data-sc-path"><span class="std std-ref">graph_data_sc_path</span></a>.
+However, it still requires other information from <a class="reference internal" href="#prep-graph-data-sc-path"><span class="std std-ref">graph_data_sc_path</span></a>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">grad epc</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+<section id="graph-pack-block">
+<h3>graph_pack block<a class="headerlink" href="#graph-pack-block" title="Link to this heading"></a></h3>
+<div class="param-card graph_pack docutils container" id="prep-hsout-filename">
+<div class="param-header">HSout_filename</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the name of the file containing the
+self-consistent Hamiltonian and overlap matrix.
+If set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, the graph data will be constructed using
+non-self-consistent part of Hamiltonian, which requires <a class="reference internal" href="#prep-stdin-filename"><span class="std std-ref">stdin_filename</span></a>
+and <a class="reference internal" href="#prep-nonscf-filename"><span class="std std-ref">nonscf_filename</span></a>.
+Otherwise, the graph data will be built using self-consistent Hamiltonian inside this file
+and also other information from <a class="reference internal" href="#prep-vbout-filename"><span class="std std-ref">vbout_filename</span></a>.
+In this case, non-self-consistent part of Hamiltonian data can
+also be included by specifying <a class="reference internal" href="#prep-nonscf-filename"><span class="std std-ref">nonscf_filename</span></a>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">graph pack</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card graph_pack docutils container" id="prep-nonscf-filename">
+<div class="param-header">nonscf_filename</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The name of the file that contains the non-self-consistent
+Hamiltonian and overlap matrix.</p>
+</div></blockquote>
+</div>
+<div class="param-block">graph pack</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card graph_pack docutils container" id="prep-stdin-filename">
+<div class="param-header">stdin_filename</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The name of the DFT software input file.
+Has no effect unless <a class="reference internal" href="#prep-hsout-filename"><span class="std std-ref">HSout_filename</span></a> is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">graph pack</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card graph_pack docutils container" id="prep-vbout-filename">
+<div class="param-header">vbout_filename</div><div class="param-meta">Options: <code>None | <b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>The name of the DFT software output file.
+Has no effect unless <a class="reference internal" href="#prep-hsout-filename"><span class="std std-ref">HSout_filename</span></a> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</div></blockquote>
+</div>
+<div class="param-block">graph pack</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card graph_pack docutils container" id="prep-data-folder">
+<div class="param-header">data_folder</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>None</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Specifies the directories of the folders with the raw data
+to be packed into graph data.
+This path will be used by the <strong>glob.glob()</strong> function to match all
+directories.
+Note that this value must point to the directory of folders, not files.</p>
+</div></blockquote>
+</div>
+<div class="param-block">graph pack</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+<div class="param-card graph_pack docutils container" id="prep-converge-step-ratio">
+<div class="param-header">converge_step_ratio</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>0.9</code></div><div class="param-desc docutils container">
+<blockquote>
+<div><p>Defines the maximum acceptable ratio between
+the number of self-consistent field (SCF) steps
+actually taken to reach convergence
+and the maximum number of SCF steps specified in the DFT input settings.
+Data entries with a convergence ratio
+exceeding this threshold will be excluded from the graph data generation process.</p>
+</div></blockquote>
+</div>
+<div class="param-block">graph pack</div></div>
+<p><a class="reference internal" href="#prep-title-keywords"><span class="std std-ref">Back to top</span></a></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../input_keywords.html" class="btn btn-neutral float-left" title="Input Keywords" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="calculator.html" class="btn btn-neutral float-right" title="Keywords of QTrans_run" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

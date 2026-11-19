@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPC Path Calculation &mdash; QTrans 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=c10d0862" />
+      <link rel="stylesheet" type="text/css" href="../_static/style.css?v=1b4ad821" />
+
+  
+    <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Conductivity Calculation" href="conduct.html" />
+    <link rel="prev" title="DOS of Quasiparticle" href="qp_dos.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QTrans
+              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory.html">Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../workflow.html">Workflow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="obtain_hs.html">Generation of Hamiltonian and Overlap Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epc_prep.html">EPC Gradient Matrix Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="phonon_prep.html">Phonon Force Data Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_disp.html">Dispersion of Quasiparticle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qp_dos.html">DOS of Quasiparticle</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">EPC Path Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#epc-path-of-gaas">EPC path of GaAs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#without-lrc">1. Without LRC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#with-lrc">2. With LRC</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="conduct.html">Conductivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resist.html">Resistivity Calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="breakdown.html">Intrinsic Dielectric Breakdown</a></li>
+<li class="toctree-l2"><a class="reference internal" href="superconduct.html">Superconductivity Calculation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../input_keywords.html">Input Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QTrans</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../tutorials.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">EPC Path Calculation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/epc_path.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="epc-path-calculation">
+<span id="tutorial-epc-path"></span><h1>EPC Path Calculation<a class="headerlink" href="#epc-path-calculation" title="Link to this heading"></a></h1>
+<p>This tutorial uses <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">epc</span></code> in <strong>QTrans</strong> to calculate
+electron-phonon coupling (EPC) matrix elements along a high-symmetry path.</p>
+<section id="epc-path-of-gaas">
+<h2>EPC path of GaAs<a class="headerlink" href="#epc-path-of-gaas" title="Link to this heading"></a></h2>
+<p>This tutorial illustrates the calculation of the EPC matrix elements of the polar semiconductor
+GaAs using <strong>QTrans</strong> with and without long-range correction (LRC).</p>
+<p>The GaAs tutorial is located in <code class="docutils literal notranslate"><span class="pre">tutorials/GaAs/openmx/epc-disp/</span></code>.
+All necessary data files are available in <code class="docutils literal notranslate"><span class="pre">tutorials/GaAs/openmx/data/</span></code>.
+The directory contains calculations with and without LRC:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd tutorials/GaAs/openmx/epc-disp/ &amp;&amp; ls
+with-LRC/ without-LRC/
+</pre></div>
+</div>
+<section id="without-lrc">
+<h3>1. Without LRC<a class="headerlink" href="#without-lrc" title="Link to this heading"></a></h3>
+<p>First, calculate the EPC matrix elements without LRC.
+Enter <code class="docutils literal notranslate"><span class="pre">without-LRC/</span></code>, where you will find the input file <code class="docutils literal notranslate"><span class="pre">input-epc-noLRC.yaml</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">ref/</span></code> folder containing reference outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd without-LRC/ &amp;&amp; ls
+input-epc-noLRC.yaml ref/
+</pre></div>
+</div>
+<p>In the input file <code class="docutils literal notranslate"><span class="pre">input-epc-noLRC.yaml</span></code>, we set <code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">'epc'</span></code> to compute the EPC matrix elements,
+and enable the use of a sparse gradient matrix (<code class="docutils literal notranslate"><span class="pre">read_sparse_grad_mat:</span> <span class="pre">True</span></code>) to accelerate the calculation.
+The correction is deactivated by setting <code class="docutils literal notranslate"><span class="pre">apply_correction:</span> <span class="pre">False</span></code>.</p>
+<p>Instead of computing all EPC matrix elements, we focus on a specific process:
+the EPC matrix elements <span class="math notranslate nohighlight">\(\left| g_{\mu\nu b}(\mathbf{k},\mathbf{q}) \right|\)</span> between an initial electronic
+state <span class="math notranslate nohighlight">\(\varepsilon_{\nu\mathbf{k}}\)</span> at a fixed wavevector
+<span class="math notranslate nohighlight">\(\mathbf{k}\)</span> in band <span class="math notranslate nohighlight">\(\mathbf{\nu}\)</span>, and a final state <span class="math notranslate nohighlight">\(\varepsilon_{\mu\mathbf{k+q}}\)</span>
+in band <span class="math notranslate nohighlight">\(\mathbf{\mu}\)</span>, with a phonon of branch <span class="math notranslate nohighlight">\(b\)</span>,
+evaluated as a function of the phonon wavevector <span class="math notranslate nohighlight">\(\mathbf{q}\)</span>.</p>
+<p>In this case, we choose the electronic state at the Gamma point in the fifteenth band (<span class="math notranslate nohighlight">\(\mathbf{\nu}\)</span> = 15) as the initial state,
+and choose the final state also in the fifteenth band (<span class="math notranslate nohighlight">\(\mathbf{\mu}\)</span> = <span class="math notranslate nohighlight">\(\mathbf{\nu}\)</span> = 15),
+by specifying: <code class="docutils literal notranslate"><span class="pre">epc_path_fix_k:</span> <span class="pre">[0.0,0.0,0.0]</span></code> and <code class="docutils literal notranslate"><span class="pre">dispersion_select_index:</span> <span class="pre">'15,15'</span></code>.
+The q-point path L-Gamma-X-W-K-Gamma is specified manually using <code class="docutils literal notranslate"><span class="pre">high_symmetry_points</span></code> and <code class="docutils literal notranslate"><span class="pre">high_symmetry_labels</span></code>.
+Alternatively, one can use the automatically generated high-symmetry path.</p>
+<p>The electronic band structures of GaAs are shown in Figure 1, where the selected band is highlighted in red.
+The band structures can be obtained using
+<code class="docutils literal notranslate"><span class="pre">cal_mode:</span> <span class="pre">'band'</span></code>; see the <a class="reference internal" href="qp_disp.html#tutorial-dispersion"><span class="std std-ref">Dispersion of Quasiparticle</span></a> section
+for more information.</p>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../_images/tot_band_GaAs.png"><img alt="tot_band_GaAs.png" src="../_images/tot_band_GaAs.png" style="width: 450.0px; height: 600.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1:</strong>  (Top) The calculated electronic band structure of GaAs, with the lowest conduction
+band highlighted in red. The Fermi level is aligned with the valence band maximum (VBM).
+(Bottom) The phonon dispersions with LRC (dotted line) and without LRC (solid line).
+The highest optical mode is highlighted in red. The yellow region indicates where LRC has
+a significant effect on the phonon dispersions.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The complete <code class="docutils literal notranslate"><span class="pre">input-epc-noLRC.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;epc&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">19</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">read_sparse_grad_mat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/GaAs-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/FORCE_SETS</span>
+<span class="w">  </span><span class="nt">apply_correction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+<span class="w">  </span><span class="nt">BECs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[[</span><span class="nv">2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2.10569</span><span class="p p-Indicator">]],[[</span><span class="nv">-2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-2.10569</span><span class="p p-Indicator">]]]</span>
+<span class="w">  </span><span class="nt">DL</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">13.355780</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">],[</span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">13.355780</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">],[</span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">13.355780</span><span class="p p-Indicator">]]</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/grad_mat_sparse.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_cut</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0</span>
+
+<span class="nt">dispersion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">high_symmetry_points</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">],[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">],[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.25</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.75</span><span class="p p-Indicator">],[</span><span class="nv">0.375</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.375</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.75</span><span class="p p-Indicator">],[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">high_symmetry_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;L&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;G&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;X&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;W&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;K&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;G&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">nks_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">epc_path_fix_k</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">dispersion_select_index</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;15,15&#39;</span>
+</pre></div>
+</div>
+<p>Now we are ready to launch the <strong>QTrans</strong> calculation with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-epc-noLRC.yaml &gt; epc-noLRC.out
+</pre></div>
+</div>
+<p>The main outputs are <code class="docutils literal notranslate"><span class="pre">epc-ave.dispersion</span></code>,
+<code class="docutils literal notranslate"><span class="pre">dispersions/epc-15-15.dispersion</span></code>, and <code class="docutils literal notranslate"><span class="pre">high_symmetry_path.dat</span></code>.
+The degeneracy-averaged data in <code class="docutils literal notranslate"><span class="pre">epc-ave.dispersion</span></code> have the following format:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># q_label: $L$ $G$ $X$ $W$ $K$ $G$
+# q_node: 0.0  0.0810640485  0.1746687514  0.2214711028  0.2545653634  0.3538481423
+#  iq    q_path  ibranch   frequency(meV)    |g|(meV)     Deform. pot.(eV/Ang)
+    0     0.00000      1       6.8870757960       0.0035376102       0.0000772320
+    0     0.00000      2       6.8870757960       0.0035376102       0.0000772320
+    0     0.00000      3      25.8072060900     109.2715124525       4.6179288411
+...
+</pre></div>
+</div>
+<p>The first two lines give the high-symmetry q-point labels and path positions.
+The six columns are the q-point index, distance along the path, phonon branch
+index, phonon energy (meV), averaged matrix-element magnitude (meV), and
+deformation potential (eV/Angstrom). Branch indices start at 1; the six
+branches are listed at each q point. The band-specific file in
+<code class="docutils literal notranslate"><span class="pre">dispersions/</span></code> provides the selected band-pair dispersion.</p>
+<p>Using these data, we plot the calculated EPC matrix elements for the highest optical phonon branch (see Figure 1);
+the results are shown in Figure 2.</p>
+</section>
+<section id="with-lrc">
+<h3>2. With LRC<a class="headerlink" href="#with-lrc" title="Link to this heading"></a></h3>
+<p>Next, repeat the calculation with LRC.
+Enter <code class="docutils literal notranslate"><span class="pre">with-LRC/</span></code>, where you will find the input file <code class="docutils literal notranslate"><span class="pre">input-epc-LRC.yaml</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">ref/</span></code> folder containing reference outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cd ..
+cd with-LRC/ &amp;&amp; ls
+input-epc-LRC.yaml ref/
+</pre></div>
+</div>
+<p>Enable LRC with <code class="docutils literal notranslate"><span class="pre">phonon.apply_correction:</span> <span class="pre">True</span></code>. The Born effective
+charges (<code class="docutils literal notranslate"><span class="pre">BECs</span></code>) and dielectric tensor (<code class="docutils literal notranslate"><span class="pre">DL</span></code>) are supplied in both
+configurations, but the correction is applied only in this run.
+The dipole-correction cutoff <code class="docutils literal notranslate"><span class="pre">q_cut</span></code> belongs in the <code class="docutils literal notranslate"><span class="pre">epc</span></code> block.</p>
+<p>The complete <code class="docutils literal notranslate"><span class="pre">input-epc-LRC.yaml</span></code> is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">basic</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cal_mode</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;epc&#39;</span>
+<span class="w">  </span><span class="nt">graph_data_path_uc</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/graph_data.npz</span>
+<span class="w">  </span><span class="nt">nao_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">19</span>
+<span class="w">  </span><span class="nt">Ham_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openmx</span>
+<span class="w">  </span><span class="nt">outdir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;./&#39;</span>
+
+<span class="nt">advanced</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">read_sparse_grad_mat</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="nt">phonon</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">supercell_matrix</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">3.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">],</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">unitcell_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/GaAs-pri.vasp</span>
+<span class="w">  </span><span class="nt">force_infos_filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/FORCE_SETS</span>
+<span class="w">  </span><span class="nt">apply_correction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">BECs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[[</span><span class="nv">2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2.10569</span><span class="p p-Indicator">]],[[</span><span class="nv">-2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-2.10569</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">],[</span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.00000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">-2.10569</span><span class="p p-Indicator">]]]</span>
+<span class="w">  </span><span class="nt">DL</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">13.355780</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">],[</span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">13.355780</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">],[</span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.000000</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">13.355780</span><span class="p p-Indicator">]]</span>
+
+<span class="nt">epc</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grad_mat_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/grad_mat_sparse.npy</span>
+<span class="w">  </span><span class="nt">mat_info_sc_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../../data/mat_info_sc.npy</span>
+<span class="w">  </span><span class="nt">cell_range_cut</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">q_cut</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100.0</span>
+
+<span class="nt">dispersion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">high_symmetry_points</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">],[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">],[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.5</span><span class="p p-Indicator">],[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.25</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.75</span><span class="p p-Indicator">],[</span><span class="nv">0.375</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.375</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.75</span><span class="p p-Indicator">],[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">]]</span>
+<span class="w">  </span><span class="nt">high_symmetry_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;L&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;G&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;X&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;W&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;K&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;G&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">nks_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">epc_path_fix_k</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">0.0</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">dispersion_select_index</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;15,15&#39;</span>
+</pre></div>
+</div>
+<p>Launch the <strong>QTrans</strong> calculation with:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mpirun -np 8 QTrans_run --config ./input-epc-LRC.yaml &gt; epc-LRC.out
+</pre></div>
+</div>
+<p>Afterwards, we can plot the corrected EPC matrix elements, as shown in Figure 2.</p>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/epc_band_GaAs.png"><img alt="epc_band_GaAs.png" src="../_images/epc_band_GaAs.png" style="width: 450.0px; height: 450.0px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 2:</strong>  Calculated EPC matrix elements <span class="math notranslate nohighlight">\(\left| g_{\mu\nu b}(\mathbf{k},\mathbf{q}) \right|\)</span>
+along high-symmetry path at <span class="math notranslate nohighlight">\(\mathbf{k}\)</span> = Gamma, <span class="math notranslate nohighlight">\(\mathbf{\mu}\)</span> = <span class="math notranslate nohighlight">\(\mathbf{\nu}\)</span> being
+the lowest conduction band, and <span class="math notranslate nohighlight">\(b\)</span> the highest optical mode.
+The elements are averaged over degenerate states.
+The red dashed line represents the calculation without LRC, while the green line shows
+the calculation with LRC. The yellow region indicates where LRC has
+a significant effect on the phonon dispersions and EPC elements.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>We can see that the LRC is important for polar materials, and <strong>QTrans</strong> successfully describes the singular behavior of the EPC
+matrix elements as <span class="math notranslate nohighlight">\(\mathbf{q} \rightarrow 0\)</span>.</p>
+<p>When plotting the sixth (highest-frequency) branch, omit the exact Gamma
+points from both the LRC and no-LRC data. The LRC value stored at Gamma is
+a zero placeholder and does not represent the directional limit as
+<span class="math notranslate nohighlight">\(\mathbf{q} \rightarrow 0\)</span>. Mask these points with <code class="docutils literal notranslate"><span class="pre">NaN</span></code> or split the
+curve into segments so that a line is not drawn across Gamma.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qp_dos.html" class="btn btn-neutral float-left" title="DOS of Quasiparticle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conduct.html" class="btn btn-neutral float-right" title="Conductivity Calculation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yang&#39;s Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
