@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/source/_static/logo.png" alt="QTrans logo" width="160">
+</p>
+
 # QTrans：A Python package for calculating Quasiparticle Transport properties.
 
 **From electronic Hamiltonians to electron–phonon coupling and transport properties**
@@ -71,22 +75,19 @@ QTrans is developed by researchers at **Fudan University**. Team information fol
 
 ### Code contributors
 
-| Name | Email |
-| --- | --- |
-| Shixu Liu | [liusx21@m.fudan.edu.cn](mailto:liusx21@m.fudan.edu.cn) |
-| Haozhe Li | [hzli24@m.fudan.edu.cn](mailto:hzli24@m.fudan.edu.cn) |
-| Dr. Yang Zhong | [yzhong@fudan.edu.cn](mailto:yzhong@fudan.edu.cn) |
-| Xingting Li | [xtli22@m.fudan.edu.cn](mailto:xtli22@m.fudan.edu.cn) |
-| Jiarui Bu | [jrbo24@m.fudan.edu.cn](mailto:jrbo24@m.fudan.edu.cn) |
-| Renyu Guo | [ryguo24@m.fudan.edu.cn](mailto:ryguo24@m.fudan.edu.cn) |
+- **Shixu Liu** — [liusx21@m.fudan.edu.cn](mailto:liusx21@m.fudan.edu.cn)
+- **Haozhe Li** — [hzli24@m.fudan.edu.cn](mailto:hzli24@m.fudan.edu.cn)
+- **Dr. Yang Zhong** — [yzhong@fudan.edu.cn](mailto:yzhong@fudan.edu.cn)
+- **Xingting Li** — [xtli22@m.fudan.edu.cn](mailto:xtli22@m.fudan.edu.cn)
+- **Jiarui Bu** — [jrbo24@m.fudan.edu.cn](mailto:jrbo24@m.fudan.edu.cn)
+- **Renyu Guo** — [ryguo24@m.fudan.edu.cn](mailto:ryguo24@m.fudan.edu.cn)
 
 ### Project leaders
 
-| Name | Email |
-| --- | --- |
-| Prof. Xingao Gong | [xggong@fudan.edu.cn](mailto:xggong@fudan.edu.cn) |
-| Prof. Hongjun Xiang | [hxiang@fudan.edu.cn](mailto:hxiang@fudan.edu.cn) |
-| Prof. Jihui Yang | [jhyang04@fudan.edu.cn](mailto:jhyang04@fudan.edu.cn) |
+- **Prof. Xingao Gong** — [xggong@fudan.edu.cn](mailto:xggong@fudan.edu.cn)
+- **Prof. Hongjun Xiang** — [hxiang@fudan.edu.cn](mailto:hxiang@fudan.edu.cn)
+- **Prof. Jihui Yang** — [jhyang04@fudan.edu.cn](mailto:jhyang04@fudan.edu.cn)
+
 
 ## License
 
