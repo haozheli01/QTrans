@@ -1,6 +1,4 @@
-<div align="center">
-
-# QTrans
+# QTrans：A Python package for calculating Quasiparticle Transport properties.
 
 **From electronic Hamiltonians to electron–phonon coupling and transport properties**
 
@@ -27,9 +25,11 @@ The package combines Python workflows, native C kernels with OpenMP support, and
 
 ## Workflow
 
-QTrans separates **data preparation** (`QTrans_prep`) from **property calculation** (`QTrans_run`). Prepared datasets can be reused for different temperatures, sampling meshes, and target properties.
-
-![QTrans workflow from atomic displacements and electronic Hamiltonians to phonons, electron–phonon coupling matrix elements, and transport properties](docs/source/_static/intro.png)
+<p align="center">
+  <img src="docs/source/_static/intro.png"
+       alt="QTrans workflow"
+       width="65%">
+</p>
 
 Electronic preparation interfaces depend on the selected workflow. See the [electronic-data tutorial](docs/source/tutorials/obtain_hs.rst) for interface-specific instructions. Phonon data must describe the same reference crystal as the electronic and EPC datasets; see the [full workflow](docs/source/workflow.rst) for data requirements and unit conventions.
 
