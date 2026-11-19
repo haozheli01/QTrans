@@ -13,7 +13,7 @@ author = 'Shixu Liu, Haozhe Li'
 release = '0.1'
 
 # -- General configuration ---------------------------------------------------
-sys.path.insert(0, os.path.abspath('./_ext'))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '_ext'))
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -39,8 +39,9 @@ html_css_files = [
 ]
 html_static_path = ['_static']
 html_theme = "sphinx_rtd_theme"
+html_baseurl = "https://haozheli01.github.io/QTrans/"
 # html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_logo = "./_static/logo.ico"
+html_logo = "./_static/logo.png"
 html_favicon = "./_static/html_mini.ico"
 
 # -- Options for HTMLHelp output ---------------------------------------------
