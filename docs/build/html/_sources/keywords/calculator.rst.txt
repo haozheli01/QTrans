@@ -96,9 +96,7 @@ Blocks
             :ref:`cell_range_cut <cal_cell_range_cut>`,
             :ref:`phonon_frequency_cutoff <cal_phonon_frequency_cutoff>`,
             :ref:`LRC_taylor_order <cal_LRC_taylor_order>`,
-            :ref:`q_cut <cal_q_cut>`,
-            :ref:`range_separation_length_L <cal_range_separation_length_L>`,
-            :ref:`vaccum_length <cal_vaccum_length>`
+            :ref:`q_cut <cal_q_cut>`
 
         **Block <transport>:**
 
@@ -606,7 +604,10 @@ phonon block
    :default: False
    :block: phonon
 
-    *bjr*
+    Controls whether the long-range dynamical quadrupole contribution is included in the electron–phonon coupling matrix
+    elements. When set to True, QTrans reads the dynamical quadrupole tensors from ``Q_file``. This parameter can be set 
+    independently of ``apply_correction``. Enabling both parameters includes the long-range dipole and quadrupole contributions; 
+    enabling only ``quadrupole_correction`` includes the quadrupole contribution alone.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -616,7 +617,27 @@ phonon block
    :default: './quadrupole.fmt'
    :block: phonon
 
-    *bjr*
+    
+    Specifies the path to the dynamical quadrupole tensor file. The file is read only when ``quadrupole_correction`` is True.
+    The structure of ``Q_file`` is:
+
+    .. code-block:: text
+
+        atom  dir    Qxx      Qyy      Qzz      Qyz      Qxz      Qxy
+        1     1      ******   ******   ******   ******   ******   ******
+        1     2      ******   ******   ******   ******   ******   ******
+        1     3      ******   ******   ******   ******   ******   ******
+        2     1      ******   ******   ******   ******   ******   ******
+        2     2      ******   ******   ******   ******   ******   ******
+        2     3      ******   ******   ******   ******   ******   ******
+        ......
+
+    ``******`` represents a quadrupole-tensor component.
+
+    The file should contain a header beginning with atom, followed by :math:`3 \times N` consecutive data rows, where :math:`N` is the number of
+    atoms in the unit cell. Each atom occupies three rows corresponding to displacements along the Cartesian x, y, and z 
+    directions (dir = 1, 2, 3). Atoms must appear in the same order as in the unit cell used for the calculation. Value 
+    of the quadrupoles is in units of :math:`e \cdot \mathrm{bohr}`. Quadrupole tensors can be obtained using `ABINIT software <https://docs.abinit.org/topics/longwave/>`_.
 
 :ref:`Back to top <cal_title_keywords>`
 
@@ -737,26 +758,6 @@ epc block
     Specifies the cutoff for applying long-range corrections:
     only q-points with magnitudes smaller than this value will be included. 
     The unit is the length of the first reciprocal lattice vector.
-
-:ref:`Back to top <cal_title_keywords>`
-
-.. _cal_range_separation_length_L:
-.. param-card:: range_separation_length_L
-   :options: <b><i>*FLOAT*</i></b>
-   :default: 100.0
-   :block: epc
-
-    *bjr*
-
-:ref:`Back to top <cal_title_keywords>`
-
-.. _cal_vaccum_length:
-.. param-card:: vaccum_length
-   :options: <b><i>*FLOAT*</i></b>
-   :default: 30.0
-   :block: epc
-
-    *bjr*
 
 :ref:`Back to top <cal_title_keywords>`
 

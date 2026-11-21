@@ -15,6 +15,7 @@
 
   
     <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+    <link rel="canonical" href="https://haozheli01.github.io/QTrans/keywords/calculator.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
@@ -39,7 +40,7 @@
           
           <a href="../index.html" class="icon icon-home">
             QTrans
-              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -201,9 +202,7 @@ block_name2:
 <a class="reference internal" href="#cal-cell-range-cut"><span class="std std-ref">cell_range_cut</span></a>,
 <a class="reference internal" href="#cal-phonon-frequency-cutoff"><span class="std std-ref">phonon_frequency_cutoff</span></a>,
 <a class="reference internal" href="#cal-lrc-taylor-order"><span class="std std-ref">LRC_taylor_order</span></a>,
-<a class="reference internal" href="#cal-q-cut"><span class="std std-ref">q_cut</span></a>,
-<a class="reference internal" href="#cal-range-separation-length-l"><span class="std std-ref">range_separation_length_L</span></a>,
-<a class="reference internal" href="#cal-vaccum-length"><span class="std std-ref">vaccum_length</span></a></p>
+<a class="reference internal" href="#cal-q-cut"><span class="std std-ref">q_cut</span></a></p>
 </div></blockquote>
 <p><strong>Block &lt;transport&gt;:</strong></p>
 <blockquote>
@@ -651,7 +650,10 @@ coupling matrix elements is included.</p>
 <div class="param-card phonon docutils container" id="cal-quadrupole-correction">
 <div class="param-header">quadrupole_correction</div><div class="param-meta">Options: <code>True | False</code><br>Default: <code>False</code></div><div class="param-desc docutils container">
 <blockquote>
-<div><p><em>bjr</em></p>
+<div><p>Controls whether the long-range dynamical quadrupole contribution is included in the electron–phonon coupling matrix
+elements. When set to True, QTrans reads the dynamical quadrupole tensors from <code class="docutils literal notranslate"><span class="pre">Q_file</span></code>. This parameter can be set
+independently of <code class="docutils literal notranslate"><span class="pre">apply_correction</span></code>. Enabling both parameters includes the long-range dipole and quadrupole contributions;
+enabling only <code class="docutils literal notranslate"><span class="pre">quadrupole_correction</span></code> includes the quadrupole contribution alone.</p>
 </div></blockquote>
 </div>
 <div class="param-block">phonon</div></div>
@@ -659,7 +661,23 @@ coupling matrix elements is included.</p>
 <div class="param-card phonon docutils container" id="cal-q-file">
 <div class="param-header">Q_file</div><div class="param-meta">Options: <code><b><i>*STRING*</i></b></code><br>Default: <code>'./quadrupole.fmt'</code></div><div class="param-desc docutils container">
 <blockquote>
-<div><p><em>bjr</em></p>
+<div><p>Specifies the path to the dynamical quadrupole tensor file. The file is read only when <code class="docutils literal notranslate"><span class="pre">quadrupole_correction</span></code> is True.
+The structure of <code class="docutils literal notranslate"><span class="pre">Q_file</span></code> is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>atom  dir    Qxx      Qyy      Qzz      Qyz      Qxz      Qxy
+1     1      ******   ******   ******   ******   ******   ******
+1     2      ******   ******   ******   ******   ******   ******
+1     3      ******   ******   ******   ******   ******   ******
+2     1      ******   ******   ******   ******   ******   ******
+2     2      ******   ******   ******   ******   ******   ******
+2     3      ******   ******   ******   ******   ******   ******
+......
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">******</span></code> represents a quadrupole-tensor component.</p>
+<p>The file should contain a header beginning with atom, followed by <span class="math notranslate nohighlight">\(3 \times N\)</span> consecutive data rows, where <span class="math notranslate nohighlight">\(N\)</span> is the number of
+atoms in the unit cell. Each atom occupies three rows corresponding to displacements along the Cartesian x, y, and z
+directions (dir = 1, 2, 3). Atoms must appear in the same order as in the unit cell used for the calculation. Value
+of the quadrupoles is in units of <span class="math notranslate nohighlight">\(e \cdot \mathrm{bohr}\)</span>. Quadrupole tensors can be obtained using <a class="reference external" href="https://docs.abinit.org/topics/longwave/">ABINIT software</a>.</p>
 </div></blockquote>
 </div>
 <div class="param-block">phonon</div></div>
@@ -760,22 +778,6 @@ for more details.</p>
 <div><p>Specifies the cutoff for applying long-range corrections:
 only q-points with magnitudes smaller than this value will be included.
 The unit is the length of the first reciprocal lattice vector.</p>
-</div></blockquote>
-</div>
-<div class="param-block">epc</div></div>
-<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
-<div class="param-card epc docutils container" id="cal-range-separation-length-l">
-<div class="param-header">range_separation_length_L</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>100.0</code></div><div class="param-desc docutils container">
-<blockquote>
-<div><p><em>bjr</em></p>
-</div></blockquote>
-</div>
-<div class="param-block">epc</div></div>
-<p><a class="reference internal" href="#cal-title-keywords"><span class="std std-ref">Back to top</span></a></p>
-<div class="param-card epc docutils container" id="cal-vaccum-length">
-<div class="param-header">vaccum_length</div><div class="param-meta">Options: <code><b><i>*FLOAT*</i></b></code><br>Default: <code>30.0</code></div><div class="param-desc docutils container">
-<blockquote>
-<div><p><em>bjr</em></p>
 </div></blockquote>
 </div>
 <div class="param-block">epc</div></div>

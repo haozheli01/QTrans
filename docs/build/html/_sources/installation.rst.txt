@@ -37,22 +37,35 @@ Installation
 
 Conda-based Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This method uses the provided environment.yaml file to create a Conda environment with the required dependencies.
+This method uses the provided environment.yml file to create a Conda environment with the required dependencies.
 
-**Step 1.Create the Conda environment** 
+**Step 1. Download QTrans**
 
-Run the following command::
+Clone the **QTrans** repository and enter its directory::
+
+  git clone https://github.com/haozheli01/QTrans.git
+  cd QTrans
+
+**Step 2. Create the Conda environment**
+
+Run the following command from the repository directory::
 
   conda env create -f environment.yml -n QTrans
 
-**Step 2.Activate the environment**::
+**Step 3. Activate the environment**::
 
   conda activate QTrans
 
-**Step 3. Download and install** **QTrans**:
+**Step 4. Install QTrans**
 
-Clone the **QTrans** repository and install the package in editable mode::
+Install the package in editable mode::
 
-  git clone ***.git
-  cd QTrans
   python -m pip install -e .
+
+
+Downloading Tutorials
+-----------------------------
+
+To download the tutorial files, clone the tutorial repository::
+
+  git clone https://github.com/haozheli01/QTrans_tutorials.git

@@ -15,6 +15,7 @@
 
   
     <link rel="shortcut icon" href="../_static/html_mini.ico"/>
+    <link rel="canonical" href="https://haozheli01.github.io/QTrans/theory/epc.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=2709fde1"></script>
@@ -39,7 +40,7 @@
           
           <a href="../index.html" class="icon icon-home">
             QTrans
-              <img src="../_static/logo.ico" class="logo" alt="Logo"/>
+              <img src="../_static/logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -64,7 +65,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#long-range-electrostatic-correction">Long-Range Electrostatic Correction</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#three-dimensional-correction">Three-Dimensional Correction</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#two-dimensional-correction">Two-Dimensional Correction</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#numerical-settings-and-output">Numerical Settings and Output</a></li>
@@ -323,32 +323,6 @@ Orbital indices are suppressed in this expression. The parameter
 <a class="reference internal" href="../keywords/calculator.html#cal-lrc-taylor-order"><span class="std std-ref">LRC_taylor_order</span></a> selects order zero or one.
 The current three-dimensional order-one path supports only nonmagnetic
 calculations without spin-orbit coupling.</p>
-</section>
-<section id="two-dimensional-correction">
-<h3>Two-Dimensional Correction<a class="headerlink" href="#two-dimensional-correction" title="Link to this heading"></a></h3>
-<p>For <code class="docutils literal notranslate"><span class="pre">system_2D</span></code>, the code uses a separate screened two-dimensional
-interaction with <span class="math notranslate nohighlight">\(q_z=0\)</span>. Its range-separation function is</p>
-<div class="math notranslate nohighlight">
-\[f_L(Q)=1-\tanh(QL/2),\]</div>
-<p>where <span class="math notranslate nohighlight">\(L\)</span> is set by
-<a class="reference internal" href="../keywords/calculator.html#cal-range-separation-length-l"><span class="std std-ref">range_separation_length_L</span></a>. The
-in-plane and out-of-plane screening functions are</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}\epsilon_\parallel(\mathbf Q)
-&amp;=1+\frac{2\pi f_L(Q)}{Q}
-\mathbf Q_\parallel\cdot\boldsymbol\alpha_\parallel
-\cdot\mathbf Q_\parallel, \\
-\epsilon_\perp(Q)
-&amp;=1-2\pi Qf_L(Q)\alpha_\perp,\end{split}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\boldsymbol\alpha_\parallel\)</span> and <span class="math notranslate nohighlight">\(\alpha_\perp\)</span> are the
-macroscopic sheet polarizabilities derived from the dielectric tensor and
-the specified supercell vacuum length. The two-dimensional Coulomb factor
-scales as <span class="math notranslate nohighlight">\(2\pi f_L(Q)/(\mathcal A Q)\)</span>, with in-plane cell area
-<span class="math notranslate nohighlight">\(\mathcal A\)</span>, instead of the three-dimensional
-<span class="math notranslate nohighlight">\(4\pi/[V_{\mathrm{uc}}d(\mathbf Q)]\)</span>. The combined dipole/quadrupole
-implementation also uses an out-of-plane position-matrix contribution.
-It should not be replaced by the three-dimensional bulk expression for a
-slab separated by vacuum.</p>
 </section>
 </section>
 <section id="numerical-settings-and-output">

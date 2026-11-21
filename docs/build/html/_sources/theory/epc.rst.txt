@@ -282,39 +282,6 @@ Orbital indices are suppressed in this expression. The parameter
 The current three-dimensional order-one path supports only nonmagnetic
 calculations without spin-orbit coupling.
 
-Two-Dimensional Correction
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For ``system_2D``, the code uses a separate screened two-dimensional
-interaction with :math:`q_z=0`. Its range-separation function is
-
-.. math::
-
-    f_L(Q)=1-\tanh(QL/2),
-
-where :math:`L` is set by
-:ref:`range_separation_length_L <cal_range_separation_length_L>`. The
-in-plane and out-of-plane screening functions are
-
-.. math::
-
-    \epsilon_\parallel(\mathbf Q)
-    &=1+\frac{2\pi f_L(Q)}{Q}
-    \mathbf Q_\parallel\cdot\boldsymbol\alpha_\parallel
-    \cdot\mathbf Q_\parallel, \\
-    \epsilon_\perp(Q)
-    &=1-2\pi Qf_L(Q)\alpha_\perp,
-
-where :math:`\boldsymbol\alpha_\parallel` and :math:`\alpha_\perp` are the
-macroscopic sheet polarizabilities derived from the dielectric tensor and
-the specified supercell vacuum length. The two-dimensional Coulomb factor
-scales as :math:`2\pi f_L(Q)/(\mathcal A Q)`, with in-plane cell area
-:math:`\mathcal A`, instead of the three-dimensional
-:math:`4\pi/[V_{\mathrm{uc}}d(\mathbf Q)]`. The combined dipole/quadrupole
-implementation also uses an out-of-plane position-matrix contribution.
-It should not be replaced by the three-dimensional bulk expression for a
-slab separated by vacuum.
-
 Numerical Settings and Output
 -----------------------------
 

@@ -6,11 +6,14 @@ QTrans
 A Python package for calculating **Q**\ uasiparticle **Trans**\ port properties.
 
 .. image:: ./_static/intro.png
-   :alt: intro.png
+   :alt: QTrans workflow from electronic Hamiltonians and phonon data to electron-phonon coupling and transport properties.
    :width: 80%
    :align: center
 
-News:
+News
+----
+
+* **November 21, 2026:** The first release of QTrans is now available!
 
 .. toctree::
    :maxdepth: 1
