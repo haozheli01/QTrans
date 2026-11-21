@@ -3,6 +3,8 @@
 
 import sys
 import os
+from pathlib import Path
+from runpy import run_path
 import sphinx_rtd_theme
 import sphinxcontrib
 
@@ -10,7 +12,9 @@ import sphinxcontrib
 project = 'QTrans'
 copyright = '2026, Yang\'s Group'
 author = 'Shixu Liu, Haozhe Li'
-release = '0.1'
+# Read the package version without importing its scientific dependencies.
+release = run_path(str(Path(__file__).resolve().parents[2] / 'src' / 'qtrans' / '_version.py'))['__version__']
+version = release
 
 # -- General configuration ---------------------------------------------------
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '_ext'))
